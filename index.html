@@ -689,6 +689,60 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 .ans .shape,.jitem .shape{align-self:stretch}
 .qbox textarea{word-break:break-word}
 .canvas{overflow:clip}
+/* ===== 題目預覽（主持人畫面） ===== */
+.pvbtn{border:1.5px solid var(--accent);background:#fff;color:var(--accent);border-radius:999px;padding:5px 14px;font-size:14px;cursor:pointer}
+.pvbtn:hover{background:var(--accent);color:#fff}
+.pv-bg{position:fixed;inset:0;z-index:90;background:#3d3a3a;display:flex;flex-direction:column;align-items:center;padding:14px 18px 12px;gap:10px}
+.pv-bg[hidden]{display:none}
+.pv-top{width:100%;max-width:1400px;color:#fff;font-size:17px}
+.pv-wrap{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+.pv-stage{position:relative;aspect-ratio:16/9;width:min(100%,calc((100vh - 120px)*16/9));max-width:1400px;container-type:inline-size;overflow:hidden;border-radius:10px;border:6px solid #262424;background:#ece4da center/cover no-repeat;font-family:"Noto Sans TC","Montserrat",sans-serif;color:#333}
+.pv-bg.max{padding:0}
+.pv-bg.max .pv-top{display:none}
+.pv-bg.max .pv-stage,.pv-bg:fullscreen .pv-stage{border:0;border-radius:0;width:min(100vw,calc((100vh - 58px)*16/9))}
+.pv-deco{position:absolute;inset:0;pointer-events:none}
+.pv-deco::before{content:"";position:absolute;left:-6%;top:12%;width:0;height:0;border-left:22cqw solid transparent;border-right:22cqw solid transparent;border-bottom:44cqw solid rgba(255,255,255,.35)}
+.pv-deco::after{content:"";position:absolute;right:-12%;bottom:-30%;width:55cqw;height:55cqw;border-radius:50%;background:rgba(255,255,255,.28)}
+.pv-q{position:absolute;left:50%;top:1.6cqw;transform:translateX(-50%);max-width:72%;background:#fff;border-radius:.3cqw;padding:.9cqw 2.6cqw;font-size:2.6cqw;font-weight:700!important;line-height:1.3;text-align:center;box-shadow:0 .25cqw .4cqw rgba(0,0,0,.18)!important;z-index:2;word-break:break-word}
+.pv-q.long{font-size:2cqw}.pv-q.xlong{font-size:1.6cqw}
+.pv-media{position:absolute;left:18%;right:18%;top:9.8cqw;bottom:21cqw;display:flex;align-items:center;justify-content:center;z-index:1}
+.pv-media img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.pv-circle{position:absolute;top:22cqw;width:8.6cqw;height:8.6cqw;border-radius:50%;background:rgba(255,250,245,.95);display:grid;place-items:center;font-family:"Montserrat","Noto Sans TC",sans-serif;font-weight:800!important;font-size:4.4cqw;color:#2b2b2b;z-index:2}
+.pv-timer{left:1.8cqw}
+.pv-count{right:2.2cqw;width:7cqw;height:7cqw;font-size:3.8cqw;top:22.8cqw}
+.pv-count.pop{animation:pvpop .3s ease-out}
+@keyframes pvpop{40%{transform:scale(1.18)}}
+.pv-countlb{position:absolute;right:3.1cqw;top:30.6cqw;background:rgba(255,250,245,.95);border-radius:999px;padding:.1cqw .8cqw;font-size:1.25cqw;font-weight:700!important;z-index:2}
+.pv-timer.low{color:#e21b3c}
+.pv-ans{position:absolute;left:.7cqw;right:.7cqw;bottom:.7cqw;display:grid;grid-template-columns:1fr 1fr;gap:.6cqw;z-index:2}
+.pv-a{position:relative;display:flex;align-items:center;gap:1.4cqw;min-height:8.6cqw;padding:.6cqw 1.6cqw;border-radius:.35cqw;color:#fff;font-size:2.3cqw;font-weight:700!important;line-height:1.25;box-shadow:inset 0 -.45cqw 0 rgba(0,0,0,.18)!important;transition:opacity .3s,filter .3s;word-break:break-word}
+.pv-ans.six .pv-a{min-height:6cqw;font-size:1.9cqw}
+.pv-a.long{font-size:1.7cqw}.pv-a.xlong{font-size:1.35cqw}
+.pv-a svg.shp6{width:2.6cqw;height:2.6cqw;flex:none}
+.pv-a img{max-height:7.4cqw;max-width:70%;object-fit:contain;background:#fff;border-radius:.3cqw}
+.pv-a .ok{position:absolute;right:1.2cqw;top:50%;transform:translateY(-50%);width:4cqw;height:4cqw;border-radius:50%;background:#66bf39;border:.35cqw solid #fff;display:none;place-items:center}
+.pv-a .ok svg{width:2.4cqw;height:2.4cqw;color:#fff}
+.pv-stage.reveal .pv-a.wrong{opacity:.35;filter:grayscale(.3)}
+.pv-stage.reveal .pv-a.right .ok{display:grid}
+.pv-input{position:absolute;left:22%;right:22%;bottom:5cqw;background:#fff;border-radius:.4cqw;padding:1.6cqw 2cqw;font-size:2.2cqw;color:#9a91ab;text-align:center;z-index:2;box-shadow:0 .3cqw 0 rgba(0,0,0,.15)!important}
+.pv-reveal-txt{position:absolute;left:22%;right:22%;bottom:13cqw;text-align:center;font-size:2.2cqw;font-weight:700!important;color:#26890c;z-index:2;display:none;background:rgba(255,255,255,.92);border-radius:.4cqw;padding:.6cqw}
+.pv-stage.reveal .pv-reveal-txt{display:block}
+.pv-slider{position:absolute;left:8%;right:8%;bottom:4cqw;background:#fff;border-radius:.4cqw;padding:2cqw 2.4cqw;z-index:2;display:flex;align-items:center;gap:2cqw;font-size:2cqw;font-weight:700!important}
+.pv-slider .tr{flex:1;height:3cqw;background:repeating-linear-gradient(90deg,#cfc8da 0 .3cqw,transparent .3cqw 1cqw);position:relative}
+.pv-slider .kn{position:absolute;top:50%;width:3.2cqw;height:3.2cqw;border-radius:50%;background:#46178f;transform:translate(-50%,-50%);transition:left .6s}
+.pv-slide{position:absolute;left:10%;right:10%;top:9cqw;bottom:4cqw;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2cqw;z-index:2;text-align:center}
+.pv-slide .sb{background:rgba(255,255,255,.9);border-radius:.4cqw;padding:1.4cqw 2cqw;font-size:2cqw;max-width:100%}
+.pv-empty{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:3cqw}
+.pv-ctrl{display:flex;align-items:center;gap:10px;width:100%;max-width:1400px;justify-content:center;position:relative;min-height:46px}
+.pv-ctrl button,.pv-nav{background:#1f1d1d;color:#fff;border:0;border-radius:6px;font-size:16px}
+.pv-nav{display:flex;align-items:center}
+.pv-nav button{background:none;color:#fff;border:0;width:44px;height:44px;font-size:22px;border-radius:6px}
+.pv-nav button:hover,.pv-fs:hover,.pv-exit:hover,.pv-replay:hover{background:#4a4646}
+.pv-nav span{min-width:70px;text-align:center;font-weight:700!important;font-family:"Montserrat","Noto Sans TC",sans-serif}
+.pv-fs{width:46px;height:44px;display:grid;place-items:center}
+.pv-exit{position:absolute;left:0;height:44px;padding:0 16px}
+.pv-replay{position:absolute;right:0;height:44px;padding:0 16px}
+@media (max-width:700px){.pv-bg{padding:10px 6px}.pv-replay{display:none}.pv-exit{position:static}.pv-ctrl{justify-content:space-between}}
 </style>
 </head>
 <body>
@@ -889,6 +943,16 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 </div></div>
 <div class="mbg" id="mbg"><div class="modal" role="dialog" aria-modal="true"><h3 id="mTitle"></h3><div class="mbody" id="mBody"></div><div class="mbtns" id="mBtns"></div></div></div>
 <div class="toast" id="toast"></div>
+<div class="pv-bg" id="pvbg" hidden>
+  <div class="pv-top"><b>題目預覽（主持人畫面）</b></div>
+  <div class="pv-wrap" id="pvWrap"><div class="pv-stage" id="pvStage"></div></div>
+  <div class="pv-ctrl">
+    <button type="button" class="pv-exit" id="pvExit" title="離開預覽">← 離開</button>
+    <div class="pv-nav"><button type="button" data-pv="first" title="第一題">«</button><button type="button" data-pv="prev" title="上一題">‹</button><span id="pvPage">1 / 1</span><button type="button" data-pv="next" title="下一題">›</button><button type="button" data-pv="last" title="最後一題">»</button></div>
+    <button type="button" class="pv-fs" id="pvFs" title="全螢幕"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    <button type="button" class="pv-replay" id="pvReplay" title="重新倒數">↻ 重播</button>
+  </div>
+</div>
 
 <script>
 /* ================= 設定 ================= */
@@ -1726,7 +1790,7 @@ function renderStage(){
   else body=`<div class="infocard"><div class="ill">${infoIll(t)}</div><p>${INFO[t]}</p></div>`;
   st.innerHTML=`
     <div class="canvas">
-      <div class="cv-top"><span class="qbadge">第 ${S.cur+1} 題／共 ${S.qs.length} 題</span><span class="cvr"><button type="button" class="setbtn" data-side="open">⚙ 題目設定</button><button type="button" class="timepill" id="pill" data-side="time" title="點擊修改答題秒數">⏱ ${timeLabel(q.time)}</button></span></div>
+      <div class="cv-top"><span class="qbadge">第 ${S.cur+1} 題／共 ${S.qs.length} 題</span><span class="cvr"><button type="button" class="pvbtn" data-act="preview" title="以主持人畫面預覽">▶ 預覽</button><button type="button" class="setbtn" data-side="open">⚙ 題目設定</button><button type="button" class="timepill" id="pill" data-side="time" title="點擊修改答題秒數">⏱ ${timeLabel(q.time)}</button></span></div>
       <div class="qbox ${qNoLabel(S.cur)?'haspre':''}">${qNoLabel(S.cur)?`<span class="qpre">${qNoLabel(S.cur).trim()}</span>`:''}<textarea data-f="text" rows="1" placeholder="${t==='slide'?'輸入投影片標題':'開始輸入你的題目'}">${esc(q.text)}</textarea><span class="cnt"></span></div>
       <div class="qmedia">${slotHTML(q,'qimg',t==='pin'?'題目圖（必填）':'')}</div>
       ${body}
@@ -2397,6 +2461,103 @@ async function pickTheme(t){
   $('#bgbg').classList.remove('show');renderGMedia();save();toast(`已選用公版主題「${t.n}」`);
 }
 
+
+/* ---------- 題目預覽（主持人畫面） ---------- */
+const pv={i:0,timers:[]};
+const SH_PV=['<path d="M10 2 19 18H1z" fill="#fff"/>','<path d="M10 1 19 10 10 19 1 10z" fill="#fff"/>','<circle cx="10" cy="10" r="8.5" fill="#fff"/>','<rect x="2" y="2" width="16" height="16" fill="#fff"/>','<path d="M10 1.5 18.5 7.7 15.3 18H4.7L1.5 7.7z" fill="#fff"/>','<path d="M5.5 2h9l4.5 8-4.5 8h-9L1 10z" fill="#fff"/>'];
+const PV_COL=['#e21b3c','#1368ce','#d89e00','#26890c','#0aa3a3','#864cbf'];
+function pvClear(){pv.timers.forEach(t=>{clearInterval(t);clearTimeout(t)});pv.timers=[]}
+function openPreview(i){
+  if(!S.qs.length){toast('還沒有題目');return}
+  pv.i=Math.max(0,Math.min(i,S.qs.length-1));
+  $('#pvbg').hidden=false;document.body.style.overflow='hidden';
+  renderPreview();
+}
+function closePreview(){
+  pvClear();$('#pvbg').hidden=true;$('#pvbg').classList.remove('max');document.body.style.overflow='';
+  if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+}
+function pvLenCls(s,a,b){const n=(s||'').length;return n>b?'xlong':n>a?'long':''}
+function renderPreview(){
+  pvClear();
+  const q=S.qs[pv.i];const st=$('#pvStage');const t=q.type;
+  $('#pvPage').textContent=`${pv.i+1} / ${S.qs.length}`;
+  st.classList.remove('reveal');
+  st.style.backgroundImage=S.bg?`url("${S.bg.img.url}")`:'';
+  const qText=(qNoLabel(pv.i)+q.text.trim())||'（未輸入題目）';
+  const img=t==='pin'&&q.qimg?q.qimg:q.qimg;
+  let html=`${S.bg?'':'<div class="pv-deco"></div>'}<div class="pv-q ${pvLenCls(qText,40,80)}">${esc(qText)}</div>`;
+  if(t==='slide'){
+    html+=`<div class="pv-slide">${img?`<div class="pv-media" style="position:static;height:24cqw;width:100%"><img src="${img.url}" alt=""></div>`:''}${q.body.trim()?`<div class="sb">${esc(q.body)}</div>`:''}</div>`;
+    st.innerHTML=html;return;
+  }
+  if(img) html+=`<div class="pv-media"><img src="${img.url}" alt=""></div>`;
+  html+=`<div class="pv-circle pv-timer" id="pvTimer">${q.time}</div><div class="pv-circle pv-count" id="pvCount">0</div><div class="pv-countlb">答案</div>`;
+  if(TILE.includes(t)){
+    const n=optCount(q);const cor=t==='poll'?[]:q.answers;
+    const tiles=Array.from({length:n},(_,k)=>{
+      const im=q.oimgs[k];const txt=(q.options[k]||'').trim();
+      if(!im&&!txt) return '';
+      const ci=colorIdx(q,k);
+      const body=im?`<img src="${im.url}" alt="">`:`<span>${esc(optPre(k)+txt)}</span>`;
+      return `<div class="pv-a ${pvLenCls(txt,30,55)} ${cor.includes(k+1)?'right':'wrong'}" style="background:${PV_COL[ci]}"><svg class="shp6" viewBox="0 0 20 20">${SH_PV[ci]}</svg>${body}<span class="ok"><svg viewBox="0 0 24 24"><use href="#i-check"/></svg></span></div>`;
+    }).join('');
+    html+=`<div class="pv-ans ${n>4?'six':''}">${tiles}</div>`;
+  }else if(t==='jumble'){
+    const n=optCount(q);
+    html+=`<div class="pv-ans">${Array.from({length:n},(_,k)=>{const txt=(q.options[k]||'').trim();return txt?`<div class="pv-a" style="background:${PV_COL[k]}"><svg class="shp6" viewBox="0 0 20 20">${SH_PV[k]}</svg><span>${esc(txt)}</span></div>`:''}).join('')}</div>`;
+    html+=`<div class="pv-reveal-txt">正確順序：${q.options.slice(0,n).filter(s=>s.trim()).map(esc).join(' → ')}</div>`;
+  }else if(t==='slider'){
+    const a=parseFloat(q.slider.min),b=parseFloat(q.slider.max),c=parseFloat(q.slider.ans);const pos=(!isNaN(a)&&!isNaN(b)&&!isNaN(c)&&b>a)?(c-a)/(b-a)*100:50;
+    html+=`<div class="pv-slider"><span>${esc(q.slider.min)}</span><div class="tr"><span class="kn" id="pvKnob" style="left:50%" data-pos="${pos}"></span></div><span>${esc(q.slider.max)}</span></div><div class="pv-reveal-txt">正確答案：${esc(q.slider.ans)}</div>`;
+  }else if(t==='typeans'){
+    html+=`<div class="pv-input">輸入答案…</div><div class="pv-reveal-txt">正確答案：${q.options.slice(0,4).filter(s=>s.trim()).map(esc).join('／')}</div>`;
+  }else if(t==='pin'){
+    if(q.pin) html=html.replace(`<img src="${img.url}" alt="">`,`<img src="${img.url}" alt="" id="pvPinImg" data-pin="${q.pin.img.url}">`);
+    html+=`<div class="pv-reveal-txt" style="bottom:1.5cqw">正確位置已標示</div>`;
+  }else{
+    html+=`<div class="pv-input">${t==='wordcloud'?'輸入一個簡短的詞…':'輸入你的回覆…'}</div>`;
+  }
+  st.innerHTML=html;
+  // 倒數與作答人數動畫
+  let left=q.time,count=0;const total=Math.max(12,Math.round(18+Math.random()*50));
+  const tEl=$('#pvTimer'),cEl=$('#pvCount');
+  pv.timers.push(setInterval(()=>{
+    left--;tEl.textContent=Math.max(0,left);tEl.classList.toggle('low',left<=5);
+    if(left<=0){pvClear();pvReveal(q)}
+  },1000));
+  const step=()=>{
+    if(count>=total) return;
+    count=Math.min(total,count+1+Math.floor(Math.random()*3));
+    cEl.textContent=count;cEl.classList.remove('pop');void cEl.offsetWidth;cEl.classList.add('pop');
+    pv.timers.push(setTimeout(step,250+Math.random()*Math.max(200,q.time*1000/total)));
+  };
+  pv.timers.push(setTimeout(step,600));
+}
+function pvReveal(q){
+  const st=$('#pvStage');st.classList.add('reveal');
+  const k=$('#pvKnob');if(k)k.style.left=k.dataset.pos+'%';
+  const pi=$('#pvPinImg');if(pi)pi.src=pi.dataset.pin;
+}
+function pvGo(i){if(i<0||i>=S.qs.length)return;pv.i=i;renderPreview()}
+$('#pvExit').onclick=closePreview;
+$('#pvReplay').onclick=()=>renderPreview();
+document.querySelector('.pv-nav').onclick=e=>{const b=e.target.closest('[data-pv]');if(!b)return;const a=b.dataset.pv;
+  pvGo(a==='first'?0:a==='last'?S.qs.length-1:a==='prev'?pv.i-1:pv.i+1)};
+$('#pvFs').onclick=async()=>{
+  const bg=$('#pvbg');
+  if(document.fullscreenElement){document.exitFullscreen().catch(()=>{});return}
+  if(bg.classList.contains('max')){bg.classList.remove('max');return}
+  try{if(bg.requestFullscreen){await bg.requestFullscreen();return}}catch(e){}
+  bg.classList.add('max');
+};
+document.addEventListener('keydown',e=>{
+  if($('#pvbg').hidden) return;
+  if(e.key==='Escape'&&!document.fullscreenElement){closePreview()}
+  else if(e.key==='ArrowRight'){pvGo(pv.i+1)}
+  else if(e.key==='ArrowLeft'){pvGo(pv.i-1)}
+});
+
 /* ---------- 參考標題拉把 ---------- */
 (function(){
   const reel=$('#tgenReel'),lever=$('#tgenLever'),act=$('#tgenAct');let pick='',busy=false;
@@ -2467,6 +2628,7 @@ stage.addEventListener('click',async e=>{
       if(s==='qimg'&&q.pin){URL.revokeObjectURL(q.pin.img.url);q.pin=null}changed(true);break}
     case 'aiimg':e.stopPropagation();aiImage(b.dataset.slot);break;
     case 'pinedit':openPinEditor(q);break;
+    case 'preview':openPreview(S.cur);break;
     case 'extra':S.extraOpen=!S.extraOpen;renderStage();save();break;
     case 'prev':if(S.cur>0){S.cur--;render();save();focusQuestion()}break;
     case 'next':if(S.cur<S.qs.length-1)S.cur++;else{S.qs.push(newQ());S.cur=S.qs.length-1}render();save();focusQuestion();break;
