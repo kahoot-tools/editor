@@ -843,6 +843,14 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 .modal.finishm .mbtns .btn{white-space:nowrap}
 @media (max-width:560px){.modal.finishm{padding:18px 14px}.modal.finishm .mbtns{gap:6px}.modal.finishm .mbtns .btn{padding:9px 10px;font-size:13px}}
 .mbtns .btn:disabled{opacity:.45;cursor:not-allowed}
+.finish-warn{max-width:720px;margin:22px auto 0;background:#fff4e5;border:1.5px solid #f5c38a;border-radius:14px;padding:14px 18px;color:#8a3b00;font-size:14px}
+.finish-warn>b{font-size:15px}
+.finish-warn ul{margin:8px 0 0;padding:0;list-style:none;line-height:1.9}
+.finish-warn li button{border:0;background:#ffe2bf;color:#8a3b00;border-radius:6px;padding:1px 8px;margin-right:8px;font-size:13px;cursor:pointer}
+.finish-warn li button:hover{background:#ffd29a}
+.fw-act{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.fw-act span{flex:1;font-size:12.5px;color:#a8642a}
+.finish-warn+.finish{margin-top:14px}
 /* 玩家手機 */
 .pv-phone{position:relative;aspect-ratio:10/16;width:calc(var(--H)*.625);container-type:inline-size;overflow:hidden;border-radius:18px;border:7px solid #1b1919;background:#ece4da center/cover no-repeat;display:flex;flex-direction:column;color:#333;font-family:"Montserrat","Noto Sans TC",sans-serif}
 .pv-phone>*{position:relative;z-index:1}
@@ -1087,6 +1095,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
         <aside class="sidecol" id="side" aria-label="題目設定"></aside>
       </div>
     </div>
+    <div class="finish-warn" id="finishWarn" hidden></div>
     <div class="finish"><button type="button" class="btn btn-purple finish-btn" id="finishBtn">✓ 編輯完成，去導出 →</button></div>
   </section>
 
@@ -2108,6 +2117,7 @@ function refreshMeta(){
   if(q.type==='slider'){const tr=$('#sTrack');if(tr){const p=sliderPos(q);tr.innerHTML=p===null?'':`<span class="ln" style="left:${p}%"></span><span class="mk" style="left:${p}%">答案 ${esc(q.slider.ans)}</span>`}}
 }
 function renderStat(){
+  if(typeof renderFinishWarn==='function') setTimeout(()=>renderFinishWarn(),0);
   const bad=S.qs.filter(q=>issuesOf(q).length).length;
   $('#stat').innerHTML=`共 ${S.qs.length} 題　`+(S.qs.length?(bad?`<span class="bad">⚠ ${bad} 題待確認</span>`:`<span class="good">✓ 全部 OK</span>`):'');
   $('#dlZip').disabled=!(S.cover||S.bg||S.qs.some(q=>allImgs(q).length));
@@ -2428,7 +2438,22 @@ async function saveFile(filename,data,mime){
   }
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
 }
+function collectIssues(){
+  const bad=S.qs.map((q,i)=>({i,is:issuesOf(q)})).filter(x=>x.is.length);
+  if(!S.title.trim()) bad.unshift({i:-1,is:['還沒有填寫']});
+  return bad;
+}
+function renderFinishWarn(force){
+  const box=$('#finishWarn');if(!box||(box.hidden&&!force)) return 0;
+  const bad=collectIssues();
+  if(!bad.length){box.hidden=true;return 0}
+  box.hidden=false;
+  box.innerHTML=`<b>⚠ 還有 ${bad.length} 個地方需要補齊</b><ul>${bad.slice(0,15).map(x=>`<li><button type="button" data-fix="${x.i}">${x.i<0?'遊戲標題':'第 '+(x.i+1)+' 題'}</button>${esc(x.is.join('、'))}</li>`).join('')}${bad.length>15?`<li>…另有 ${bad.length-15} 項</li>`:''}</ul><div class="fw-act"><span>點上面的項目可直接前往修改</span><button type="button" class="mini-btn" id="finishAnyway">仍要導出</button></div>`;
+  return bad.length;
+}
+let skipCheck=false;
 async function checkBefore(){
+  if(skipCheck){skipCheck=false;return true}
   if(!S.qs.length){toast('還沒有題目');return false}
   const bad=S.qs.map((q,i)=>({i,is:issuesOf(q)})).filter(x=>x.is.length);
   if(!S.title.trim()) bad.unshift({i:-1,is:['還沒有填寫']});
@@ -2462,7 +2487,7 @@ $('#dlZip').onclick=async()=>{
     if(S.bg){zip.file(`圖片/背景.${extOf(S.bg.img)}`,S.bg.img.blob);lines.push(`背景.${extOf(S.bg.img)}　→　${S.bg.kind==='theme'?(S.bg.name?'公版主題「'+S.bg.name+'」':'公版背景截圖'):'自訂背景圖'}`)}
     S.qs.forEach((q,i)=>allImgs(q).forEach(([slot,im])=>{
       const no=i+1;
-      const nm=slot==='qimg'?`${no}`:slot==='aimg'?`${no}解答`:slot==='qbg'?`${no}背景`:slot==='pin'?`${no}答案位置`:`${no}-${+slot.slice(1)+1}`;
+      const nm=slot==='qimg'?`${no}`:slot==='aimg'?`${no}解答`:slot==='qbg'?`${no}_bkgrd`:slot==='pin'?`${no}答案位置`:`${no}-${+slot.slice(1)+1}`;
       const what=slot==='qimg'?'題目圖':slot==='aimg'?'解答圖':slot==='qbg'?'本題專屬背景':slot==='pin'?'答案位置圖':'選項 '+(+slot.slice(1)+1)+' 圖';
       const fn=`${nm}.${extOf(im)}`;zip.file('圖片/'+fn,im.blob);
       lines.push(`${fn}　→　第 ${no} 題${what}${im.cut?'（原圖）':''}：${q.text.trim()}`);
@@ -2596,7 +2621,7 @@ document.addEventListener('click',e=>{
   if(!q&&!s.dataset.side) return;
   if(s.dataset.side){
     const a=s.dataset.side;
-    if(a==='toggle'){S.setOpen=!S.setOpen;openMenu=null}
+    if(a==='toggle'){if(openMenu&&isRow()){openMenu=null}else{S.setOpen=!S.setOpen;openMenu=null}}
     else if(a==='open'){S.setOpen=true;openMenu=null}
     else if(a==='time'){S.setOpen=true;openMenu='time'}
     else if(a==='applyall'&&q){const t=q.time;const adj=applyTimeAll(t);S.defTime=t;$('#bulkTime').value=String(t);renderRail();renderStat();refreshMeta();toast(`全部題目已設為 ${timeLabel(t)}`+(adj?`（${adj} 題因題型最低秒數自動調高）`:''))}
@@ -3117,14 +3142,24 @@ rail.addEventListener('keydown',e=>{const th=e.target.closest('.thumb');if(th&&(
 
 $('#backInput').onclick=backToInput;
 let skipName=false;
-$('#finishBtn').onclick=async()=>{
+$('#finishBtn').onclick=()=>{
+  if(!S.qs.length){toast('還沒有題目');return}
+  if(renderFinishWarn(true)){$('#finishWarn').scrollIntoView({behavior:'smooth',block:'center'});return}
+  openFinish();
+};
+$('#finishWarn').addEventListener('click',e=>{
+  const f=e.target.closest('[data-fix]');
+  if(f){const i=+f.dataset.fix;if(i<0){$('#gTitle').scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>$('#gTitle').focus({preventScroll:true}),300)}else{S.cur=i;render();save();focusQuestion()}return}
+  if(e.target.id==='finishAnyway') openFinish(true);
+});
+async function openFinish(force){
   const hasImg=!$('#dlZip').disabled;
   const v=await modal('編輯完成，去導出',`<div class="finish-note"><p>📦 若題目與圖片已製作完成，可直接<b>下載壓縮檔</b>提供給小幫手。</p><p>📝 若有圖片或其他素材尚未上傳，可先<b>下載題目 Excel</b> 安排製作，待圖片完善後再補傳完整檔。</p>${hasImg?'':'<p class="finish-na">目前沒有上傳任何圖片，只需要下載 Excel。</p>'}</div><label class="finish-name"><span>LINE 名稱</span><input type="text" id="finName" maxlength="40" value="${esc(S.name)}" placeholder="會用在檔名，例如：小明"></label>`,
     [{label:'⬇ 下載Excel',value:'x',cls:'btn-green'},{label:'⬇ Excel+圖片(ZIP)',value:'z',primary:true,disabled:hasImg?'':'有上傳圖片時才需要'},{label:'取消',value:null}],'finishm');
   if(!v) return;
-  S.name=($('#finName').value||'').trim();save();skipName=true;
+  S.name=($('#finName').value||'').trim();save();skipName=true;skipCheck=true;
   if(v==='x')$('#dlExcel').click();else $('#dlZip').click();
-  setTimeout(()=>{skipName=false},3000);
+  setTimeout(()=>{skipName=false;skipCheck=false},3000);
 };
 $('#resumeBtn').onclick=()=>setView('edit');
 $('#navMenu').onclick=e=>{e.stopPropagation();const t=$('#top');const o=!t.classList.contains('navopen');t.classList.toggle('navopen',o);$('#navMenu').setAttribute('aria-expanded',o)};
