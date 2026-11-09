@@ -618,7 +618,8 @@ footer p{color:var(--muted);font-size:14px}
   .rail{position:relative;top:auto;max-height:var(--railH,calc(100vh - var(--hdr,60px) - 24px));overflow-y:auto;overscroll-behavior:contain}
 }
 /* PNG 去背：用棋盤格底顯示透明 */
-.slot.filled,.optpic,.pinprev,.gcardm .gt,.bg-cur img{background-color:#fff;background-image:conic-gradient(#ececf2 25%,#fff 0 50%,#ececf2 0 75%,#fff 0);background-size:16px 16px}
+.slot.filled,.pinprev,.gcardm .gt,.bg-cur img{background:rgba(255,255,255,.35)}
+.optpic{background:transparent}
 /* 隱私說明 */
 .privacy{display:flex;gap:12px;align-items:flex-start;margin-top:14px;background:#e9f7ef;border:1.5px solid #9fd8b6;color:#14532d;border-radius:14px;padding:12px 16px;font-size:14.5px;line-height:1.6}
 .privacy b{font-size:15.5px}
@@ -690,7 +691,8 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 .qbox textarea{word-break:break-word}
 .canvas{overflow:clip}
 /* ===== 題目預覽（主持人畫面） ===== */
-.pvbtn{border:0;background:var(--accent);color:#fff;border-radius:999px;padding:5px 14px 5px 11px;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.pvbtn{border:0;background:var(--accent);color:#fff;border-radius:999px;height:34px;padding:0 14px 0 11px;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box}
+.cvr .timepill{height:34px;padding:0 14px 0 12px;font-size:14px;box-shadow:none;box-sizing:border-box;line-height:1}
 .pvbtn svg{width:18px;height:18px}
 .pv-bg{position:fixed;inset:0;z-index:90;background:#3d3a3a;display:flex;flex-direction:column;align-items:center;padding:10px 18px 12px;gap:10px;font-family:"Montserrat","Noto Sans TC",sans-serif}
 .pv-bg[hidden]{display:none}
@@ -742,33 +744,46 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 /* 玩家手機 */
 .pv-phone{position:relative;aspect-ratio:10/16;width:calc(var(--H)*.625);container-type:inline-size;overflow:hidden;border-radius:18px;border:7px solid #1b1919;background:#ece4da center/cover no-repeat;display:flex;flex-direction:column;color:#333;font-family:"Montserrat","Noto Sans TC",sans-serif}
 .pv-phone>*{position:relative;z-index:1}
-.pv-phone .pv-deco{z-index:0}
-.ph-top{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:2.4cqw 4cqw;font-size:4.2cqw;font-weight:800!important}
-.ph-top i{font-style:normal;background:#333;color:#fff;border-radius:999px;padding:.4cqw 3cqw;font-size:3.6cqw}
-.ph-q{margin:3cqw 3cqw 0;background:#fff;border-radius:1.2cqw;padding:2.6cqw 3cqw;text-align:center;font-size:5cqw;font-weight:800!important;line-height:1.3;word-break:break-word;box-shadow:0 .6cqw 1cqw rgba(0,0,0,.15)!important}
-.ph-q.long{font-size:4.2cqw}.ph-q.xlong{font-size:3.6cqw}
-.ph-media{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:3cqw}
+.pv-phone .pv-deco{z-index:0;position:absolute}
+.ph-top{display:flex;align-items:center;justify-content:center;position:relative;padding:4cqw 4cqw 2cqw;min-height:16cqw}
+.ph-no{position:absolute;left:4cqw;top:4cqw;width:10cqw;height:10cqw;border-radius:50%;background:rgba(243,236,251,.95);display:grid;place-items:center;font-size:4.4cqw}
+.ph-type{display:inline-flex;align-items:center;gap:2cqw;background:rgba(243,236,251,.95);border-radius:999px;padding:1.6cqw 4.5cqw 1.6cqw 3cqw;font-size:4.2cqw;font-family:"Noto Sans TC","Montserrat",sans-serif}
+.ph-type svg{width:5.6cqw;height:7cqw}
+.ph-body{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;padding:0 3.5cqw}
+.ph-media{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:2cqw 0 3cqw}
 .ph-media img{max-width:100%;max-height:100%;object-fit:contain;display:block}
-.ph-ans{display:grid;grid-template-columns:1fr 1fr;gap:2cqw;padding:0 2cqw 2cqw}
+.ph-q{align-self:center;max-width:100%;margin:0 auto 2.4cqw;background:rgba(240,232,250,.93);border-radius:1.6cqw;padding:2cqw 4cqw;text-align:center;font-size:4.4cqw;line-height:1.35;word-break:break-word;font-family:"Noto Sans TC","Montserrat",sans-serif}
+.ph-q.long{font-size:3.9cqw}.ph-q.xlong{font-size:3.4cqw}
+.ph-hint{align-self:center;background:rgba(240,232,250,.93);padding:1.4cqw 3cqw;font-size:3.6cqw;margin-bottom:2.4cqw}
+.ph-ans{display:grid;grid-template-columns:1fr 1fr;gap:1.6cqw}
 .ph-ans.one{grid-template-columns:1fr}
-.ph-ans .pv-a{min-height:24cqw;flex-direction:column;justify-content:center;gap:1.6cqw;padding:2cqw;font-size:4.4cqw;text-align:center;border-radius:1.2cqw;box-shadow:inset 0 -1.2cqw 0 rgba(0,0,0,.18)!important}
-.ph-ans.six .pv-a{min-height:16cqw;font-size:3.8cqw}
-.ph-ans .pv-a.long{font-size:3.6cqw}.ph-ans .pv-a.xlong{font-size:3.1cqw}
-.ph-ans .pv-a svg.shp6{width:7cqw;height:7cqw}
-.ph-ans .pv-a img{max-height:16cqw;max-width:90%}
-.ph-ans .pv-a .ok{right:2cqw;top:2cqw;transform:none;width:8cqw;height:8cqw;border-width:.8cqw}
-.ph-ans .pv-a .ok svg{width:5cqw;height:5cqw}
-.ph-box{margin:0 4cqw 4cqw;background:#fff;border-radius:1.4cqw;padding:4cqw;text-align:center;font-size:4.6cqw;color:#9a91ab;box-shadow:0 1cqw 0 rgba(0,0,0,.15)!important}
-.ph-btn{margin:0 4cqw 4cqw;background:#333;color:#fff;border-radius:1.4cqw;padding:3cqw;text-align:center;font-size:4.6cqw;font-weight:800!important}
-.ph-slider{margin:0 4cqw 4cqw;background:#fff;border-radius:1.4cqw;padding:6cqw 5cqw;display:flex;align-items:center;gap:3cqw;font-size:4.2cqw;font-weight:800!important}
+.ph-ans .pv-a{min-height:13cqw;flex-direction:row;justify-content:flex-start;gap:2cqw;padding:2cqw 2.4cqw;font-size:4.4cqw;text-align:left;border-radius:.8cqw;line-height:1.2;box-shadow:inset 0 -1cqw 0 rgba(0,0,0,.2)!important;text-shadow:0 .3cqw .4cqw rgba(0,0,0,.25)}
+.ph-ans.six .pv-a{min-height:10cqw;font-size:3.9cqw}
+.ph-ans .pv-a.long{font-size:3.7cqw}.ph-ans .pv-a.xlong{font-size:3.2cqw}
+.ph-ans .pv-a svg.shp6{width:4.4cqw;height:4.4cqw}
+.ph-ans .pv-a img{max-height:11cqw;max-width:75%}
+.ph-ans .pv-a .ok{display:none!important}
+.ph-tbar{margin:2.6cqw 0 2.2cqw;height:5.4cqw;background:rgba(0,0,0,.08);border-radius:999px;position:relative}
+.ph-tbar i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:#f5efd2;transition:width 1s linear;display:flex;align-items:center;justify-content:flex-end;padding-right:2.4cqw;font-style:normal;font-size:3.8cqw;min-width:9cqw;box-sizing:border-box}
+.ph-box{background:#fff;border-radius:1.4cqw;padding:4cqw;text-align:center;font-size:4.4cqw;color:#9a91ab;margin-bottom:2.4cqw}
+.ph-btn{align-self:center;background:#fff;color:#333;border-radius:1.2cqw;padding:2.6cqw 6cqw;font-size:4.6cqw;box-shadow:inset 0 -1cqw 0 rgba(0,0,0,.15)!important;margin-bottom:1cqw}
+.ph-slider{background:#fff;border-radius:1.4cqw;padding:5cqw 4cqw;display:flex;align-items:center;gap:3cqw;font-size:4cqw;margin-bottom:2.4cqw}
 .ph-slider .tr{flex:1;height:2cqw;background:#cfc8da;border-radius:2cqw;position:relative}
 .ph-slider .kn{position:absolute;top:50%;width:7cqw;height:7cqw;border-radius:50%;background:#46178f;transform:translate(-50%,-50%);transition:left .6s}
-.ph-msg{flex:1;display:grid;place-items:center;text-align:center;padding:6cqw;font-size:5.4cqw;font-weight:800!important}
-.ph-msg span{background:rgba(255,255,255,.92);border-radius:1.4cqw;padding:4cqw 5cqw}
-.ph-bot{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:2.4cqw 4cqw;font-size:4cqw;font-weight:800!important;margin-top:auto}
-.ph-bot i{font-style:normal;background:#333;color:#fff;border-radius:1cqw;padding:.4cqw 3cqw}
-.ph-res{position:absolute;left:0;right:0;top:9cqw;z-index:3;display:none;text-align:center;color:#fff;font-size:6cqw;font-weight:800!important;padding:3cqw;background:#66bf39}
-.reveal .ph-res{display:block}
+.ph-pinwrap{background:rgba(240,232,250,.93);padding:2cqw;border-radius:1cqw;margin-bottom:3cqw}
+.ph-pinwrap img{width:100%;display:block}
+.ph-bot{display:flex;align-items:center;gap:3cqw;background:rgba(255,255,255,.6);padding:2.4cqw 4cqw;font-size:4.6cqw;margin-top:auto}
+.ph-bot .av{width:9cqw;height:9cqw;border-radius:50%;background:#a3a6b4;flex:none}
+.ph-bot .nm{margin-right:auto}
+.ph-bot i{font-style:normal;background:#333;color:#fff;border-radius:1cqw;padding:1.4cqw 5cqw;font-size:4.6cqw;min-width:18cqw;text-align:center}
+.ph-res{display:none;flex:1;margin:0 3cqw 3cqw;border-radius:2cqw;background:rgba(40,24,70,.55);flex-direction:column;align-items:center;justify-content:center;gap:4cqw;padding:0 5cqw;color:#fff;text-align:center}
+.ph-res h4{margin:0;font-size:9cqw;text-shadow:0 .5cqw 0 rgba(0,0,0,.35);font-family:"Noto Sans TC",sans-serif}
+.ph-res .ic{width:20cqw;height:20cqw;border-radius:50%;background:#66bf39;border:1.4cqw solid #fff;display:grid;place-items:center}
+.ph-res .ic svg{width:11cqw;height:11cqw;color:#fff}
+.ph-res .pts{width:100%;background:rgba(0,0,0,.55);border-radius:1.2cqw;padding:3cqw;font-size:7cqw}
+.ph-res p{margin:0;font-size:4.4cqw;text-shadow:0 .3cqw 0 rgba(0,0,0,.35)}
+.pv-phone.reveal .ph-body{display:none}
+.pv-phone.reveal .ph-res{display:flex}
 #pvbg *{font-weight:800!important}
 #pvbg :is(.pv-input,.ph-box,.pv-hbtn,.pv-hbtn *,.pv-exit,.pv-replay,.pv-slide .sb,.ph-top i,.pv-countlb){font-weight:600!important}
 /* 下方控制列 */
@@ -1808,7 +1823,7 @@ const FILE_ACCEPT='.jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,ima
 const IMG_ICON='<svg width="22" height="22"><use href="#i-img"/></svg>';
 function slotHTML(q,slot,labelOverride){
   const im=getImg(q,slot);const label=labelOverride||slotLabel(slot);const key=q.id+slot;
-  if(im){const pinQ=slot==='qimg'&&q.type==='pin';return `<div class="slot filled" data-slot="${slot}"><img src="${vis(im).url}" alt="${label}"><span class="stag">${label}${im.cut?'（已裁剪）':''}</span>
+  if(im){const pinQ=slot==='qimg'&&q.type==='pin';return `<div class="slot filled" data-slot="${slot}"><img src="${vis(im).url}" alt="${label}">${slot==='qimg'?'':`<span class="stag">${label}${im.cut?'（已裁剪）':''}</span>`}
     <div class="sact">${slot==='qimg'&&!pinQ?'<button class="sbg" data-act="setbg" title="把這張圖設為本題背景">設為背景</button>':''}${pinQ?'':`<button data-act="crop" data-slot="${slot}" title="編輯圖片裁剪內容" aria-label="裁剪">${CROP_IC}</button>`}<button data-act="pick" data-slot="${slot}" title="更換圖片" aria-label="更換">✎</button><button data-act="rmimg" data-slot="${slot}" title="刪除圖片" aria-label="刪除圖片">${TRASH_IC}</button></div>
     <input type="file" hidden accept="${FILE_ACCEPT}" data-file="${slot}"></div>`}
   return `<div class="slot ${loading.has(key)?'loading':''}" data-slot="${slot}" tabindex="0">
@@ -1889,10 +1904,10 @@ function renderStage(){
   st.innerHTML=`
     <div class="canvas">
       <div class="cv-top"><span class="qbadge">第 ${S.cur+1} 題／共 ${S.qs.length} 題</span><span class="cvr"><button type="button" class="pvbtn" data-act="preview" title="預覽主持視角與玩家手機畫面">${EYE_IC}預覽</button><button type="button" class="setbtn" data-side="open">⚙ 題目設定</button><button type="button" class="timepill" id="pill" data-side="time" title="點擊修改答題秒數">⏱ ${timeLabel(q.time)}</button></span></div>
-      <div class="qarea ${q.qbg?'hasbg':''}" ${q.qbg?`style="background-image:url(&quot;${vis(q.qbg).url}&quot;)"`:''}>
+      <div class="qarea ${q.qbg||S.bg?'hasbg':''}" ${q.qbg||S.bg?`style="background-image:url(&quot;${q.qbg?vis(q.qbg).url:S.bg.img.url}&quot;)"`:''}>
       <div class="qbox ${qNoLabel(S.cur)?'haspre':''}">${qNoLabel(S.cur)?`<span class="qpre">${qNoLabel(S.cur).trim()}</span>`:''}<textarea data-f="text" rows="1" placeholder="${t==='slide'?'輸入投影片標題':'開始輸入你的題目'}">${esc(q.text)}</textarea><span class="cnt"></span></div>
-      <div class="qmedia">${slotHTML(q,'qimg',t==='pin'?'題目圖（必填）':'')}</div>
-      ${q.qbg?`<div class="bgbar"><span>🖼 此題已套用專屬背景</span><button data-act="bgmedia" title="把背景改回題目圖片">設為媒體內容</button><button data-act="crop" data-slot="qbg" title="編輯背景裁剪內容">${CROP_IC}</button><button data-act="rmbg" title="移除此題背景">${TRASH_IC}</button></div>`:''}
+      ${q.qbg?'':`<div class="qmedia">${slotHTML(q,'qimg',t==='pin'?'題目圖（必填）':'')}</div>`}
+      ${q.qbg?`<div class="bgbar"><span>🖼 此題已套用專屬背景（每題只能放一張圖）</span><button data-act="bgmedia" title="把背景改回題目圖片">設為媒體內容</button><button data-act="crop" data-slot="qbg" title="編輯背景裁剪內容">${CROP_IC}</button><button data-act="rmbg" title="移除此題背景">${TRASH_IC}</button></div>`:''}
       ${body}
       </div>
       <div class="noterow"><span class="lb">備註</span><input data-f="note" value="${esc(q.note)}" placeholder="答案解釋文字、影片連結、口頭說明等"><select data-act="preset"><option value="">＋常用</option>${NOTE_PRESETS.map(([l,v])=>`<option value="${v}">${l}</option>`).join('')}</select></div>
@@ -2017,6 +2032,7 @@ function makeSortable(box,{itemSel,handleSel,axis,longPress,ignore,onTap,onCommi
 
 /* ================= 圖片 ================= */
 function setImg(q,slot,file){
+  if(slot==='qimg'&&q.qbg){toast('這題已把圖片設為背景，每題只能放一張圖');return false}
   const err=imgError(file,q.type==='pin'&&slot==='qimg');
   if(err){
     if(q===cur()){
@@ -2458,7 +2474,7 @@ function renderGMedia(){
 }
 $('#gmedia').addEventListener('click',e=>{
   const x=e.target.closest('[data-gx]');
-  if(x){e.stopPropagation();if(x.dataset.gx==='cover'){URL.revokeObjectURL(S.cover.url);S.cover=null}else{URL.revokeObjectURL(S.bg.img.url);S.bg=null}renderGMedia();save();return}
+  if(x){e.stopPropagation();if(x.dataset.gx==='cover'){URL.revokeObjectURL(S.cover.url);S.cover=null}else{URL.revokeObjectURL(S.bg.img.url);S.bg=null}renderGMedia();if(x.dataset.gx!=='cover')renderStage();save();return}
   const c=e.target.closest('[data-g]');if(!c) return;
   if(c.dataset.g==='cover') $('#coverFile').click(); else openBg();
 });
@@ -2475,7 +2491,7 @@ document.querySelectorAll('[data-bg]').forEach(b=>b.onclick=()=>{bgKind=b.datase
 $('#bgFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
   const err=imgError(f);if(err){$('#bgErr').innerHTML=err;return}
   if(S.bg)URL.revokeObjectURL(S.bg.img.url);S.bg={kind:bgKind,name:'',img:makeImg(f,f.name)};
-  $('#bgbg').classList.remove('show');renderGMedia();save();toast(bgKind==='theme'?'已上傳公版截圖':'已上傳自訂背景')};
+  $('#bgbg').classList.remove('show');renderGMedia();renderStage();save();toast(bgKind==='theme'?'已上傳公版截圖':'已上傳自訂背景')};
 
 const BANKS={"婚禮":[{"cat":"基礎題","rows":[[1,"請問今天是農曆幾月幾號？",["六月廿六","六月廿七","六月廿八","六月廿九"],[1]],[2,"請問今天結婚的新人是？",["玄彬&孫藝珍","林志玲&Akira","王小帥&陳小美","楊過&小龍女"],[2]],[3,"請問新人在家中的排行是？",["都是老大","老大／老二","老二／老么","都是老么"],[0]],[4,"請問今天的宴客地點是？",["圓山大飯店","台北１０１","君品酒店","萊特薇庭"],[3]],[5,"請問今天的菜單上有幾道菜？",["10","11","12","13"],[2]],[6,"請問各位今天是來參加？",["端午划龍舟","告別單身趴","鴻海尾牙","婚禮"],[3]],[7,"請問今天席開幾桌？",["15桌","22桌","35桌","49桌"],[1]]]},{"cat":"時事題","rows":[[8,"2026年10月侵襲台灣的颱風「薔琵」到底有沒有登陸？",["有","沒有"],[1]],[9,"PHP 在科技新聞中通常指的是什麼？",["一種程式語言","一種航空燃料","一種食品添加物","一種醫療影像設備"],[0]],[10,"飛天特斯拉話題爆紅後，台灣網友竟然關心什麼問題？",["要考飛行駕照嗎","飛高會不會耳鳴","手搖飲要放哪裡","ETC 怎麼扣款"],[2]],[11,"Threads 爆紅的「比奇堡發財桌布」，網友聲稱換了之後有什麼好事？",["發票中獎","搶到演唱會門票","順利排便","以上皆有"],[3]],[12,"朋友留言「請去高麗菜那桌坐」，通常是在說什麼？",["你很有智慧","你便祕了，要多吃蔬菜","你被排擠了","你要負責煮火鍋"],[0]],[13,"請填空：「他很壞，＿＿＿」",["壞壞壞","嘟嘟嘟","咚咚咚","啦啦啦"],[1]],[14,"近期流行語「YBSG」最接近什麼意思？",["也不是說哥","要不要試試看","太扯了、太誇張了","有病是不是哥"],[2]],[15,"最近爆紅的台版 GTA《臺北狂飆》，能在遊戲裡做什麼很台灣的事情？",["追垃圾車","搶演唱會門票","夜市擺攤賣雞排","到學校補修學分"],[0]],[16,"最近爆紅的《80 億分之一》人生模擬器，是讓玩家體驗什麼？",["成為億萬富翁","隨機投胎到不同國家的人生","跟全球 80 億人比智商","抽選全球最幸運的人"],[1]],[17,"是誰成功挑戰徒手攀登101大樓？",["Alex Honnold","Alex Rodriguez","Tommy Caldwell","Chris Sharma"],[0]],[18,"請問畫面中這招叫什麼? (附GIF圖)",["剪刀步","閃身步","歐洲步","試探步"],[1]],[19,"2026年FIFA 世界盃足球賽由哪三個國家共同主辦？",["巴西、阿根廷、智利","美國、加拿大、墨西哥","西班牙、葡萄牙、法國","日本、韓國、中國"],[1]],[20,"2026年FIFA 世界盃足球賽冠軍是哪一隊？",["阿根廷","法國","西班牙","英格蘭"],[2]],[21,"2026年FIFA 世界盃足球賽決賽，是哪兩個國家？",["阿根廷v.s西班牙","阿根廷v.s葡萄牙","英格蘭v.s法國","西班牙v.s法國"],[0]],[22,"2026年台灣九合一地方選舉的投票日期是哪一天？",["10月23日","11月28日","12月4日","12月25日"],[1]],[23,"2026 年第 37 屆金曲獎，拿下「歌后」的是誰？",["彭佳慧","蔡依林","單依純","洪佩瑜"],[1]],[24,"近年最常被拿來生成「婚紗照、插畫、照片」的是哪一個？",["GPS","GAS","APT","GPT"],[3]],[25,"2026 年最熱門的「AI 婚禮新科技」如果要幫新人做一件事，最可能是？",["幫忙生成婚紗照","幫忙搶捧花","幫忙喝喜酒","幫忙包紅包"],[0]]]},{"cat":"趣味題","rows":[[26,"請問各位今天參加婚禮的原因？",["見證幸福","尾牙抽獎","吃吃喝喝","物色對象"],[0]],[27,"請問各位今天參加婚禮的原因？",["看笑話","看熱鬧","看你沒有","看看愛情真正的樣子"],[3]],[28,"請選擇最適合形容今日這對新人的成語？",["豺狼虎豹","狼吞虎嚥","郎才女貌","狼狽為奸"],[2]],[29,"以下哪個是新娘可以赤手空拳對付的生物？",["蟑螂","新郎","螳螂","色狼"],[1]],[30,"請問新郎長的像哪位明星？",["金城武","許光漢","彭于晏","以上皆是"],[3]],[31,"全場最美的女人是？",["新娘","花童","我自己","主持人"],[0]],[32,"請問新郎自詡.....？",["桃園彭于晏","新莊吳彥祖","交大金城武","新竹澎恰恰"],[2]],[33,"請問新娘的招式是什麼？",["水之呼吸","炎之呼吸","雷之呼吸","美得不能呼吸"],[3]],[34,"今天新郎的內褲是什麼顏色？",["紅色","藍色","黑色","沒有穿"],[0]],[35,"兩人最初認識是因為……？",["一把菜刀","一把鑰匙","一把青","一把鼻涕一把眼淚"],[1]],[36,"下列何者較高？",["新郎的地位","新娘的地位","新郎躺下比較高","新郎的身高"],[1]],[37,"新郎的腹肌有幾塊？",["六塊","八塊","團結一大塊","十塊"],[2]],[38,"新娘參加賽跑追過第2名後，請問新娘會變成第幾名？",["第一名","第二名","第三名","第四名"],[1]],[39,"請問誰永遠是對的？",["姑婆","三姑六婆","老太婆","老婆"],[3]],[40,"最近有些人為了搶演唱會門票，特地去拜哪位神明？",["財神爺","月老","文昌帝君","土地公"],[1]],[41,"遊戲裡的「台幣戰士」是什麼意思？",["專門玩台灣製遊戲的人","遊戲內專門賺錢的職業","大量課金的玩家","只用新台幣交易的人"],[2]],[42,"當有人說「我給你ㄅ級分」，是在表達什麼？",["不及格","普通","最高評價","很白目"],[2]],[43,"網路流行的「初級大人」，最接近哪種狀態？",["剛滿 18 歲","還沒辦信用卡","在家族裡沒有決定權的大人","駕照考了三次"],[2]],[44,"朋友說「今天又多了一顆金色記憶球」，通常是什麼意思？",["買到黃金","有一段想珍藏的快樂回憶","忘記今天要考試","遊戲抽到金色角色"],[1]],[45,"請問這把聽什麼？(附圖)一二二三三四五五六七中中中發發發",["二萬","五八萬","二五八萬","沒聽"],[2]],[46,"請問這副麻將差哪張胡牌？(附圖)一二二三三四五五六七中中中發發",["東風","二五八萬","沒有聽","相公～"],[3]],[47,"請問下副麻將聽幾個洞？(附圖)一一一二三四五六七八九九九發發發",["三個","五個","七個","九個"],[3]],[48,"唐伯虎點秋香中，含笑半步顛是用什麼做的？(附圖)",["蜂蜜，川貝，桔梗，加上天山雪蓮配製","蜂蜜，人參，桔梗，加上天山雪蓮配製","枇杷，川貝，桔梗，加上天山雪蓮配製","枇杷，人參，桔梗，加上天山雪蓮配製"],[0]],[49,"唐伯虎點秋香中，唐伯虎剛進華夫人家當僕人時的代碼是幾號？",["9453","89757","9817","9527"],[3]],[50,"撲克牌老K中，哪一個花色沒有鬍子？",["紅心","黑桃","方塊","梅花"],[0]],[51,"圖中的客家語暗自sad，是什麼意思？",["暗自難過","好漂亮","謝謝","我真的不知道"],[2]]]},{"cat":"新人題","rows":[[52,"請問圖片中有幾個【新郎】？",["４個","５個","６個","７個"],[0]],[53,"請問圖片中有幾個【新娘】？",["４個","５個","６個","７個"],[1]],[54,"新郎新娘是在哪裡認識的？",["咖啡廳","公司","全聯","夜店"],[1]],[55,"新人交往多久？",["三年","五年","六年","十年"],[2]],[56,"新人的交往紀念日是？",["2月14日","4月1日","5月20日","12月25日"],[2]],[57,"新人沒有一起去過的地方是？",["紐西蘭","日本","澎湖","馬祖"],[3]],[58,"新人第一次出遊的地方是？",["台北新兒童樂園","小琉球","高雄愛河","台東鹿野高台"],[0]],[59,"新人即將去哪裡度蜜月？",["歐洲","馬爾地夫","日本","義大利"],[0]],[60,"新人一起看的第一部電影是？",["變形金剛4","阿凡達","我的少女時代","厲陰宅2"],[3]],[61,"新人一起養的寵物是？",["兔子","貓咪","狗狗","倉鼠"],[0]],[62,"新郎、新娘分別是哪裡人？",["高雄/台北","台東/花蓮","桃園/台中","高雄/台南"],[2]],[63,"新郎是什麼星座？",["家裡座","天蠍座","金牛座","安太座"],[2]],[64,"新郎新娘身高差幾公分？",["１０ｃｍ","１２ｃｍ","１５ｃｍ","２０ｃｍ"],[1]],[65,"新郎新娘差幾歲？",["１歲","２歲","３歲","５歲"],[1]],[66,"新郎今年30歲，請問新郎新娘差幾歲？",["一樣大","２歲","５歲","１２歲"],[3]],[67,"新郎在哪裡向新娘求婚？",["陽明山","貓空","武嶺","北海岸"],[0]],[68,"新郎的職業是？",["軍人","警察","消防員","公務員"],[0]],[69,"新娘被魔法帽分到哪個學院？",["史萊哲林","葛萊分多","雷克勞文","嶺東科大"],[3]],[70,"新郎收到新娘送過最特別的禮物是？",["吵架和好券一張","恐龍裝","四角內褲","柬埔寨機票"],[2]],[71,"新郎最怕的是什麼？",["蟑螂","新娘","媽媽","爸爸"],[1]],[72,"新郎惹怒新娘時，會買什麼食物安撫新娘？",["珍珠奶茶","草莓蛋糕","雞排","豆花"],[0]],[73,"新郎目前任職於哪間公司？",["台積電","裕隆汽車","永大機電","中鋼"],[2]],[74,"請問新娘屬什麼？",["鼠","兔","羊","屬於新郎"],[3]],[75,"請問照片中是誰的小時候？",["新郎","新娘"],[1]],[76,"新娘最討厭的食物是？",["芋頭","香菜","青椒","香菇"],[1]],[77,"新郎新娘分別喜歡的顏色是？",["藍色/粉色","藍色/綠色","黑色/紫色","黃色/綠色"],[0]],[78,"新人的兄弟姊妹加起來共有幾位？",["1位","2位","3位","4位"],[3]],[79,"新娘二進禮服的顏色是？",["紅色","藍色","金色","綠色"],[0]]]},{"cat":"影音題","rows":[[80,"請問這首歌的歌名是？https://youtu.be/s3-ahYZ4h-o",["走在紅毯那一天","今天妳要嫁給我","Marry Me","最重要的決定"],[1]],[81,"(語音題)請問這句客語的中文是？https://www.youtube.com/watch?v=ms7SgDpsjoI",["新娘好讚喔！","新娘好瘦喔！","新娘好漂亮喔！","新娘好溫柔喔！"],[2]]]},{"cat":"進階題","rows":[[82,"請問今天是新人交往多少天？",["1966天","2279天","2543天","3520天"],[1]],[83,"新娘是A型，新郎是AB型，請問未來的孩子出生可能會是什麼血型？",["A型、O型","A型、O型、AB型","A型、B型、AB型","B型、O型"],[2]],[84,"請問新人的名字總共有幾劃？",["33","49","62","75"],[3]],[85,"新人在哪個戶政事務所登記結婚？",["士林戶政","淡水戶政","南屯戶政","北投戶政"],[0]],[86,"新郎在幾月幾號向新娘求婚？",["1月1號","3月20號","5月20號","12月25號"],[2]]]},{"cat":"其他題型","rows":[[87,"【滑桿題】心有靈犀一點通！請滑到新人預想的數字",["999","設定區間500-1000"],[]],[88,"【排列順序】請排列以下嫁娶的先後順序",["文定","迎娶","拜別父母","結婚宴客"],[]],[89,"【排列順序】請排列以下事件發生的先後順序",["新郎求婚","交往六週年","登記結婚","舉辦婚禮"],[]],[90,"【賓客留言】留下給新人祝福的話♥",["預設60秒"],[]]]}],"尾牙":[{"cat":"基礎題","rows":[[1,"請問今天是幾月幾日？",["1月1日","1月2日","1月3日","1月4日"],[0]],[2,"請問各位今天是來參加？",["端午划龍舟","告別單身趴","尾牙","婚禮"],[2]],[3,"尾牙辦在哪裡？",["林酒店","台中擔仔麵","新天地","台南擔仔麵"],[2]],[4,"請問今年尾牙的主題風格是？",["復古風","多巴胺風","台客風","芭比風"],[2]],[5,"尾牙抽獎時，最讓人期待聽到哪一句話？",["謝謝參與","明年再接再厲","這次沒有你的份","最大獎得主是你"],[3]],[6,"今天尾牙第一道菜是？",["菩提上素海中寶","迎賓如意六前菜","清蒸甘露龍虎斑","幸福手作流沙包"],[1]],[7,"請問公司名稱是？",["富士通","富士達","富士山","富士康"],[1]],[8,"請問公司已成立幾年？",["5年","10年","20年","30年"],[3]],[9,"舉辦尾牙的目的是？",["尾牙就是要人多才熱鬧","有人想要愛的表白","凝聚向心力","不要問啦！來啦！喝酒啦！"],[2]],[10,"本次尾牙共有幾道菜？",["14","13","12","11"],[2]]]},{"cat":"時事題","rows":[[11,"2026年10月侵襲台灣的颱風「薔琵」到底有沒有登陸？",["有","沒有"],[1]],[12,"PHP 在科技新聞中通常指的是什麼？",["一種程式語言","一種航空燃料","一種食品添加物","一種醫療影像設備"],[0]],[13,"是誰成功挑戰徒手攀登101大樓？",["Alex Honnold","Alex Rodriguez","Tommy Caldwell","Chris Sharma"],[0]],[14,"請問畫面中這招叫什麼? (附GIF圖)",["剪刀步","閃身步","歐洲步","試探步"],[1]],[15,"2026年FIFA 世界盃足球賽由哪三個國家共同主辦？",["巴西、阿根廷、智利","美國、加拿大、墨西哥","西班牙、葡萄牙、法國","日本、韓國、中國"],[1]],[16,"2026年FIFA 世界盃足球賽冠軍是哪一隊？",["阿根廷","法國","西班牙","英格蘭"],[2]],[17,"2026年FIFA 世界盃足球賽決賽，是哪兩個國家？",["阿根廷v.s西班牙","阿根廷v.s葡萄牙","英格蘭v.s法國","西班牙v.s法國"],[0]],[18,"2026年台灣九合一地方選舉的投票日期是哪一天？",["10月23日","11月28日","12月4日","12月25日"],[1]],[19,"台灣《職業安全衛生法》的職場霸凌防治新制，於 2026 年哪一天正式施行？",["1月1日","4月1日","7月1日","12月31日"],[2]],[20,"台灣自 2026 年起，育嬰留職停薪制度新增了哪一項彈性？",["只能以年為單位申請","可在符合規定下以日為單位申請","所有育嬰留停都必須無薪","只有主管可以申請"],[1]],[21,"2026年5月嘉義藝術節，與哪一個高人氣IP合作掀起一股熱潮？",["Loopy","吉伊卡哇","皮克敏","黃色小鴨"],[2]],[22,"2026 年第 37 屆金曲獎，拿下「歌后」的是誰？",["彭佳慧","蔡依林","單依純","洪佩瑜"],[1]],[23,"飛天特斯拉話題爆紅後，台灣網友竟然關心什麼問題？",["要考飛行駕照嗎","飛高會不會耳鳴","手搖飲要放哪裡","ETC 怎麼扣款"],[2]],[24,"2026 年第61屆金鐘獎，拿下戲劇節目女主角的是誰？",["柯佳嬿","邵雨薇","楊貴媚","鍾欣凌"],[2]],[25,"2026 年第61屆金鐘獎，拿下戲劇節目男主角的是誰？",["周渝民","莊凱勛","陳澤耀","曾敬驊"],[1]]]},{"cat":"趣味題","rows":[[26,"最近有些人為了搶演唱會門票，特地去拜哪位神明？",["財神爺","月老","文昌帝君","土地公"],[1]],[27,"遊戲裡的「台幣戰士」是什麼意思？",["專門玩台灣製遊戲的人","遊戲內專門賺錢的職業","大量課金的玩家","只用新台幣交易的人"],[2]],[28,"Threads 爆紅的「比奇堡發財桌布」，網友聲稱換了之後有什麼好事？",["發票中獎","搶到演唱會門票","順利排便","以上皆有"],[3]],[29,"當有人說「我給你ㄅ級分」，是在表達什麼？",["不及格","普通","最高評價","很白目"],[2]],[30,"朋友留言「請去高麗菜那桌坐」，通常是在說什麼？",["你很有智慧","你便祕了，要多吃蔬菜","你被排擠了","你要負責煮火鍋"],[0]],[31,"請填空：「他很壞，＿＿＿」",["壞壞壞","嘟嘟嘟","咚咚咚","啦啦啦"],[1]],[32,"近期流行語「YBSG」最接近什麼意思？",["也不是說哥","要不要試試看","太扯了、太誇張了","有病是不是哥"],[2]],[33,"最近爆紅的台版 GTA《臺北狂飆》，能在遊戲裡做什麼很台灣的事情？",["追垃圾車","搶演唱會門票","夜市擺攤賣雞排","到學校補修學分"],[0]],[34,"網路流行的「初級大人」，最接近哪種狀態？",["剛滿 18 歲","還沒辦信用卡","在家族裡沒有決定權的大人","駕照考了三次"],[2]],[35,"朋友說「今天又多了一顆金色記憶球」，通常是什麼意思？",["買到黃金","有一段想珍藏的快樂回憶","忘記今天要考試","遊戲抽到金色角色"],[1]],[36,"最近爆紅的《80 億分之一》人生模擬器，是讓玩家體驗什麼？",["成為億萬富翁","隨機投胎到不同國家的人生","跟全球 80 億人比智商","抽選全球最幸運的人"],[1]],[37,"上班族一天中最期待的時間通常是什麼？",["早會時間","下班時間","加班時間","開會時間"],[1]],[38,"公司尾牙最常見的活動之一是什麼？",["變裝秀","抽獎","成果發表","期中考"],[1]],[39,"如果可以選一種超能力帶去上班，你最可能想要哪一種？",["瞬間完成工作","隨時瞬間移動","讓時間暫停","以上皆可能是熱門選擇"],[3]],[40,"如果你突然中了尾牙最大獎，最合理的第一步是什麼？",["立刻辭職","買冰島的機票","發文炫耀","確認中獎資格與領獎方式"],[3]],[41,"《海綿寶寶》中，派大星最常被設定成海綿寶寶的什麼人？",["老闆","鄰居兼好友","老師","計程車司機"],[1]],[42,"《魷魚遊戲》中，參賽者最初穿著什麼顏色的運動服？",["紅色","藍色","綠色","黑色"],[2]],[43,"請問下副麻將聽幾個洞？一一一二三四五六七八九九九發發發",["三個","五個","七個","九個"],[3]],[44,"唐伯虎點秋香中，含笑半步顛是用什麼做的？",["蜂蜜，川貝，桔梗，加上天山雪蓮配製","蜂蜜，人參，桔梗，加上天山雪蓮配製","枇杷，川貝，桔梗，加上天山雪蓮配製","枇杷，人參，桔梗，加上天山雪蓮配製"],[0]],[45,"唐伯虎點秋香中，唐伯虎剛進華夫人家中當僕人時的代碼是幾號？",["9453","89757","9817","9527"],[3]],[46,"《賭俠》中周星祖的法文名字是什麼？",["今晚打太極","今晚打電動","Sit down please","今晚打老虎"],[3]],[47,"撲克牌老K中，哪一個花色沒有鬍子？",["紅心","黑桃","方塊","梅花"],[0]],[48,"米老鼠有幾根手指？",["3根","4根","5根","6根"],[1]],[49,"Hello Kitty的身高是幾顆蘋果高？",["3","7","4","5"],[3]],[50,"哪個月有28天？",["1月","2月","12月","每個月都有"],[3]],[51,"什麼車沒有輪子？",["腳踏車","火車","風車","汽車"],[2]],[52,"小明參加賽跑追過第2名後，請問小明會變成第幾名？",["第一名","第二名","第三名","第四名"],[1]],[53,"瑪利歐的耀西是什麼動物？",["龍","蜥蜴","烏龜","矮袋鼠"],[2]],[54,"《甄嬛傳》中，華妃最具代表性的經典台詞是哪一句？",["臣妾做不到啊","賤人就是矯情","皇上，臣妾冤枉","你這個磨人的小妖精"],[1]],[55,"「山無稜，天地合，才敢與君絕」是那一部劇情金句？",["還珠格格","後宮甄嬛傳","如懿傳","延禧攻略"],[0]],[56,"哪個水果視力最差？",["草莓","蘋果","芒果","葡萄"],[2]],[57,"如果把一個成人的全部血管連接起來，其長度接近多少公里？",["10公里","10萬公里","1000公里","1000萬公里"],[1]],[58,"哪個選項答案不等於10？",["2*5","6*4-2*7","9*8-5*5*5+9*7","6*6-22"],[3]],[59,"圓周率小數點第4位？",["3","4","5","6"],[2]],[60,"1=5、2=15、3=215、4=315、5=？",["415","45","1","2115"],[2]]]},{"cat":"公司題","rows":[[61,"請問現任總經理/董事長是誰？",["郭台銘","張忠謀","王永慶","陳志強"],[3]],[62,"請問公司目前在哪裡沒有據點？",["台中","台南","台東","新竹"],[2]],[63,"請問公司的吉祥物是？",["熊大","旺財","阿龍","大津"],[2]],[64,"請問公司是哪一年成立的？",["1893","1989","1983","1999"],[3]],[65,"請問公司的統一編號是？",["12345678","12262611","12262266","12626211"],[1]],[66,"公司股票代碼是多少？",["2454","2230","2330","2232"],[2]],[67,"目前公司員工數大約為多少人？",["300","500","1000","1500"],[2]],[68,"公司企業使命不包含哪一個？",["誠信篤實","卓越創新","利他貢獻","利潤至上"],[3]],[69,"請問公司地址在哪條路上？",["忠明南路","忠孝路","忠明路","忠勇路"],[0]],[70,"請問公司有幾位女生的HR呢？",["5位","6位","7位","8位"],[0]],[71,"下圖哪一個是公司LOGO？",["圖片1","圖片2","圖片3","圖片4"],[1]],[72,"下列何者不在5S的規範裡面?",["整理","整頓","整潔","清掃"],[2]],[73,"下列哪一種行為最有助於減少辦公室溝通誤會？",["所有事情都不回覆","只用表情符號交代工作","重要事項確認內容與期限","把所有訊息都設為靜音"],[2]],[74,"請問台灣的三節獎金不包含哪個節日？",["清明節","中秋節","端午節","春節"],[0]]]},{"cat":"知識題","rows":[[75,"請問傳統尾牙要吃以下哪種食物？",["刈包","小籠包","叉燒包","奶黃包"],[0]],[76,"「尾牙」的傳統習俗，與早期商家祭拜哪位神明有關？",["媽祖","土地公","月老","文昌帝君"],[1]],[77,"傳統「尾牙」中的「牙」，主要與什麼習俗有關？",["牙齒保健","染黑齒習俗","商家祭拜土地公的作牙習俗","因為大家會「牙」起來"],[2]],[78,"台灣傳統習俗中的「頭牙」，通常是農曆哪一天？",["正月初一","二月初二","五月初五","八月十五"],[1]],[79,"人工智慧（AI）最適合用來協助哪一項工作？",["在所有情況下保證答案正確","協助整理資料、生成草稿與分析資訊","完全取代所有人的判斷","保證任何投資獲利"],[1]],[80,"台灣在全球半導體產業中，最具代表性的優勢之一是什麼？",["生產紙張","先進晶圓製造","生產汽車輪胎","開採鑽石"],[1]],[81,"為什麼飛機窗戶通常是圓角，而不是尖銳的正方形？",["比較美觀","可減少尖角造成的應力集中","比較容易清潔窗簾","為了讓飛機飛得比較快"],[1]],[82,"哪一種動物的指紋與人類指紋非常相似，甚至可能讓人難以單靠外觀區分？",["無尾熊","海龜","金魚","蝴蝶"],[0]],[83,"為什麼手機在低溫環境下，有時會突然掉電或自動關機？",["低溫會讓手機變重","低溫可能降低鋰電池的輸出能力","低溫會讓螢幕吸收電力","低溫會讓電池永久變成磁鐵"],[1]],[84,"一個圓的半徑變成原來的 2 倍，面積會變成原來的幾倍？",["2 倍","3 倍","4 倍","8 倍"],[2]],[85,"一個數列為 2、6、12、20、30，下一個數字是什麼？",["36","40","42","48"],[2]],[86,"光從太陽傳到地球，約需要多久？",["8 秒","8 分 20 秒","80 分鐘","24 小時"],[1]],[87,"人體的紅血球主要負責哪一項工作？",["製造膽汁","運送氧氣","消化脂肪","製造胰島素"],[1]],[88,"下列哪一種氣體在地球大氣中所占比例最高？",["氧氣","二氧化碳","氮氣","氫氣"],[2]],[89,"若一個細菌每分鐘數量增加為原來的 2 倍，從 1 個開始，5分鐘後有多少個？",["16 個","25 個","32 個","64 個"],[2]],[90,"如果一件商品先漲價 20%，再降價 20%，最後價格與原價相比如何？",["完全相同","高 4%","低 4%","低 2%"],[2]],[91,"下列何者為台灣保育類動物？",["櫻花鉤吻蝦","台灣雲豹","台灣鯛","梅花鹿"],[1]],[92,"北極熊皮膚的顏色是什麼？",["黑色","白色","褐色","杏色"],[0]],[93,"台幣100元上的建築物是？",["國父紀念館","行政院","中正紀念堂","中山樓"],[3]],[94,"想要快速解酒、改善宿醉症狀，哪項方法不適用？",["補充水分","睡眠充足","洗冷水澡","吃頓豐盛早餐"],[2]],[95,"三個人彼此各握手一次，總共握手幾次？",["2 次","3 次","6 次","9 次"],[1]],[96,"請問英文He is in the pink的意思是？",["他看起來很健康","他穿粉紅色衣服","他看起來戀愛了","他看起來像芭比"],[0]],[97,"下列哪一部電影的全球票房最高？",["阿凡達","復仇者聯盟：終局之戰","阿凡達：水之道","鐵達尼號"],[0]],[98,"受驚嚇的長頸鹿會有什麼動作？",["躲在樹叢","奔跑","埋頭","把頭伸高"],[3]],[99,"下列哪個是人體含水量最高的器官？",["大腦","眼球","心臟","皮膚"],[1]],[100,"人類通常有幾對染色體？",["12 對","23 對","32 對","46 對"],[1]],[101,"請問大腦分泌什麼激素會令人感覺到幸福與快樂？",["內啡肽","酪氨酸","多巴胺","甲状腺素"],[2]],[102,"哪種食物原料是台灣特有種，全世界只有台灣才有生長？",["仙草","愛玉","粉圓","芋頭"],[1]]]},{"cat":"特殊題型","rows":[[103,"【圖標答題】請從圖片一堆貓頭鷹中找到貓咪 (附圖檔)",[],[]],[104,"【排列順序】請排列以下員工的身高(從高到矮)",["員工A","員工B","員工C","員工D"],[]],[105,"【文字雲】留下新年祝福話",[],[]]]}]};
 /* ---------- 參考題庫匯入 ---------- */
@@ -2563,7 +2579,7 @@ async function pickTheme(t){
   if(S.bg)URL.revokeObjectURL(S.bg.img.url);
   S.bg={kind:'theme',name:t.n,img:makeImg(blob,`${t.n}.${ext}`)};
   $('#themeQ').value='';$('#themeRes').innerHTML='';
-  $('#bgbg').classList.remove('show');renderGMedia();save();toast(`已選用公版主題「${t.n}」`);
+  $('#bgbg').classList.remove('show');renderGMedia();renderStage();save();toast(`已選用公版主題「${t.n}」`);
 }
 
 
@@ -2600,7 +2616,7 @@ async function pvApplyColor(){
   let dk;
   if(pv.color==='dark') dk=false; else if(pv.color==='light') dk=true;
   else{const b=pvBgImg(q);dk=b?(await bgLum(b.url))<.5:false}
-  st.classList.toggle('dk',dk);
+  st.classList.toggle('dk',dk);$('#pvPhone').classList.toggle('light-bg',!dk&&pv.color==='auto');
 }
 function pvTiles(q,n,ph){
   const cor=q.type==='poll'?[]:q.answers;
@@ -2625,18 +2641,27 @@ function hostHTML(q,i){
   else html+=`<div class="pv-input">${t==='wordcloud'?'輸入一個簡短的詞…':'輸入你的回覆…'}</div>`;
   return html;
 }
+const PH_ICON='<svg viewBox="0 0 16 20"><rect x="1" y="1" width="14" height="18" rx="2" fill="#333"/><rect x="2.6" y="2.6" width="5" height="6.6" fill="#e21b3c"/><rect x="8.4" y="2.6" width="5" height="6.6" fill="#1368ce"/><rect x="2.6" y="10.4" width="5" height="6.6" fill="#d89e00"/><rect x="8.4" y="10.4" width="5" height="6.6" fill="#26890c"/></svg>';
 function phoneHTML(q,i){
   const t=q.type;const qText=pvQText(q,i);const img=vis(q.qimg);const bg=pvBgImg(q);
-  let html=`${bg?'':'<div class="pv-deco"></div>'}<div class="ph-top"><span>${i+1} / ${S.qs.length}</span><i>${TYPES[t].label}</i></div>`;
-  if(t==='slide') return html+`<div class="ph-msg"><span>請看主持人的大螢幕</span></div><div class="ph-bot"><span>玩家</span><i>0</i></div>`;
-  html+=`<div class="ph-q ${pvLenCls(qText,24,48)}">${esc(qText)}</div>`;
-  html+=`<div class="ph-media">${img?`<img src="${img.url}" alt="" ${t==='pin'&&q.pin?`class="phPin" data-pin="${q.pin.img.url}"`:''}>`:''}</div>`;
-  if(TILE.includes(t)||t==='jumble'){const n=optCount(q);html+=`<div class="ph-ans ${n>4?'six':''} ${t==='jumble'?'one':''}">${pvTiles(q,n,true)}</div>`}
-  else if(t==='slider'){const p=sliderPos(q);html+=`<div class="ph-slider"><span>${esc(q.slider.min)}</span><div class="tr"><span class="kn" style="left:50%" data-pos="${p===null?50:p}"></span></div><span>${esc(q.slider.max)}</span></div><div class="ph-btn">送出</div>`}
-  else if(t==='pin') html+=`<div class="ph-btn">點圖片放置圖釘</div>`;
-  else html+=`<div class="ph-box">${t==='typeans'?'輸入答案':t==='wordcloud'?'輸入一個簡短的詞':'輸入你的回覆'}</div><div class="ph-btn">送出</div>`;
-  if(!['poll','wordcloud','open','brainstorm'].includes(t)) html+=`<div class="ph-res">✓ 正確答案已公布</div>`;
-  return html+`<div class="ph-bot"><span>玩家</span><i>0</i></div>`;
+  let html=`${bg?'':'<div class="pv-deco"></div>'}<div class="ph-top"><span class="ph-no">${i+1}</span><span class="ph-type">${PH_ICON}${TYPES[t].label}</span></div><div class="ph-body">`;
+  const end=`</div>`;
+  const bot=`<div class="ph-bot"><span class="av"></span><span class="nm">test</span><i id="phScore">0</i></div>`;
+  if(t==='slide') return html+`<div class="ph-media"></div><div class="ph-q">請看主持人的大螢幕</div>`+end+bot;
+  const tbar=`<div class="ph-tbar"><i id="phBar" style="width:100%">${q.time}</i></div>`;
+  if(t==='pin'){
+    html+=`<div class="ph-q ${pvLenCls(qText,22,44)}" style="margin-top:1cqw">${esc(qText)}</div><div class="ph-hint">請拖曳移動圖片並放置圖標。</div><div class="ph-media" style="padding:0"><div class="ph-pinwrap">${img?`<img src="${img.url}" alt="">`:''}</div></div><div class="ph-btn">提交</div>`+tbar;
+  }else{
+    html+=`<div class="ph-media">${img?`<img src="${img.url}" alt="">`:''}</div><div class="ph-q ${pvLenCls(qText,22,44)}">${esc(qText)}</div>`;
+    if(TILE.includes(t)||t==='jumble'){const n=optCount(q);html+=`<div class="ph-ans ${n>4?'six':''} ${t==='jumble'?'one':''}">${pvTiles(q,n,true)}</div>`}
+    else if(t==='slider'){const p=sliderPos(q);html+=`<div class="ph-slider"><span>${esc(q.slider.min)}</span><div class="tr"><span class="kn" style="left:50%" data-pos="${p===null?50:p}"></span></div><span>${esc(q.slider.max)}</span></div><div class="ph-btn">提交</div>`}
+    else html+=`<div class="ph-box">${t==='typeans'?'輸入答案':t==='wordcloud'?'輸入一個簡短的詞':'輸入你的回覆'}</div><div class="ph-btn">提交</div>`;
+    html+=tbar;
+  }
+  html+=end;
+  const scored=!['poll','wordcloud','open','brainstorm'].includes(t)&&q.points!=='none';
+  html+=`<div class="ph-res">${scored?`<h4>正確</h4><div class="ic"><svg viewBox="0 0 24 24"><use href="#i-check"/></svg></div><div class="pts" id="phPts">+ 0</div><p>答題連勝 1</p>`:`<h4>${['poll','wordcloud','open','brainstorm'].includes(t)?'已送出答案':'正確'}</h4><div class="ic"><svg viewBox="0 0 24 24"><use href="#i-check"/></svg></div><p>${q.points==='none'&&!['poll','wordcloud','open','brainstorm'].includes(t)?'本題不計分':'感謝你的回覆！'}</p>`}</div>`;
+  return html+bot;
 }
 function renderPreview(){
   pvClear();
@@ -2651,7 +2676,7 @@ function renderPreview(){
   let left=q.time,count=0;const total=Math.max(12,Math.round(18+Math.random()*50));
   const tEl=$('#pvTimer'),cEl=$('#pvCount');
   pv.timers.push(setInterval(()=>{
-    left--;tEl.textContent=Math.max(0,left);
+    left--;tEl.textContent=Math.max(0,left);const pb=$('#phBar');if(pb){pb.style.width=Math.max(0,left/q.time*100)+'%';pb.textContent=Math.max(0,left)}
     if(left<=0){pvClear();pvReveal()}
   },1000));
   const step=()=>{
@@ -2664,6 +2689,7 @@ function renderPreview(){
 }
 function pvReveal(){
   ['#pvStage','#pvPhone'].forEach(s=>$(s).classList.add('reveal'));
+  const q=S.qs[pv.i];const pts=$('#phPts');if(pts){const v=q.points==='double'?Math.round(1600+Math.random()*380):Math.round(800+Math.random()*190);pts.textContent='+ '+v;$('#phScore').textContent=v}
   document.querySelectorAll('#pvbg .kn[data-pos]').forEach(k=>k.style.left=k.dataset.pos+'%');
   document.querySelectorAll('#pvPinImg,#pvbg .phPin').forEach(pi=>pi.src=pi.dataset.pin);
 }
@@ -2765,7 +2791,8 @@ async function setQBg(q){
 }
 function bgToMedia(q){
   if(!q.qbg) return;
-  const t=q.qimg;q.qimg=q.qbg;q.qbg=t||null;changed(true);toast(t?'背景與題目圖已互換':'已改回題目圖片');
+  if(q.qimg){URL.revokeObjectURL(q.qimg.url)}
+  q.qimg=q.qbg;q.qbg=null;changed(true);toast('已改回題目圖片');
 }
 
 /* ---------- 參考標題拉把 ---------- */
