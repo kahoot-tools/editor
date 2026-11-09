@@ -831,6 +831,12 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
   .exbar .row .mini-btn{white-space:nowrap;padding:5px 10px}
   .sidecol.full .sidepanel{max-height:100vh;height:100vh;height:100dvh;border-radius:0;transition:height .2s}
 }
+/* v23 */
+.finish{display:flex;justify-content:center;margin:26px 0 4px}
+.finish-btn{font-size:17px;padding:14px 30px;border-radius:14px}
+.finish-note p{margin:0 0 8px}.finish-na{color:var(--muted);font-size:13.5px}
+.modal.finishm{max-width:560px}
+.mbtns .btn:disabled{opacity:.45;cursor:not-allowed}
 /* 玩家手機 */
 .pv-phone{position:relative;aspect-ratio:10/16;width:calc(var(--H)*.625);container-type:inline-size;overflow:hidden;border-radius:18px;border:7px solid #1b1919;background:#ece4da center/cover no-repeat;display:flex;flex-direction:column;color:#333;font-family:"Montserrat","Noto Sans TC",sans-serif}
 .pv-phone>*{position:relative;z-index:1}
@@ -1075,6 +1081,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
         <aside class="sidecol" id="side" aria-label="題目設定"></aside>
       </div>
     </div>
+    <div class="finish"><button type="button" class="btn btn-purple finish-btn" id="finishBtn">✓ 編輯完成，去導出 →</button></div>
   </section>
 
   <section class="blk">
@@ -1308,7 +1315,7 @@ function modal(title,html,buttons,cls){
   return new Promise(res=>{
     $('#mbg .modal').className='modal'+(cls?' '+cls:'');$('#mTitle').textContent=title;$('#mBody').innerHTML=html;
     const box=$('#mBtns');box.innerHTML='';
-    buttons.forEach(b=>{const el=document.createElement('button');el.className='btn '+(b.primary?'btn-purple':'btn-ghost');el.textContent=b.label;el.onclick=()=>{$('#mbg').classList.remove('show');res(b.value)};box.appendChild(el)});
+    buttons.forEach(b=>{const el=document.createElement('button');el.className='btn '+(b.cls||(b.primary?'btn-purple':'btn-ghost'));el.textContent=b.label;if(b.disabled){el.disabled=true;el.title=b.disabled}el.onclick=()=>{$('#mbg').classList.remove('show');res(b.value)};box.appendChild(el)});
     $('#mbg').classList.add('show');
   });
 }
@@ -3102,6 +3109,12 @@ rail.addEventListener('contextmenu',e=>{if(e.target.closest('.thumb'))e.preventD
 rail.addEventListener('keydown',e=>{const th=e.target.closest('.thumb');if(th&&(e.key==='Enter'||e.key===' ')){e.preventDefault();S.cur=+th.closest('.titem').dataset.i;render();save()}});
 
 $('#backInput').onclick=backToInput;
+$('#finishBtn').onclick=async()=>{
+  const hasImg=!$('#dlZip').disabled;
+  const v=await modal('編輯完成，去導出',`<div class="finish-note"><p>📦 若題目與圖片已製作完成，可直接<b>下載壓縮檔</b>提供給小幫手。</p><p>📝 若有圖片或其他素材尚未上傳，可先<b>下載題目 Excel</b> 安排製作，待圖片完善後再補傳完整檔。</p>${hasImg?'':'<p class="finish-na">目前沒有上傳任何圖片，只需要下載 Excel。</p>'}</div>`,
+    [{label:'取消',value:null},{label:'⬇ 下載Excel',value:'x',cls:'btn-green'},{label:'⬇ Excel+圖片(ZIP)',value:'z',primary:true,disabled:hasImg?'':'有上傳圖片時才需要'}],'finishm');
+  if(v==='x')$('#dlExcel').click();else if(v==='z')$('#dlZip').click();
+};
 $('#resumeBtn').onclick=()=>setView('edit');
 $('#navMenu').onclick=e=>{e.stopPropagation();const t=$('#top');const o=!t.classList.contains('navopen');t.classList.toggle('navopen',o);$('#navMenu').setAttribute('aria-expanded',o)};
 document.addEventListener('click',e=>{if(!e.target.closest('.topnav,#navMenu'))$('#top').classList.remove('navopen')});
