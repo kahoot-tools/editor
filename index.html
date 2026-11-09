@@ -671,6 +671,15 @@ footer p{color:var(--muted);font-size:14px}
 .selbar .mini-btn{padding:4px 8px;font-size:12.5px}
 .selhint{font-size:11.5px;color:var(--muted);text-align:center;margin:-4px 0 -2px}
 @media (max-width:860px){.selhint{display:none}.selbar{flex:none;width:150px;align-self:stretch;flex-direction:column;justify-content:center}}
+/* 字體：Noto Sans TC，內文不加粗；只有主標題與下載鈕加粗 */
+body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
+*{font-weight:400!important}
+:is(h1,h2,h3,b,strong,.btn,.mode b,.qbox textarea,.ans input,.jitem input,.ta-main input,.seg button,.mini-btn,.set,.sp-lb,.titlerow label,.qbadge,.timepill,.hl,.tn,.extra-t,.gs-t,.topnav a,.brand){font-weight:500!important}
+:is(.kbox,.kmini){font-weight:900!important}
+.banner h1>span:last-child{font-weight:900!important}
+:is(#dlExcel,#dlZip,#dlExcel *,#dlZip *){font-weight:700!important}
+.qbox textarea{font-size:23px}
+@media (max-width:560px){.qbox textarea{font-size:19px}}
 </style>
 </head>
 <body>
