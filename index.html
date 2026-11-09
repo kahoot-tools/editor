@@ -660,6 +660,17 @@ footer p{color:var(--muted);font-size:14px}
 .bank-foot{display:flex;align-items:center;gap:10px}
 .bank-foot #bankCount{font-weight:700;color:var(--muted);font-size:14px}
 @media (max-width:860px){.theme-res{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* 多選 */
+.titem.sel .thumb{border-color:var(--k1);background:#eef5ff}
+.titem.sel.on .thumb{border-color:var(--accent)}
+.titem.gh{display:none}
+.titem.multi .thumb{box-shadow:6px 6px 0 -2px #fff,6px 6px 0 0 var(--k1)!important}
+.dcount{position:absolute;right:-8px;top:-10px;z-index:6;min-width:34px;height:34px;border-radius:999px;background:var(--k1);color:#fff;font-weight:900;font-size:16px;display:grid;place-items:center;padding:0 8px;border:3px solid #fff}
+.selbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:#eef5ff;border:1.5px solid #b9d3f5;border-radius:12px;padding:8px}
+.selbar b{flex:1;font-size:13.5px;color:var(--k1)}
+.selbar .mini-btn{padding:4px 8px;font-size:12.5px}
+.selhint{font-size:11.5px;color:var(--muted);text-align:center;margin:-4px 0 -2px}
+@media (max-width:860px){.selhint{display:none}.selbar{flex:none;width:150px;align-self:stretch;flex-direction:column;justify-content:center}}
 </style>
 </head>
 <body>
@@ -779,6 +790,8 @@ footer p{color:var(--muted);font-size:14px}
 
       <div class="studio">
         <aside class="rail" id="rail" aria-label="題目縮圖，可拖曳調整順序">
+          <div class="selbar" id="selbar" hidden><b>已選 <span id="selCount">0</span> 題</b><button type="button" class="mini-btn danger" id="selDel">🗑 刪除</button><button type="button" class="mini-btn" id="selClear">取消</button></div>
+          <div class="selhint">按住 Shift 點選可連選多題</div>
           <div id="thumbs"></div>
           <button class="add-q" id="addQ" title="新增題目">＋<span class="lg"> 加入題目</span></button>
         </aside>
@@ -1583,6 +1596,8 @@ function render(){
   $('#editor').hidden=!show;document.body.classList.toggle('has-editor',show);
   if(!show) return;
   if(S.cur>=S.qs.length) S.cur=Math.max(0,S.qs.length-1);
+  const ids=new Set(S.qs.map(q=>q.id));[...selIds].forEach(id=>{if(!ids.has(id))selIds.delete(id)});
+  if(S.qs[S.cur]&&!selIds.has(S.qs[S.cur].id)){selIds.clear();selIds.add(S.qs[S.cur].id);selAnchor=S.cur}
   renderRail();renderStage();renderStat();
 }
 function thumbHTML(q,i){
@@ -1590,7 +1605,7 @@ function thumbHTML(q,i){
   let bars='';
   if(TILE.includes(q.type)){const n=optCount(q);bars=Array.from({length:n},(_,k)=>`<i class="s${colorIdx(q,k)} ${q.answers.includes(k+1)?'c':''}"></i>`).join('')}
   const thumbImg=q.type==='pin'&&q.pin?q.pin.img:q.qimg;
-  return `<div class="titem ${i===S.cur?'on':''}" data-i="${i}">
+  return `<div class="titem ${i===S.cur?'on':''} ${selIds.size>1&&selIds.has(q.id)?'sel':''}" data-i="${i}">
     <div class="thumb" role="button" tabindex="0" aria-label="第 ${i+1} 題">
       <span class="tn">${i+1}</span>${q.type!=='quiz'?`<span class="ttype">${TYPES[q.type].label}</span>`:''}${bad?'<span class="tdot" title="有欄位待確認"></span>':''}
       <div class="tv">${thumbImg?`<img src="${thumbImg.url}" alt="">`:`<svg width="30" height="30"><use href="#i-img"/></svg>`}</div>
@@ -1600,8 +1615,10 @@ function thumbHTML(q,i){
     <div class="tbtns"><button type="button" data-tact="dup" data-i="${i}">⧉ 複製</button><button type="button" class="del" data-tact="del" data-i="${i}">🗑 刪除</button></div>
   </div>`;
 }
+const selIds=new Set();let selAnchor=0;
 function renderRail(){
   $('#thumbs').innerHTML=S.qs.map(thumbHTML).join('');
+  const sb=$('#selbar');if(sb){sb.hidden=selIds.size<2;$('#selCount').textContent=selIds.size}
   const on=document.querySelector('.titem.on');on&&on.scrollIntoView({block:'nearest',inline:'nearest'});
 }
 function refreshThumb(i){
@@ -1748,10 +1765,10 @@ function flip(els,mutate){
     el.style.transform='';
   });
 }
-function makeSortable(box,{itemSel,handleSel,axis,longPress,ignore,onTap,onCommit,scroller}){
+function makeSortable(box,{itemSel,handleSel,axis,longPress,ignore,onTap,onCommit,scroller,onStart}){
   if(!box) return;
   let d=null;
-  const items=()=>[...box.children].filter(x=>x.matches(itemSel));
+  const items=()=>[...box.children].filter(x=>x.matches(itemSel)&&!x.classList.contains('gh'));
   box.addEventListener('pointerdown',e=>{
     if(e.button>0) return;
     if(ignore&&e.target.closest(ignore)) return;
@@ -1765,7 +1782,7 @@ function makeSortable(box,{itemSel,handleSel,axis,longPress,ignore,onTap,onCommi
     else if(d.touch&&longPress) d.timer=setTimeout(start,300);
   });
   function start(){
-    if(!d) return;d.active=true;d.it.classList.add('dragging');d.it.style.transition='none';d.it.style.position='relative';d.it.style.zIndex='5';
+    if(!d) return;d.active=true;if(onStart)onStart(d.it);d.orig=items();d.it.classList.add('dragging');d.it.style.transition='none';d.it.style.position='relative';d.it.style.zIndex='5';
     try{d.it.setPointerCapture(d.id)}catch(e){}
     if(d.touch&&navigator.vibrate) try{navigator.vibrate(12)}catch(e){}
   }
@@ -1800,11 +1817,12 @@ function makeSortable(box,{itemSel,handleSel,axis,longPress,ignore,onTap,onCommi
     setTimeout(()=>{
       dd.it.classList.remove('dragging');dd.it.style.cssText='';
       const order=items().map(x=>dd.orig.indexOf(x));
-      onCommit(order,dd.orig.indexOf(dd.it));
+      onCommit(order,dd.orig.indexOf(dd.it),dd.it);
     },200);
   }
-  box.addEventListener('pointerup',e=>end(e,false));
-  box.addEventListener('pointercancel',e=>end(e,true));
+  window.addEventListener('pointerup',e=>end(e,false));
+  window.addEventListener('pointercancel',e=>end(e,true));
+  window.addEventListener('blur',()=>{if(d&&d.active)end(null,true)});
 }
 
 /* ================= 圖片 ================= */
@@ -2453,17 +2471,50 @@ rail.addEventListener('click',async e=>{
       qimg:cp(q.qimg),aimg:cp(q.aimg),oimgs:q.oimgs.map(cp),pin:q.pin?{shape:JSON.parse(JSON.stringify(q.pin.shape)),img:cp(q.pin.img)}:null});
     S.qs.splice(i+1,0,c);S.cur=i+1;render();save();toast('已複製為第 '+(i+2)+' 題');
   }else{
+    if(selIds.size>1&&selIds.has(q.id)){deleteSelected();return}
     if((q.text.trim()||q.options.some(s=>s.trim())||allImgsRaw(q).length)&&!await modal(`刪除第 ${i+1} 題？`,esc(q.text||'（未輸入題目）'),[{label:'取消',value:false},{label:'刪除',value:true,primary:true}])) return;
     allImgsRaw(q).forEach(im=>URL.revokeObjectURL(im.url));
     S.qs.splice(i,1);if(S.cur>i||S.cur>=S.qs.length)S.cur=Math.max(0,S.cur-1);render();save();
   }
 });
 makeSortable(thumbs,{itemSel:'.titem',axis:()=>isRow()?'x':'y',longPress:true,ignore:'button',scroller:rail,
-  onTap:it=>{S.cur=+it.dataset.i;render();save();if(isRow())focusQuestion()},
-  onCommit:(order,from)=>{
-    const movedId=S.qs[from].id;S.qs=order.map(i=>S.qs[i]);S.cur=S.qs.findIndex(q=>q.id===movedId);
-    render();save();if(order.some((v,i)=>v!==i))toast(`已移到第 ${S.cur+1} 題`);
+  onTap:(it,e)=>{
+    const i=+it.dataset.i;const id=S.qs[i].id;
+    if(e&&e.shiftKey){const a=Math.min(selAnchor,i),b=Math.max(selAnchor,i);selIds.clear();for(let k=a;k<=b;k++)selIds.add(S.qs[k].id)}
+    else if(e&&(e.ctrlKey||e.metaKey)){if(selIds.has(id)&&selIds.size>1){selIds.delete(id)}else selIds.add(id);selAnchor=i;if(!selIds.has(id)){const f=S.qs.findIndex(q=>selIds.has(q.id));S.cur=f;render();save();return}}
+    else{selIds.clear();selIds.add(id);selAnchor=i}
+    S.cur=i;render();save();if(isRow()&&!(e&&(e.shiftKey||e.ctrlKey||e.metaKey)))focusQuestion();
+  },
+  onStart:it=>{
+    const id=S.qs[+it.dataset.i].id;
+    if(!selIds.has(id)||selIds.size<2){selIds.clear();selIds.add(id);return}
+    thumbs.querySelectorAll('.titem').forEach(el=>{const q=S.qs[+el.dataset.i];if(el!==it&&selIds.has(q.id))el.classList.add('gh')});
+    const c=document.createElement('span');c.className='dcount';c.textContent=selIds.size;it.appendChild(c);it.classList.add('multi');
+  },
+  onCommit:(order,_f,el)=>{
+    const from=+el.dataset.i;
+    const all=[...thumbs.querySelectorAll('.titem')].map(el=>+el.dataset.i);
+    const movedId=S.qs[from].id;const group=selIds.size>1&&selIds.has(movedId);
+    let newOrder;
+    if(group){
+      const selIdx=S.qs.map((q,i)=>selIds.has(q.id)?i:-1).filter(i=>i>=0);
+      newOrder=[];all.forEach(i=>{if(i===from)newOrder.push(...selIdx);else if(!selIds.has(S.qs[i].id))newOrder.push(i)});
+    }else newOrder=all;
+    const before=S.qs.map(q=>q.id).join();
+    S.qs=newOrder.map(i=>S.qs[i]);S.cur=S.qs.findIndex(q=>q.id===movedId);
+    render();save();
+    if(S.qs.map(q=>q.id).join()!==before) toast(group?`已移動 ${selIds.size} 題`:`已移到第 ${S.cur+1} 題`);
   }});
+async function deleteSelected(){
+  const idx=S.qs.map((q,i)=>selIds.has(q.id)?i:-1).filter(i=>i>=0);if(!idx.length) return;
+  if(!await modal(`刪除已選的 ${idx.length} 題？`,idx.slice(0,8).map(i=>`第 ${i+1} 題：${esc(S.qs[i].text||'（未輸入題目）')}`).join('<br>')+(idx.length>8?`<br>…另有 ${idx.length-8} 題`:''),[{label:'取消',value:false},{label:`刪除 ${idx.length} 題`,value:true,primary:true}])) return;
+  idx.forEach(i=>allImgsRaw(S.qs[i]).forEach(im=>URL.revokeObjectURL(im.url)));
+  const first=idx[0];S.qs=S.qs.filter(q=>!selIds.has(q.id));selIds.clear();
+  S.cur=Math.min(first,Math.max(0,S.qs.length-1));render();save();toast(`已刪除 ${idx.length} 題`);
+}
+$('#selDel').onclick=deleteSelected;
+$('#selClear').onclick=()=>{const id=S.qs[S.cur]&&S.qs[S.cur].id;selIds.clear();if(id)selIds.add(id);renderRail()};
+document.addEventListener('keydown',e=>{if(e.key==='Delete'&&selIds.size>1&&!e.target.closest('input,textarea,select'))deleteSelected()});
 rail.addEventListener('contextmenu',e=>{if(e.target.closest('.thumb'))e.preventDefault()});
 rail.addEventListener('keydown',e=>{const th=e.target.closest('.thumb');if(th&&(e.key==='Enter'||e.key===' ')){e.preventDefault();S.cur=+th.closest('.titem').dataset.i;render();save()}});
 
