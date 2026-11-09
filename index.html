@@ -7,7 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Montserrat:wght@800;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Montserrat:wght@700;800;900&display=swap">
 <style>
 /* 版面：頂部列 → 立體紫色橫幅 → 三個模式按鈕（點選後展開）→ 白色大框編輯區（標題／匯出設定／左側縮圖＋置中畫布）→ 匯入說明 → 頁尾 LINE */
 :root{
@@ -690,59 +690,145 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 .qbox textarea{word-break:break-word}
 .canvas{overflow:clip}
 /* ===== 題目預覽（主持人畫面） ===== */
-.pvbtn{border:1.5px solid var(--accent);background:#fff;color:var(--accent);border-radius:999px;padding:5px 14px;font-size:14px;cursor:pointer}
-.pvbtn:hover{background:var(--accent);color:#fff}
-.pv-bg{position:fixed;inset:0;z-index:90;background:#3d3a3a;display:flex;flex-direction:column;align-items:center;padding:14px 18px 12px;gap:10px}
+.pvbtn{border:0;background:var(--accent);color:#fff;border-radius:999px;padding:5px 14px 5px 11px;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.pvbtn svg{width:18px;height:18px}
+.pv-bg{position:fixed;inset:0;z-index:90;background:#3d3a3a;display:flex;flex-direction:column;align-items:center;padding:10px 18px 12px;gap:10px;font-family:"Montserrat","Noto Sans TC",sans-serif}
 .pv-bg[hidden]{display:none}
-.pv-top{width:100%;max-width:1400px;color:#fff;font-size:17px}
-.pv-wrap{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
-.pv-stage{position:relative;aspect-ratio:16/9;width:min(100%,calc((100vh - 120px)*16/9));max-width:1400px;container-type:inline-size;overflow:hidden;border-radius:10px;border:6px solid #262424;background:#ece4da center/cover no-repeat;font-family:"Noto Sans TC","Montserrat",sans-serif;color:#333}
-.pv-bg.max{padding:0}
-.pv-bg.max .pv-top{display:none}
-.pv-bg.max .pv-stage,.pv-bg:fullscreen .pv-stage{border:0;border-radius:0;width:min(100vw,calc((100vh - 58px)*16/9))}
+.pv-main{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;gap:28px;--H:min(calc(100vh - 128px),calc((100vw - 90px)/2.403))}
+.pv-col{display:flex;flex-direction:column;gap:8px;min-width:0}
+.pv-head{display:flex;align-items:center;gap:8px;color:#fff;height:36px}
+.pv-head b{font-size:17px;font-weight:700!important;font-family:"Noto Sans TC",sans-serif;margin-right:auto}
+.pv-hbtn{background:#1f1d1d;color:#fff;border:0;border-radius:6px;height:36px;padding:0 12px;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-family:"Noto Sans TC",sans-serif;cursor:pointer}
+.pv-hbtn:hover{background:#4a4646}
+.pv-hbtn svg{width:18px;height:18px}
+.pv-stage{position:relative;aspect-ratio:16/9;width:calc(var(--H)*16/9);container-type:inline-size;overflow:hidden;border-radius:10px;border:6px solid #262424;background:#ece4da center/cover no-repeat;color:#333;font-family:"Montserrat","Noto Sans TC",sans-serif}
+.pv-bg.max,.pv-bg:fullscreen{padding:6px 10px 8px}
+.pv-bg.max .pv-col.ph,.pv-bg:fullscreen .pv-col.ph{display:none}
+.pv-bg.max .pv-main,.pv-bg:fullscreen .pv-main{--H:min(calc(100vh - 110px),calc((100vw - 32px)*9/16))}
+.pv-bg.max .pv-head b,.pv-bg:fullscreen .pv-head b{visibility:hidden}
 .pv-deco{position:absolute;inset:0;pointer-events:none}
 .pv-deco::before{content:"";position:absolute;left:-6%;top:12%;width:0;height:0;border-left:22cqw solid transparent;border-right:22cqw solid transparent;border-bottom:44cqw solid rgba(255,255,255,.35)}
 .pv-deco::after{content:"";position:absolute;right:-12%;bottom:-30%;width:55cqw;height:55cqw;border-radius:50%;background:rgba(255,255,255,.28)}
-.pv-q{position:absolute;left:50%;top:1.6cqw;transform:translateX(-50%);max-width:72%;background:#fff;border-radius:.3cqw;padding:.9cqw 2.6cqw;font-size:2.6cqw;font-weight:700!important;line-height:1.3;text-align:center;box-shadow:0 .25cqw .4cqw rgba(0,0,0,.18)!important;z-index:2;word-break:break-word}
+.pv-q{position:absolute;left:50%;top:1.6cqw;transform:translateX(-50%);max-width:72%;background:#fff;border-radius:.3cqw;padding:.9cqw 2.6cqw;font-size:2.6cqw;font-weight:800!important;line-height:1.3;text-align:center;box-shadow:0 .25cqw .4cqw rgba(0,0,0,.18)!important;z-index:2;word-break:break-word}
 .pv-q.long{font-size:2cqw}.pv-q.xlong{font-size:1.6cqw}
 .pv-media{position:absolute;left:18%;right:18%;top:9.8cqw;bottom:21cqw;display:flex;align-items:center;justify-content:center;z-index:1}
-.pv-media img{max-width:100%;max-height:100%;object-fit:contain;display:block}
-.pv-circle{position:absolute;top:22cqw;width:8.6cqw;height:8.6cqw;border-radius:50%;background:rgba(255,250,245,.95);display:grid;place-items:center;font-family:"Montserrat","Noto Sans TC",sans-serif;font-weight:800!important;font-size:4.4cqw;color:#2b2b2b;z-index:2}
+.pv-media img{max-width:100%;max-height:100%;object-fit:contain;display:block;background:none}
+.pv-circle{position:absolute;top:22cqw;width:8.6cqw;height:8.6cqw;border-radius:50%;background:var(--pvc);color:var(--pvt);display:grid;place-items:center;font-weight:800!important;font-size:4.4cqw;z-index:2}
+.pvwrap-c{--pvc:#5a2b85;--pvt:#fff}
+.pvwrap-c.dk{--pvc:#e4d6f5;--pvt:#3b1a5c}
 .pv-timer{left:1.8cqw}
 .pv-count{right:2.2cqw;width:7cqw;height:7cqw;font-size:3.8cqw;top:22.8cqw}
 .pv-count.pop{animation:pvpop .3s ease-out}
 @keyframes pvpop{40%{transform:scale(1.18)}}
-.pv-countlb{position:absolute;right:3.1cqw;top:30.6cqw;background:rgba(255,250,245,.95);border-radius:999px;padding:.1cqw .8cqw;font-size:1.25cqw;font-weight:700!important;z-index:2}
-.pv-timer.low{color:#e21b3c}
+.pv-countlb{position:absolute;right:2.9cqw;top:30.6cqw;background:var(--pvc);color:var(--pvt);border-radius:999px;padding:.1cqw .8cqw;font-size:1.25cqw;font-weight:700!important;z-index:2;font-family:"Noto Sans TC",sans-serif}
 .pv-ans{position:absolute;left:.7cqw;right:.7cqw;bottom:.7cqw;display:grid;grid-template-columns:1fr 1fr;gap:.6cqw;z-index:2}
-.pv-a{position:relative;display:flex;align-items:center;gap:1.4cqw;min-height:8.6cqw;padding:.6cqw 1.6cqw;border-radius:.35cqw;color:#fff;font-size:2.3cqw;font-weight:700!important;line-height:1.25;box-shadow:inset 0 -.45cqw 0 rgba(0,0,0,.18)!important;transition:opacity .3s,filter .3s;word-break:break-word}
+.pv-a{position:relative;display:flex;align-items:center;gap:1.4cqw;min-height:8.6cqw;padding:.6cqw 1.6cqw;border-radius:.35cqw;color:#fff;font-size:2.3cqw;font-weight:800!important;line-height:1.25;box-shadow:inset 0 -.45cqw 0 rgba(0,0,0,.18)!important;transition:opacity .3s,filter .3s;word-break:break-word}
 .pv-ans.six .pv-a{min-height:6cqw;font-size:1.9cqw}
 .pv-a.long{font-size:1.7cqw}.pv-a.xlong{font-size:1.35cqw}
 .pv-a svg.shp6{width:2.6cqw;height:2.6cqw;flex:none}
-.pv-a img{max-height:7.4cqw;max-width:70%;object-fit:contain;background:#fff;border-radius:.3cqw}
+.pv-a img{max-height:7.4cqw;max-width:70%;object-fit:contain;background:none}
 .pv-a .ok{position:absolute;right:1.2cqw;top:50%;transform:translateY(-50%);width:4cqw;height:4cqw;border-radius:50%;background:#66bf39;border:.35cqw solid #fff;display:none;place-items:center}
 .pv-a .ok svg{width:2.4cqw;height:2.4cqw;color:#fff}
-.pv-stage.reveal .pv-a.wrong{opacity:.35;filter:grayscale(.3)}
-.pv-stage.reveal .pv-a.right .ok{display:grid}
+.reveal .pv-a.wrong{opacity:.35;filter:grayscale(.3)}
+.reveal .pv-a.right .ok{display:grid}
 .pv-input{position:absolute;left:22%;right:22%;bottom:5cqw;background:#fff;border-radius:.4cqw;padding:1.6cqw 2cqw;font-size:2.2cqw;color:#9a91ab;text-align:center;z-index:2;box-shadow:0 .3cqw 0 rgba(0,0,0,.15)!important}
-.pv-reveal-txt{position:absolute;left:22%;right:22%;bottom:13cqw;text-align:center;font-size:2.2cqw;font-weight:700!important;color:#26890c;z-index:2;display:none;background:rgba(255,255,255,.92);border-radius:.4cqw;padding:.6cqw}
-.pv-stage.reveal .pv-reveal-txt{display:block}
-.pv-slider{position:absolute;left:8%;right:8%;bottom:4cqw;background:#fff;border-radius:.4cqw;padding:2cqw 2.4cqw;z-index:2;display:flex;align-items:center;gap:2cqw;font-size:2cqw;font-weight:700!important}
+.pv-reveal-txt{position:absolute;left:22%;right:22%;bottom:13cqw;text-align:center;font-size:2.2cqw;font-weight:800!important;color:#26890c;z-index:2;display:none;background:rgba(255,255,255,.92);border-radius:.4cqw;padding:.6cqw}
+.reveal .pv-reveal-txt{display:block}
+.pv-slider{position:absolute;left:8%;right:8%;bottom:4cqw;background:#fff;border-radius:.4cqw;padding:2cqw 2.4cqw;z-index:2;display:flex;align-items:center;gap:2cqw;font-size:2cqw;font-weight:800!important}
 .pv-slider .tr{flex:1;height:3cqw;background:repeating-linear-gradient(90deg,#cfc8da 0 .3cqw,transparent .3cqw 1cqw);position:relative}
 .pv-slider .kn{position:absolute;top:50%;width:3.2cqw;height:3.2cqw;border-radius:50%;background:#46178f;transform:translate(-50%,-50%);transition:left .6s}
 .pv-slide{position:absolute;left:10%;right:10%;top:9cqw;bottom:4cqw;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2cqw;z-index:2;text-align:center}
 .pv-slide .sb{background:rgba(255,255,255,.9);border-radius:.4cqw;padding:1.4cqw 2cqw;font-size:2cqw;max-width:100%}
-.pv-empty{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:3cqw}
-.pv-ctrl{display:flex;align-items:center;gap:10px;width:100%;max-width:1400px;justify-content:center;position:relative;min-height:46px}
-.pv-ctrl button,.pv-nav{background:#1f1d1d;color:#fff;border:0;border-radius:6px;font-size:16px}
-.pv-nav{display:flex;align-items:center}
-.pv-nav button{background:none;color:#fff;border:0;width:44px;height:44px;font-size:22px;border-radius:6px}
-.pv-nav button:hover,.pv-fs:hover,.pv-exit:hover,.pv-replay:hover{background:#4a4646}
-.pv-nav span{min-width:70px;text-align:center;font-weight:700!important;font-family:"Montserrat","Noto Sans TC",sans-serif}
-.pv-fs{width:46px;height:44px;display:grid;place-items:center}
-.pv-exit{position:absolute;left:0;height:44px;padding:0 16px}
-.pv-replay{position:absolute;right:0;height:44px;padding:0 16px}
-@media (max-width:700px){.pv-bg{padding:10px 6px}.pv-replay{display:none}.pv-exit{position:static}.pv-ctrl{justify-content:space-between}}
+/* 玩家手機 */
+.pv-phone{position:relative;aspect-ratio:10/16;width:calc(var(--H)*.625);container-type:inline-size;overflow:hidden;border-radius:18px;border:7px solid #1b1919;background:#ece4da center/cover no-repeat;display:flex;flex-direction:column;color:#333;font-family:"Montserrat","Noto Sans TC",sans-serif}
+.pv-phone>*{position:relative;z-index:1}
+.pv-phone .pv-deco{z-index:0}
+.ph-top{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:2.4cqw 4cqw;font-size:4.2cqw;font-weight:800!important}
+.ph-top i{font-style:normal;background:#333;color:#fff;border-radius:999px;padding:.4cqw 3cqw;font-size:3.6cqw}
+.ph-q{margin:3cqw 3cqw 0;background:#fff;border-radius:1.2cqw;padding:2.6cqw 3cqw;text-align:center;font-size:5cqw;font-weight:800!important;line-height:1.3;word-break:break-word;box-shadow:0 .6cqw 1cqw rgba(0,0,0,.15)!important}
+.ph-q.long{font-size:4.2cqw}.ph-q.xlong{font-size:3.6cqw}
+.ph-media{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:3cqw}
+.ph-media img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.ph-ans{display:grid;grid-template-columns:1fr 1fr;gap:2cqw;padding:0 2cqw 2cqw}
+.ph-ans.one{grid-template-columns:1fr}
+.ph-ans .pv-a{min-height:24cqw;flex-direction:column;justify-content:center;gap:1.6cqw;padding:2cqw;font-size:4.4cqw;text-align:center;border-radius:1.2cqw;box-shadow:inset 0 -1.2cqw 0 rgba(0,0,0,.18)!important}
+.ph-ans.six .pv-a{min-height:16cqw;font-size:3.8cqw}
+.ph-ans .pv-a.long{font-size:3.6cqw}.ph-ans .pv-a.xlong{font-size:3.1cqw}
+.ph-ans .pv-a svg.shp6{width:7cqw;height:7cqw}
+.ph-ans .pv-a img{max-height:16cqw;max-width:90%}
+.ph-ans .pv-a .ok{right:2cqw;top:2cqw;transform:none;width:8cqw;height:8cqw;border-width:.8cqw}
+.ph-ans .pv-a .ok svg{width:5cqw;height:5cqw}
+.ph-box{margin:0 4cqw 4cqw;background:#fff;border-radius:1.4cqw;padding:4cqw;text-align:center;font-size:4.6cqw;color:#9a91ab;box-shadow:0 1cqw 0 rgba(0,0,0,.15)!important}
+.ph-btn{margin:0 4cqw 4cqw;background:#333;color:#fff;border-radius:1.4cqw;padding:3cqw;text-align:center;font-size:4.6cqw;font-weight:800!important}
+.ph-slider{margin:0 4cqw 4cqw;background:#fff;border-radius:1.4cqw;padding:6cqw 5cqw;display:flex;align-items:center;gap:3cqw;font-size:4.2cqw;font-weight:800!important}
+.ph-slider .tr{flex:1;height:2cqw;background:#cfc8da;border-radius:2cqw;position:relative}
+.ph-slider .kn{position:absolute;top:50%;width:7cqw;height:7cqw;border-radius:50%;background:#46178f;transform:translate(-50%,-50%);transition:left .6s}
+.ph-msg{flex:1;display:grid;place-items:center;text-align:center;padding:6cqw;font-size:5.4cqw;font-weight:800!important}
+.ph-msg span{background:rgba(255,255,255,.92);border-radius:1.4cqw;padding:4cqw 5cqw}
+.ph-bot{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:2.4cqw 4cqw;font-size:4cqw;font-weight:800!important;margin-top:auto}
+.ph-bot i{font-style:normal;background:#333;color:#fff;border-radius:1cqw;padding:.4cqw 3cqw}
+.ph-res{position:absolute;left:0;right:0;top:9cqw;z-index:3;display:none;text-align:center;color:#fff;font-size:6cqw;font-weight:800!important;padding:3cqw;background:#66bf39}
+.reveal .ph-res{display:block}
+#pvbg *{font-weight:800!important}
+#pvbg :is(.pv-input,.ph-box,.pv-hbtn,.pv-hbtn *,.pv-exit,.pv-replay,.pv-slide .sb,.ph-top i,.pv-countlb){font-weight:600!important}
+/* 下方控制列 */
+.pv-ctrl{display:flex;align-items:center;gap:10px;width:100%;max-width:1500px;justify-content:center;position:relative;min-height:48px}
+.pv-ctrl button,.pv-nav{background:#1f1d1d;color:#fff;border:0;border-radius:6px;font-size:16px;font-family:"Noto Sans TC",sans-serif}
+.pv-nav{display:flex;align-items:center;padding:0 4px}
+.pv-nav button{background:none;color:#fff;border:0;width:50px;height:48px;border-radius:6px;display:grid;place-items:center;cursor:pointer}
+.pv-nav button svg{width:28px;height:28px}
+.pv-nav button:hover,.pv-exit:hover,.pv-replay:hover{background:#4a4646}
+.pv-nav span{min-width:78px;text-align:center;font-weight:800!important;font-size:18px;font-family:"Montserrat","Noto Sans TC",sans-serif}
+.pv-exit{position:absolute;left:0;height:46px;padding:0 16px}
+.pv-replay{position:absolute;right:0;height:46px;padding:0 16px}
+@media (max-width:760px){
+  .pv-bg{padding:8px 6px;overflow:auto}
+  .pv-main{flex-direction:column;justify-content:flex-start;gap:14px;flex:none;--H:calc((100vw - 24px)*9/16)}
+  .pv-phone{width:min(64vw,300px)}
+  .pv-replay{display:none}.pv-exit{position:static}.pv-ctrl{justify-content:space-between;flex-wrap:wrap}
+  .pv-nav button{width:42px}
+}
+.modal.wide{width:min(880px,100%);max-width:880px}
+.crop-tabs{display:flex;justify-content:center;gap:26px;margin:2px 0 12px}
+.crop-tabs button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;color:#6a6380;font-size:14px;cursor:pointer;padding:4px 6px}
+.crop-tabs button svg{width:26px;height:26px}
+.crop-tabs button.on{color:#1368ce;font-weight:700!important}
+.crop-tabs button.on span{text-decoration:underline;text-underline-offset:3px}
+.modal.wide .mbody{max-height:none;overflow:visible}
+.crop-vp{position:relative;height:min(400px,calc(100vh - 330px));min-height:220px;background:#666;overflow:hidden;touch-action:none;cursor:grab;user-select:none;border-radius:4px}
+.crop-vp.drag{cursor:grabbing}
+.crop-vp img{position:absolute;left:0;top:0;max-width:none;transform-origin:0 0;pointer-events:none}
+.crop-fr{position:absolute;box-shadow:0 0 0 9999px rgba(30,30,30,.55)!important;outline:2px solid rgba(255,255,255,.9);pointer-events:none}
+.crop-zoom{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px;color:#6a6380}
+.crop-zoom input{width:min(300px,60%);accent-color:#333}
+.crop-tip{font-size:13px;color:var(--muted);text-align:center;margin:8px 0 0}
+.modal.bgtip{width:min(620px,100%);max-width:620px}
+.bgtip-ul{margin:0 0 14px;padding-left:20px;color:#555;font-size:15px;line-height:1.7}
+.bgtip-pv{display:flex;justify-content:center;align-items:flex-end;gap:22px;flex-wrap:wrap}
+.bgtip-pv figure{margin:0;text-align:center;font-size:14px;color:#333}
+.bgtip-pv figcaption{margin-top:6px}
+.mini{position:relative;background:#ccc center/cover no-repeat;border-radius:6px;overflow:hidden}
+.mini.mob{width:130px;height:206px}.mini.desk{width:286px;height:166px}
+.mini .mbar{position:absolute;left:12%;right:12%;top:8%;height:9%;background:#fff;border-radius:2px}
+.mini.mob .mbar{left:12%;right:12%;top:8%;height:9%}
+.mini .mt{position:absolute;left:4%;right:4%;bottom:5%;display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.mini .mt b{display:block;height:24px;border-radius:2px}
+.mini.desk .mt b{height:20px}
+.mini.mob .mt{height:34%}.mini.mob .mt b{height:auto}
+.bgtip-chk{display:flex;align-items:center;gap:8px;margin-top:16px;font-size:14px;color:#333}
+.bgtip-chk input{width:18px;height:18px}
+.sact .sbg{width:auto!important;padding:0 14px;border-radius:6px!important;font-size:14px}
+.slot .sact button{border-radius:6px}
+.slot .sact button svg{width:19px;height:19px}
+.opact{position:absolute;right:62px;top:8px;display:flex;gap:6px;z-index:2}
+.opact button{width:32px;height:32px;border-radius:6px;border:0;background:#fff;color:#333;border:1px solid #d9d4e2;display:grid;place-items:center;cursor:pointer}
+.opact button svg{width:17px;height:17px}
+.qarea>*{position:relative}
+.qarea.hasbg{background:center/cover no-repeat;border-radius:14px;padding:12px;margin:12px -4px 0}
+.bgbar{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap;margin-top:10px}
+.bgbar span{margin-right:auto;background:rgba(255,255,255,.92);border-radius:6px;padding:5px 10px;font-size:13px;color:#333}
+.bgbar button{border:0;background:#fff;border-radius:6px;height:34px;padding:0 12px;font-size:14px;border:1px solid #d9d4e2;display:inline-flex;align-items:center;gap:5px;cursor:pointer;color:#333}
+.bgbar button svg{width:17px;height:17px}
 </style>
 </head>
 <body>
@@ -944,12 +1030,19 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 <div class="mbg" id="mbg"><div class="modal" role="dialog" aria-modal="true"><h3 id="mTitle"></h3><div class="mbody" id="mBody"></div><div class="mbtns" id="mBtns"></div></div></div>
 <div class="toast" id="toast"></div>
 <div class="pv-bg" id="pvbg" hidden>
-  <div class="pv-top"><b>題目預覽（主持人畫面）</b></div>
-  <div class="pv-wrap" id="pvWrap"><div class="pv-stage" id="pvStage"></div></div>
+  <div class="pv-main">
+    <div class="pv-col">
+      <div class="pv-head"><b>主持視角</b><button type="button" class="pv-hbtn" id="pvColor" title="切換倒數與人數圓圈的顏色（自動依背景深淺）"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg><span id="pvColorTxt">圓圈：自動</span></button><button type="button" class="pv-hbtn" id="pvFs" title="全螢幕"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span id="pvFsTxt">全螢幕</span></button></div>
+      <div class="pv-stage pvwrap-c" id="pvStage"></div>
+    </div>
+    <div class="pv-col ph">
+      <div class="pv-head"><b>玩家視角</b></div>
+      <div class="pv-phone" id="pvPhone"></div>
+    </div>
+  </div>
   <div class="pv-ctrl">
     <button type="button" class="pv-exit" id="pvExit" title="離開預覽">← 離開</button>
-    <div class="pv-nav"><button type="button" data-pv="first" title="第一題">«</button><button type="button" data-pv="prev" title="上一題">‹</button><span id="pvPage">1 / 1</span><button type="button" data-pv="next" title="下一題">›</button><button type="button" data-pv="last" title="最後一題">»</button></div>
-    <button type="button" class="pv-fs" id="pvFs" title="全螢幕"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    <div class="pv-nav"><button type="button" data-pv="first" title="前往第一題"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m12 6-6 6 6 6M19 6l-6 6 6 6"/></svg></button><button type="button" data-pv="prev" title="前往上一題"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button><span id="pvPage">1 / 1</span><button type="button" data-pv="next" title="前往下一題"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></button><button type="button" data-pv="last" title="前往最後一題"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m12 6 6 6-6 6M5 6l6 6-6 6"/></svg></button></div>
     <button type="button" class="pv-replay" id="pvReplay" title="重新倒數">↻ 重播</button>
   </div>
 </div>
@@ -1098,9 +1191,9 @@ function loadScript(url){
 }
 let toastT;
 function toast(m,ms=2600){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),ms)}
-function modal(title,html,buttons){
+function modal(title,html,buttons,cls){
   return new Promise(res=>{
-    $('#mTitle').textContent=title;$('#mBody').innerHTML=html;
+    $('#mbg .modal').className='modal'+(cls?' '+cls:'');$('#mTitle').textContent=title;$('#mBody').innerHTML=html;
     const box=$('#mBtns');box.innerHTML='';
     buttons.forEach(b=>{const el=document.createElement('button');el.className='btn '+(b.primary?'btn-purple':'btn-ghost');el.textContent=b.label;el.onclick=()=>{$('#mbg').classList.remove('show');res(b.value)};box.appendChild(el)});
     $('#mbg').classList.add('show');
@@ -1120,6 +1213,10 @@ function imgError(file,noGif){
 }
 const mimeOf=ext=>({jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp'})[ext.toLowerCase()]||'';
 function makeImg(blob,name){return {blob,name:name||'image.png',url:URL.createObjectURL(blob)}}
+const vis=im=>im?(im.cut||im):null;
+const CROP_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2v14a2 2 0 0 0 2 2h14M18 22V8a2 2 0 0 0-2-2H2"/></svg>';
+const TRASH_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
+const EYE_IC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
 function b64ToBlob(b64,type){const bin=atob(b64);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type})}
 
 /* ================= Claude 頁面能力（只在 Claude 裡有） ================= */
@@ -1551,10 +1648,11 @@ function allImgs(q){
   if(q.qimg) out.push(['qimg',q.qimg]);
   if(q.type==='pin'&&q.pin&&q.pin.img) out.push(['pin',q.pin.img]);
   if(q.aimg) out.push(['aimg',q.aimg]);
+  if(q.qbg) out.push(['qbg',q.qbg]);
   if(TILE.includes(q.type)) q.oimgs.forEach((im,k)=>{if(im&&k<optCount(q))out.push(['o'+k,im])});
   return out;
 }
-function allImgsRaw(q){return [q.qimg,q.aimg,...q.oimgs,q.pin&&q.pin.img].filter(Boolean)}
+function allImgsRaw(q){return [q.qimg,q.aimg,q.qbg,...q.oimgs,q.pin&&q.pin.img].filter(Boolean)}
 
 const isGif=im=>!!im&&(/\.gif$/i.test(im.name)||/gif/i.test(im.blob.type));
 function qNoLabel(i){
@@ -1570,7 +1668,7 @@ const minTime=t=>MIN_TIME[t]||5;
 const clampTime=q=>{const m=minTime(q.type);if(q.time<m){q.time=TIMES.find(x=>x>=m);return true}return false};
 function applyTimeAll(t){let adj=0;S.qs.forEach(q=>{q.time=t;if(clampTime(q))adj++});return adj}
 function newQ(x={}){
-  const q={type:'quiz',text:'',options:['','','',''],answers:[],time:S.defTime,points:'standard',note:'',body:'',qimg:null,aimg:null,oimgs:[],slider:{min:'0',max:'50',ans:''},pin:null,...x};
+  const q={type:'quiz',text:'',options:['','','',''],answers:[],time:S.defTime,points:'standard',note:'',body:'',qimg:null,aimg:null,qbg:null,oimgs:[],slider:{min:'0',max:'50',ans:''},pin:null,...x};
   q.id=x.id||uid();
   if(!TIMES.includes(q.time)) q.time=S.defTime;
   if(TYPES[q.type]) clampTime(q);
@@ -1685,7 +1783,7 @@ function thumbHTML(q,i){
   const bad=issuesOf(q).length>0;
   let bars='';
   if(TILE.includes(q.type)){const n=optCount(q);bars=Array.from({length:n},(_,k)=>`<i class="s${colorIdx(q,k)} ${q.answers.includes(k+1)?'c':''}"></i>`).join('')}
-  const thumbImg=q.type==='pin'&&q.pin?q.pin.img:q.qimg;
+  const thumbImg=vis(q.type==='pin'&&q.pin?q.pin.img:(q.qimg||q.qbg));
   return `<div class="titem ${i===S.cur?'on':''} ${selIds.size>1&&selIds.has(q.id)?'sel':''}" data-i="${i}">
     <div class="thumb" role="button" tabindex="0" aria-label="第 ${i+1} 題">
       <span class="tn">${i+1}</span>${q.type!=='quiz'?`<span class="ttype">${TYPES[q.type].label}</span>`:''}${bad?'<span class="tdot" title="有欄位待確認"></span>':''}
@@ -1710,9 +1808,9 @@ const FILE_ACCEPT='.jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,ima
 const IMG_ICON='<svg width="22" height="22"><use href="#i-img"/></svg>';
 function slotHTML(q,slot,labelOverride){
   const im=getImg(q,slot);const label=labelOverride||slotLabel(slot);const key=q.id+slot;
-  if(im) return `<div class="slot filled" data-slot="${slot}"><img src="${im.url}" alt="${label}"><span class="stag">${label}</span>
-    <div class="sact"><button data-act="pick" data-slot="${slot}" title="更換圖片" aria-label="更換">✎</button><button data-act="rmimg" data-slot="${slot}" title="移除圖片" aria-label="移除">✕</button></div>
-    <input type="file" hidden accept="${FILE_ACCEPT}" data-file="${slot}"></div>`;
+  if(im){const pinQ=slot==='qimg'&&q.type==='pin';return `<div class="slot filled" data-slot="${slot}"><img src="${vis(im).url}" alt="${label}"><span class="stag">${label}${im.cut?'（已裁剪）':''}</span>
+    <div class="sact">${slot==='qimg'&&!pinQ?'<button class="sbg" data-act="setbg" title="把這張圖設為本題背景">設為背景</button>':''}${pinQ?'':`<button data-act="crop" data-slot="${slot}" title="編輯圖片裁剪內容" aria-label="裁剪">${CROP_IC}</button>`}<button data-act="pick" data-slot="${slot}" title="更換圖片" aria-label="更換">✎</button><button data-act="rmimg" data-slot="${slot}" title="刪除圖片" aria-label="刪除圖片">${TRASH_IC}</button></div>
+    <input type="file" hidden accept="${FILE_ACCEPT}" data-file="${slot}"></div>`}
   return `<div class="slot ${loading.has(key)?'loading':''}" data-slot="${slot}" tabindex="0">
     <div class="errwrap"></div>
     <svg class="si" width="34" height="34"><use href="#i-img"/></svg>
@@ -1732,8 +1830,8 @@ function tilesHTML(q){
     const ci=colorIdx(q,k);const im=q.oimgs[k];const filled=optFilled(q,k);const right=t!=='poll'&&q.answers.includes(k+1);
     const ph=t==='tf'?(k?'否':'是'):`新增答案 ${k+1}${k>=2?'（選填）':''}`;
     const ov=im?0:overBy(q.options[k],75);
-    const body=im?`<div class="optpic"><img src="${im.url}" alt="選項 ${k+1} 圖片"></div>`:`${S.optPrefix!=='none'?`<span class="opre">${optPre(k).trim()}</span>`:''}<textarea data-f="opt" data-k="${k}" rows="1" placeholder="${ph}">${esc(q.options[k]||'')}</textarea>`;
-    const imgBtn=im?`<button class="oimgx" data-act="rmimg" data-slot="o${k}" title="移除圖片" aria-label="移除選項 ${k+1} 圖片">✕</button>`:`<button class="oimgbtn" data-act="pick" data-slot="o${k}" title="加入以圖片作答選項" aria-label="選項 ${k+1} 改用圖片">${IMG_ICON}</button>`;
+    const body=im?`<div class="optpic"><img src="${vis(im).url}" alt="選項 ${k+1} 圖片"></div>`:`${S.optPrefix!=='none'?`<span class="opre">${optPre(k).trim()}</span>`:''}<textarea data-f="opt" data-k="${k}" rows="1" placeholder="${ph}">${esc(q.options[k]||'')}</textarea>`;
+    const imgBtn=im?`<span class="opact"><button data-act="crop" data-slot="o${k}" title="編輯圖片裁剪內容" aria-label="裁剪選項 ${k+1} 圖片">${CROP_IC}</button><button data-act="rmimg" data-slot="o${k}" title="刪除圖片（保留選項）" aria-label="刪除選項 ${k+1} 圖片">${TRASH_IC}</button></span>`:`<button class="oimgbtn" data-act="pick" data-slot="o${k}" title="加入以圖片作答選項" aria-label="選項 ${k+1} 改用圖片">${IMG_ICON}</button>`;
     const rm=(t!=='tf'&&n>2)?`<button class="rm" data-act="delopt" data-k="${k}" title="刪除此選項" aria-label="刪除選項">✕</button>`:'';
     const chk=t!=='poll'?`<button class="chk ${right?'on':''}" data-act="ans" data-k="${k}" aria-label="把選項 ${k+1} 設為正確答案" title="勾選為正確答案（勾 2 個以上自動變複選題）">${CHECK}</button>`:'';
     return `<div class="ans c${ci} ${filled?'filled':''} ${right?'right':''} ${im?'hasimg':''}" data-slot="o${k}" data-k="${k}"><span class="ocnt ${ov?'over':''}">${ov?'-'+ov:(q.options[k]||'').length+'/75'}</span><span class="shape s${ci}"><svg><use href="#sh${ci}"/></svg></span>${body}${imgBtn}${rm}${chk}<input type="file" hidden accept="${FILE_ACCEPT}" data-file="o${k}"></div>`;
@@ -1790,10 +1888,13 @@ function renderStage(){
   else body=`<div class="infocard"><div class="ill">${infoIll(t)}</div><p>${INFO[t]}</p></div>`;
   st.innerHTML=`
     <div class="canvas">
-      <div class="cv-top"><span class="qbadge">第 ${S.cur+1} 題／共 ${S.qs.length} 題</span><span class="cvr"><button type="button" class="pvbtn" data-act="preview" title="以主持人畫面預覽">▶ 預覽</button><button type="button" class="setbtn" data-side="open">⚙ 題目設定</button><button type="button" class="timepill" id="pill" data-side="time" title="點擊修改答題秒數">⏱ ${timeLabel(q.time)}</button></span></div>
+      <div class="cv-top"><span class="qbadge">第 ${S.cur+1} 題／共 ${S.qs.length} 題</span><span class="cvr"><button type="button" class="pvbtn" data-act="preview" title="預覽主持視角與玩家手機畫面">${EYE_IC}預覽</button><button type="button" class="setbtn" data-side="open">⚙ 題目設定</button><button type="button" class="timepill" id="pill" data-side="time" title="點擊修改答題秒數">⏱ ${timeLabel(q.time)}</button></span></div>
+      <div class="qarea ${q.qbg?'hasbg':''}" ${q.qbg?`style="background-image:url(&quot;${vis(q.qbg).url}&quot;)"`:''}>
       <div class="qbox ${qNoLabel(S.cur)?'haspre':''}">${qNoLabel(S.cur)?`<span class="qpre">${qNoLabel(S.cur).trim()}</span>`:''}<textarea data-f="text" rows="1" placeholder="${t==='slide'?'輸入投影片標題':'開始輸入你的題目'}">${esc(q.text)}</textarea><span class="cnt"></span></div>
       <div class="qmedia">${slotHTML(q,'qimg',t==='pin'?'題目圖（必填）':'')}</div>
+      ${q.qbg?`<div class="bgbar"><span>🖼 此題已套用專屬背景</span><button data-act="bgmedia" title="把背景改回題目圖片">設為媒體內容</button><button data-act="crop" data-slot="qbg" title="編輯背景裁剪內容">${CROP_IC}</button><button data-act="rmbg" title="移除此題背景">${TRASH_IC}</button></div>`:''}
       ${body}
+      </div>
       <div class="noterow"><span class="lb">備註</span><input data-f="note" value="${esc(q.note)}" placeholder="答案解釋文字、影片連結、口頭說明等"><select data-act="preset"><option value="">＋常用</option>${NOTE_PRESETS.map(([l,v])=>`<option value="${v}">${l}</option>`).join('')}</select></div>
       <div class="extra">
         <button class="extra-t ${S.extraOpen?'on':''}" data-act="extra" aria-expanded="${S.extraOpen}">📎 上傳其他圖片${q.aimg?'<span class="badge">已上傳解答圖</span>':''}<span class="chev"></span></button>
@@ -2067,12 +2168,13 @@ let savePending=false;
 function save(now){
   clearTimeout(saveT);savePending=true;$('#saveChip').textContent='儲存中…';$('#saveChip').classList.remove('ok');
   saveT=setTimeout(async()=>{savePending=false;
-    const strip=im=>im?{blob:im.blob,name:im.name}:null;
+    const strip=im=>im?{blob:im.blob,name:im.name,cut:im.cut?{blob:im.cut.blob,name:im.cut.name,st:im.cut.st}:null}:null;
     const data={v:6,setOpen:S.setOpen,gsOpen:S.gsOpen,cur:S.cur,qNo:S.qNo,cover:strip(S.cover),bg:S.bg?{kind:S.bg.kind,name:S.bg.name||'',img:strip(S.bg.img)}:null,optPrefix:S.optPrefix,name:S.name,title:S.title,defTime:S.defTime,editing:S.editing,extraOpen:S.extraOpen,
-      qs:S.qs.map(q=>({...q,qimg:strip(q.qimg),aimg:strip(q.aimg),oimgs:q.oimgs.map(strip),pin:q.pin?{shape:q.pin.shape,img:strip(q.pin.img)}:null}))};
+      noBgTip:!!S.noBgTip,
+      qs:S.qs.map(q=>({...q,qimg:strip(q.qimg),aimg:strip(q.aimg),qbg:strip(q.qbg),oimgs:q.oimgs.map(strip),pin:q.pin?{shape:q.pin.shape,img:strip(q.pin.img)}:null}))};
     let ok=false;
     try{await idbSet(data);ok=true}catch(e){
-      try{localStorage.setItem('kahootQEditor',JSON.stringify({...data,qs:data.qs.map(q=>({...q,qimg:null,aimg:null,oimgs:[],pin:null}))}));ok=true}catch(e2){}
+      try{localStorage.setItem('kahootQEditor',JSON.stringify({...data,qs:data.qs.map(q=>({...q,qimg:null,aimg:null,qbg:null,oimgs:[],pin:null}))}));ok=true}catch(e2){}
     }
     const d=new Date();
     $('#saveChip').textContent=ok?`✓ 已自動儲存在此瀏覽器 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`:'⚠ 此瀏覽器無法儲存草稿';
@@ -2085,10 +2187,11 @@ async function restore(){
   if(!d){try{d=JSON.parse(localStorage.getItem('kahootQEditor')||'null')}catch(e){}}
   if(!d) return false;
   S.qNo=d.qNo||'none';S.setOpen=!!d.setOpen;S.gsOpen=!!d.gsOpen;S.cover=d.cover&&d.cover.blob?makeImg(d.cover.blob,d.cover.name):null;S.bg=d.bg&&d.bg.img&&d.bg.img.blob?{kind:d.bg.kind,name:d.bg.name||'',img:makeImg(d.bg.img.blob,d.bg.img.name)}:null;S.optPrefix=d.optPrefix||'none';S.name=d.name||'';S.title=d.title||'';S.defTime=TIMES.includes(d.defTime)?d.defTime:20;S.editing=!!d.editing;S.extraOpen=!!d.extraOpen;
-  const mk=im=>im&&im.blob?makeImg(im.blob,im.name):null;
+  S.noBgTip=!!d.noBgTip;
+  const mk=im=>{if(!im||!im.blob)return null;const o=makeImg(im.blob,im.name);if(im.cut&&im.cut.blob)o.cut={...makeImg(im.cut.blob,im.cut.name),st:im.cut.st};return o};
   S.qs=(d.qs||[]).map(q=>{
     const pin=q.pin&&q.pin.img&&q.pin.img.blob?{shape:q.pin.shape,img:mk(q.pin.img)}:null;
-    const n=newQ({...q,qimg:mk(q.qimg),aimg:mk(q.aimg||q.oimg),oimgs:(q.oimgs||[]).map(mk),pin});
+    const n=newQ({...q,qimg:mk(q.qimg),aimg:mk(q.aimg||q.oimg),qbg:mk(q.qbg),oimgs:(q.oimgs||[]).map(mk),pin});
     delete n.oimg;return n;
   });
   S.cur=Math.min(d.cur||0,Math.max(0,S.qs.length-1));
@@ -2180,9 +2283,11 @@ $('#dlZip').onclick=async()=>{
     if(S.bg){zip.file(`圖片/背景.${extOf(S.bg.img)}`,S.bg.img.blob);lines.push(`背景.${extOf(S.bg.img)}　→　${S.bg.kind==='theme'?(S.bg.name?'公版主題「'+S.bg.name+'」':'公版背景截圖'):'自訂背景圖'}`)}
     S.qs.forEach((q,i)=>allImgs(q).forEach(([slot,im])=>{
       const no=i+1;
-      const nm=slot==='qimg'?`${no}`:slot==='aimg'?`${no}解答`:slot==='pin'?`${no}答案位置`:`${no}-${+slot.slice(1)+1}`;
+      const nm=slot==='qimg'?`${no}`:slot==='aimg'?`${no}解答`:slot==='qbg'?`${no}背景`:slot==='pin'?`${no}答案位置`:`${no}-${+slot.slice(1)+1}`;
+      const what=slot==='qimg'?'題目圖':slot==='aimg'?'解答圖':slot==='qbg'?'本題專屬背景':slot==='pin'?'答案位置圖':'選項 '+(+slot.slice(1)+1)+' 圖';
       const fn=`${nm}.${extOf(im)}`;zip.file('圖片/'+fn,im.blob);
-      lines.push(`${fn}　→　第 ${no} 題${slot==='qimg'?'題目圖':slot==='aimg'?'解答圖':slot==='pin'?'答案位置圖':'選項 '+(+slot.slice(1)+1)+' 圖'}：${q.text.trim()}`);
+      lines.push(`${fn}　→　第 ${no} 題${what}${im.cut?'（原圖）':''}：${q.text.trim()}`);
+      if(im.cut){const cf=`${nm}_cut.${extOf(im.cut)}`;zip.file('圖片/'+cf,im.cut.blob);lines.push(`${cf}　→　第 ${no} 題${what}（裁剪後，請用這張）`)}
     }));
     zip.file('圖片/圖片對照表.txt','﻿'+lines.join('\r\n'));
     await saveFile(base+'.zip',await zip.generateAsync({type:'blob'}),'application/zip');
@@ -2462,10 +2567,11 @@ async function pickTheme(t){
 }
 
 
-/* ---------- 題目預覽（主持人畫面） ---------- */
-const pv={i:0,timers:[]};
+/* ---------- 題目預覽（主持視角＋玩家視角） ---------- */
+const pv={i:0,timers:[],color:'auto'};
 const SH_PV=['<path d="M10 2 19 18H1z" fill="#fff"/>','<path d="M10 1 19 10 10 19 1 10z" fill="#fff"/>','<circle cx="10" cy="10" r="8.5" fill="#fff"/>','<rect x="2" y="2" width="16" height="16" fill="#fff"/>','<path d="M10 1.5 18.5 7.7 15.3 18H4.7L1.5 7.7z" fill="#fff"/>','<path d="M5.5 2h9l4.5 8-4.5 8h-9L1 10z" fill="#fff"/>'];
 const PV_COL=['#e21b3c','#1368ce','#d89e00','#26890c','#0aa3a3','#864cbf'];
+const PV_OK='<span class="ok"><svg viewBox="0 0 24 24"><use href="#i-check"/></svg></span>';
 function pvClear(){pv.timers.forEach(t=>{clearInterval(t);clearTimeout(t)});pv.timers=[]}
 function openPreview(i){
   if(!S.qs.length){toast('還沒有題目');return}
@@ -2478,53 +2584,75 @@ function closePreview(){
   if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
 }
 function pvLenCls(s,a,b){const n=(s||'').length;return n>b?'xlong':n>a?'long':''}
+const pvQText=(q,i)=>{const t=q.text.trim();return t?(qNoLabel(i)+t):'這是題目'};
+const pvOptText=(q,k)=>{const s=(q.options[k]||'').trim();return s?optPre(k)+s:(q.type==='tf'?(k?'否':'是'):'選項'+(k+1))};
+const pvBgImg=q=>q.qbg?vis(q.qbg):(S.bg?S.bg.img:null);
+const lumCache=new Map();
+function bgLum(url){
+  if(lumCache.has(url)) return Promise.resolve(lumCache.get(url));
+  return new Promise(res=>{const im=new Image();
+    im.onload=()=>{try{const c=document.createElement('canvas');c.width=c.height=24;const x=c.getContext('2d');x.drawImage(im,0,0,24,24);const d=x.getImageData(0,0,24,24).data;let s=0;for(let i=0;i<d.length;i+=4)s+=.2126*d[i]+.7152*d[i+1]+.0722*d[i+2];const l=s/(d.length/4)/255;lumCache.set(url,l);res(l)}catch(e){res(.8)}};
+    im.onerror=()=>res(.8);im.src=url});
+}
+async function pvApplyColor(){
+  const st=$('#pvStage');const q=S.qs[pv.i];if(!q) return;
+  $('#pvColorTxt').textContent='圓圈：'+({auto:'自動',dark:'深紫',light:'淺紫'})[pv.color];
+  let dk;
+  if(pv.color==='dark') dk=false; else if(pv.color==='light') dk=true;
+  else{const b=pvBgImg(q);dk=b?(await bgLum(b.url))<.5:false}
+  st.classList.toggle('dk',dk);
+}
+function pvTiles(q,n,ph){
+  const cor=q.type==='poll'?[]:q.answers;
+  return Array.from({length:n},(_,k)=>{
+    const im=TILE.includes(q.type)?q.oimgs[k]:null;const txt=pvOptText(q,k);const ci=colorIdx(q,k);
+    const right=q.type==='jumble'?true:cor.includes(k+1);
+    const body=im?`<img src="${vis(im).url}" alt="">`:`<span>${esc(txt)}</span>`;
+    return `<div class="pv-a ${pvLenCls(txt,ph?18:30,ph?34:55)} ${right?'right':'wrong'}" style="background:${PV_COL[ci]}"><svg class="shp6" viewBox="0 0 20 20">${SH_PV[ci]}</svg>${body}${q.type==='jumble'?'':PV_OK}</div>`;
+  }).join('');
+}
+function hostHTML(q,i){
+  const t=q.type;const qText=pvQText(q,i);const img=vis(q.qimg);const bg=pvBgImg(q);
+  let html=`${bg?'':'<div class="pv-deco"></div>'}<div class="pv-q ${pvLenCls(qText,40,80)}">${esc(qText)}</div>`;
+  if(t==='slide') return html+`<div class="pv-slide">${img?`<div class="pv-media" style="position:static;height:24cqw;width:100%"><img src="${img.url}" alt=""></div>`:''}${q.body.trim()?`<div class="sb">${esc(q.body)}</div>`:''}</div>`;
+  if(img) html+=`<div class="pv-media"><img src="${img.url}" alt="" ${t==='pin'&&q.pin?`id="pvPinImg" data-pin="${q.pin.img.url}"`:''}></div>`;
+  html+=`<div class="pv-circle pv-timer" id="pvTimer">${q.time}</div><div class="pv-circle pv-count" id="pvCount">0</div><div class="pv-countlb">答案</div>`;
+  if(TILE.includes(t)){const n=optCount(q);html+=`<div class="pv-ans ${n>4?'six':''}">${pvTiles(q,n)}</div>`}
+  else if(t==='jumble'){const n=optCount(q);html+=`<div class="pv-ans">${pvTiles(q,n)}</div><div class="pv-reveal-txt">正確順序：${Array.from({length:n},(_,k)=>esc(pvOptText(q,k))).join(' → ')}</div>`}
+  else if(t==='slider'){const p=sliderPos(q);html+=`<div class="pv-slider"><span>${esc(q.slider.min)}</span><div class="tr"><span class="kn" style="left:50%" data-pos="${p===null?50:p}"></span></div><span>${esc(q.slider.max)}</span></div><div class="pv-reveal-txt">正確答案：${esc(q.slider.ans)}</div>`}
+  else if(t==='typeans') html+=`<div class="pv-input">輸入答案…</div><div class="pv-reveal-txt">正確答案：${q.options.slice(0,4).filter(s=>s.trim()).map(esc).join('／')||'（未填）'}</div>`;
+  else if(t==='pin') html+=`<div class="pv-reveal-txt" style="bottom:1.5cqw">正確位置已標示</div>`;
+  else html+=`<div class="pv-input">${t==='wordcloud'?'輸入一個簡短的詞…':'輸入你的回覆…'}</div>`;
+  return html;
+}
+function phoneHTML(q,i){
+  const t=q.type;const qText=pvQText(q,i);const img=vis(q.qimg);const bg=pvBgImg(q);
+  let html=`${bg?'':'<div class="pv-deco"></div>'}<div class="ph-top"><span>${i+1} / ${S.qs.length}</span><i>${TYPES[t].label}</i></div>`;
+  if(t==='slide') return html+`<div class="ph-msg"><span>請看主持人的大螢幕</span></div><div class="ph-bot"><span>玩家</span><i>0</i></div>`;
+  html+=`<div class="ph-q ${pvLenCls(qText,24,48)}">${esc(qText)}</div>`;
+  html+=`<div class="ph-media">${img?`<img src="${img.url}" alt="" ${t==='pin'&&q.pin?`class="phPin" data-pin="${q.pin.img.url}"`:''}>`:''}</div>`;
+  if(TILE.includes(t)||t==='jumble'){const n=optCount(q);html+=`<div class="ph-ans ${n>4?'six':''} ${t==='jumble'?'one':''}">${pvTiles(q,n,true)}</div>`}
+  else if(t==='slider'){const p=sliderPos(q);html+=`<div class="ph-slider"><span>${esc(q.slider.min)}</span><div class="tr"><span class="kn" style="left:50%" data-pos="${p===null?50:p}"></span></div><span>${esc(q.slider.max)}</span></div><div class="ph-btn">送出</div>`}
+  else if(t==='pin') html+=`<div class="ph-btn">點圖片放置圖釘</div>`;
+  else html+=`<div class="ph-box">${t==='typeans'?'輸入答案':t==='wordcloud'?'輸入一個簡短的詞':'輸入你的回覆'}</div><div class="ph-btn">送出</div>`;
+  if(!['poll','wordcloud','open','brainstorm'].includes(t)) html+=`<div class="ph-res">✓ 正確答案已公布</div>`;
+  return html+`<div class="ph-bot"><span>玩家</span><i>0</i></div>`;
+}
 function renderPreview(){
   pvClear();
-  const q=S.qs[pv.i];const st=$('#pvStage');const t=q.type;
+  const q=S.qs[pv.i];const st=$('#pvStage'),ph=$('#pvPhone');
   $('#pvPage').textContent=`${pv.i+1} / ${S.qs.length}`;
-  st.classList.remove('reveal');
-  st.style.backgroundImage=S.bg?`url("${S.bg.img.url}")`:'';
-  const qText=(qNoLabel(pv.i)+q.text.trim())||'（未輸入題目）';
-  const img=t==='pin'&&q.qimg?q.qimg:q.qimg;
-  let html=`${S.bg?'':'<div class="pv-deco"></div>'}<div class="pv-q ${pvLenCls(qText,40,80)}">${esc(qText)}</div>`;
-  if(t==='slide'){
-    html+=`<div class="pv-slide">${img?`<div class="pv-media" style="position:static;height:24cqw;width:100%"><img src="${img.url}" alt=""></div>`:''}${q.body.trim()?`<div class="sb">${esc(q.body)}</div>`:''}</div>`;
-    st.innerHTML=html;return;
-  }
-  if(img) html+=`<div class="pv-media"><img src="${img.url}" alt=""></div>`;
-  html+=`<div class="pv-circle pv-timer" id="pvTimer">${q.time}</div><div class="pv-circle pv-count" id="pvCount">0</div><div class="pv-countlb">答案</div>`;
-  if(TILE.includes(t)){
-    const n=optCount(q);const cor=t==='poll'?[]:q.answers;
-    const tiles=Array.from({length:n},(_,k)=>{
-      const im=q.oimgs[k];const txt=(q.options[k]||'').trim();
-      if(!im&&!txt) return '';
-      const ci=colorIdx(q,k);
-      const body=im?`<img src="${im.url}" alt="">`:`<span>${esc(optPre(k)+txt)}</span>`;
-      return `<div class="pv-a ${pvLenCls(txt,30,55)} ${cor.includes(k+1)?'right':'wrong'}" style="background:${PV_COL[ci]}"><svg class="shp6" viewBox="0 0 20 20">${SH_PV[ci]}</svg>${body}<span class="ok"><svg viewBox="0 0 24 24"><use href="#i-check"/></svg></span></div>`;
-    }).join('');
-    html+=`<div class="pv-ans ${n>4?'six':''}">${tiles}</div>`;
-  }else if(t==='jumble'){
-    const n=optCount(q);
-    html+=`<div class="pv-ans">${Array.from({length:n},(_,k)=>{const txt=(q.options[k]||'').trim();return txt?`<div class="pv-a" style="background:${PV_COL[k]}"><svg class="shp6" viewBox="0 0 20 20">${SH_PV[k]}</svg><span>${esc(txt)}</span></div>`:''}).join('')}</div>`;
-    html+=`<div class="pv-reveal-txt">正確順序：${q.options.slice(0,n).filter(s=>s.trim()).map(esc).join(' → ')}</div>`;
-  }else if(t==='slider'){
-    const a=parseFloat(q.slider.min),b=parseFloat(q.slider.max),c=parseFloat(q.slider.ans);const pos=(!isNaN(a)&&!isNaN(b)&&!isNaN(c)&&b>a)?(c-a)/(b-a)*100:50;
-    html+=`<div class="pv-slider"><span>${esc(q.slider.min)}</span><div class="tr"><span class="kn" id="pvKnob" style="left:50%" data-pos="${pos}"></span></div><span>${esc(q.slider.max)}</span></div><div class="pv-reveal-txt">正確答案：${esc(q.slider.ans)}</div>`;
-  }else if(t==='typeans'){
-    html+=`<div class="pv-input">輸入答案…</div><div class="pv-reveal-txt">正確答案：${q.options.slice(0,4).filter(s=>s.trim()).map(esc).join('／')}</div>`;
-  }else if(t==='pin'){
-    if(q.pin) html=html.replace(`<img src="${img.url}" alt="">`,`<img src="${img.url}" alt="" id="pvPinImg" data-pin="${q.pin.img.url}">`);
-    html+=`<div class="pv-reveal-txt" style="bottom:1.5cqw">正確位置已標示</div>`;
-  }else{
-    html+=`<div class="pv-input">${t==='wordcloud'?'輸入一個簡短的詞…':'輸入你的回覆…'}</div>`;
-  }
-  st.innerHTML=html;
-  // 倒數與作答人數動畫
+  st.classList.remove('reveal');ph.classList.remove('reveal');
+  const bg=pvBgImg(q);
+  st.style.backgroundImage=ph.style.backgroundImage=bg?`url("${bg.url}")`:'';
+  st.innerHTML=hostHTML(q,pv.i);ph.innerHTML=phoneHTML(q,pv.i);
+  pvApplyColor();
+  if(q.type==='slide') return;
   let left=q.time,count=0;const total=Math.max(12,Math.round(18+Math.random()*50));
   const tEl=$('#pvTimer'),cEl=$('#pvCount');
   pv.timers.push(setInterval(()=>{
-    left--;tEl.textContent=Math.max(0,left);tEl.classList.toggle('low',left<=5);
-    if(left<=0){pvClear();pvReveal(q)}
+    left--;tEl.textContent=Math.max(0,left);
+    if(left<=0){pvClear();pvReveal()}
   },1000));
   const step=()=>{
     if(count>=total) return;
@@ -2534,29 +2662,111 @@ function renderPreview(){
   };
   pv.timers.push(setTimeout(step,600));
 }
-function pvReveal(q){
-  const st=$('#pvStage');st.classList.add('reveal');
-  const k=$('#pvKnob');if(k)k.style.left=k.dataset.pos+'%';
-  const pi=$('#pvPinImg');if(pi)pi.src=pi.dataset.pin;
+function pvReveal(){
+  ['#pvStage','#pvPhone'].forEach(s=>$(s).classList.add('reveal'));
+  document.querySelectorAll('#pvbg .kn[data-pos]').forEach(k=>k.style.left=k.dataset.pos+'%');
+  document.querySelectorAll('#pvPinImg,#pvbg .phPin').forEach(pi=>pi.src=pi.dataset.pin);
 }
 function pvGo(i){if(i<0||i>=S.qs.length)return;pv.i=i;renderPreview()}
 $('#pvExit').onclick=closePreview;
 $('#pvReplay').onclick=()=>renderPreview();
+$('#pvColor').onclick=()=>{pv.color=({auto:'dark',dark:'light',light:'auto'})[pv.color];pvApplyColor()};
 document.querySelector('.pv-nav').onclick=e=>{const b=e.target.closest('[data-pv]');if(!b)return;const a=b.dataset.pv;
   pvGo(a==='first'?0:a==='last'?S.qs.length-1:a==='prev'?pv.i-1:pv.i+1)};
+const pvFsSync=()=>{const on=!!document.fullscreenElement||$('#pvbg').classList.contains('max');$('#pvFsTxt').textContent=on?'結束全螢幕':'全螢幕'};
+document.addEventListener('fullscreenchange',pvFsSync);
 $('#pvFs').onclick=async()=>{
   const bg=$('#pvbg');
   if(document.fullscreenElement){document.exitFullscreen().catch(()=>{});return}
-  if(bg.classList.contains('max')){bg.classList.remove('max');return}
+  if(bg.classList.contains('max')){bg.classList.remove('max');pvFsSync();return}
   try{if(bg.requestFullscreen){await bg.requestFullscreen();return}}catch(e){}
-  bg.classList.add('max');
+  bg.classList.add('max');pvFsSync();
 };
 document.addEventListener('keydown',e=>{
   if($('#pvbg').hidden) return;
-  if(e.key==='Escape'&&!document.fullscreenElement){closePreview()}
+  if(e.key==='Escape'&&!document.fullscreenElement){if($('#pvbg').classList.contains('max')){$('#pvbg').classList.remove('max');pvFsSync()}else closePreview()}
   else if(e.key==='ArrowRight'){pvGo(pv.i+1)}
   else if(e.key==='ArrowLeft'){pvGo(pv.i-1)}
 });
+
+/* ---------- 圖片裁剪 ---------- */
+const CROP_SH=[['land','橫向',16/9,'<rect x="3" y="7" width="18" height="11" rx="1.5"/>'],['port','直向',2/3,'<rect x="7" y="3" width="10" height="18" rx="1.5"/>'],['square','方形',1,'<rect x="4" y="4" width="16" height="16" rx="1.5"/>'],['circle','圓形',1,'<circle cx="12" cy="12" r="9"/>']];
+const loadImgEl=url=>new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
+async function openCrop(q,slot){
+  const im=getImg(q,slot);if(!im) return;
+  let img;try{img=await loadImgEl(im.url)}catch(e){toast('圖片讀取失敗');return}
+  const W=img.naturalWidth,H=img.naturalHeight;
+  let shape=im.cut?im.cut.st.shape:'land';const keepBox=im.cut?im.cut.st.box:null;
+  const html=`<div class="crop-tabs">${CROP_SH.map(([k,l,,ic])=>`<button type="button" data-cs="${k}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ic}</svg><span>${l}</span></button>`).join('')}</div>
+    <div class="crop-vp" id="cropVp"><img id="cropImg" src="${im.url}" alt="" draggable="false"><div class="crop-fr" id="cropFr"></div></div>
+    <div class="crop-zoom"><svg viewBox="0 0 24 24" width="18" height="18"><use href="#i-img"/></svg><input type="range" id="cropZ" min="0" max="100" step="1" value="0" aria-label="縮放"><svg viewBox="0 0 24 24" width="26" height="26"><use href="#i-img"/></svg></div>
+    <p class="crop-tip">拖曳圖片調整位置，滑桿放大縮小。原圖會保留，下載 ZIP 時另附裁剪後的圖（檔名加 _cut）。${isGif(im)?'<br>GIF 裁剪後會變成靜態圖片。':''}</p>`;
+  const btns=[{label:'關閉',value:0},{label:'儲存',value:1,primary:true}];
+  if(im.cut) btns.unshift({label:'還原原圖',value:2});
+  const p=modal('裁剪圖片',html,btns,'wide');
+  const vp=$('#cropVp'),fr=$('#cropFr'),ie=$('#cropImg'),zr=$('#cropZ');
+  let fx,fy,fw,fh,s,ix,iy,minS;
+  const ratio=()=>CROP_SH.find(c=>c[0]===shape)[2];
+  function frame(){
+    const vw=vp.clientWidth,vh=vp.clientHeight,pad=16,r=ratio();
+    fw=vw-pad*2;fh=fw/r;if(fh>vh-pad*2){fh=vh-pad*2;fw=fh*r}
+    fx=(vw-fw)/2;fy=(vh-fh)/2;minS=Math.max(fw/W,fh/H);
+    Object.assign(fr.style,{left:fx+'px',top:fy+'px',width:fw+'px',height:fh+'px',borderRadius:shape==='circle'?'50%':'2px'});
+    vp.querySelectorAll('[data-cs]');document.querySelectorAll('.crop-tabs [data-cs]').forEach(b=>b.classList.toggle('on',b.dataset.cs===shape));
+  }
+  function clamp(){s=Math.max(minS,Math.min(minS*4,s));ix=Math.min(fx,Math.max(fx+fw-W*s,ix));iy=Math.min(fy,Math.max(fy+fh-H*s,iy))}
+  function draw(){clamp();Object.assign(ie.style,{width:W*s+'px',height:H*s+'px',transform:`translate(${ix}px,${iy}px)`});zr.value=Math.round((s/minS-1)/3*100)}
+  function zoomTo(ns,cx=fx+fw/2,cy=fy+fh/2){const ux=(cx-ix)/s,uy=(cy-iy)/s;s=ns;ix=cx-ux*s;iy=cy-uy*s;draw()}
+  frame();
+  if(keepBox){s=fw/(keepBox.w*W);ix=fx-keepBox.x*W*s;iy=fy-keepBox.y*H*s}else{s=minS;ix=fx+(fw-W*s)/2;iy=fy+(fh-H*s)/2}
+  draw();
+  $('#mBody').querySelector('.crop-tabs').onclick=e=>{const b=e.target.closest('[data-cs]');if(!b)return;
+    const cx=(fx+fw/2-ix)/s,cy=(fy+fh/2-iy)/s;const rel=s/minS;shape=b.dataset.cs;frame();s=minS*rel;ix=fx+fw/2-cx*s;iy=fy+fh/2-cy*s;draw()};
+  zr.oninput=()=>zoomTo(minS*(1+3*zr.value/100));
+  vp.onwheel=e=>{e.preventDefault();const r=vp.getBoundingClientRect();zoomTo(s*(e.deltaY<0?1.08:1/1.08),e.clientX-r.left,e.clientY-r.top)};
+  let drag=null;
+  vp.onpointerdown=e=>{drag={x:e.clientX,y:e.clientY,ix,iy};vp.setPointerCapture(e.pointerId);vp.classList.add('drag')};
+  vp.onpointermove=e=>{if(!drag)return;ix=drag.ix+e.clientX-drag.x;iy=drag.iy+e.clientY-drag.y;draw()};
+  vp.onpointerup=vp.onpointercancel=()=>{drag=null;vp.classList.remove('drag')};
+  const v=await p;
+  if(v===2){URL.revokeObjectURL(im.cut.url);delete im.cut;changed(true);toast('已還原原圖');return}
+  if(v!==1) return;
+  const box={x:(fx-ix)/(W*s),y:(fy-iy)/(H*s),w:fw/(W*s),h:fh/(H*s)};
+  const sw=box.w*W,sh=box.h*H;const k=Math.min(1,2400/Math.max(sw,sh));
+  const c=document.createElement('canvas');c.width=Math.max(1,Math.round(sw*k));c.height=Math.max(1,Math.round(sh*k));
+  const x=c.getContext('2d');
+  if(shape==='circle'){x.beginPath();x.arc(c.width/2,c.height/2,Math.min(c.width,c.height)/2,0,Math.PI*2);x.clip()}
+  x.drawImage(img,box.x*W,box.y*H,sw,sh,0,0,c.width,c.height);
+  const png=shape==='circle'||/png|webp|gif/i.test(im.blob.type)||/\.(png|webp|gif)$/i.test(im.name);
+  const blob=await new Promise(r=>c.toBlob(r,png?'image/png':'image/jpeg',.92));
+  if(!blob){toast('裁剪失敗');return}
+  if(im.cut) URL.revokeObjectURL(im.cut.url);
+  const stem=(im.name||'image').replace(/\.[^.]+$/,'');
+  im.cut={blob,name:`${stem}_cut.${png?'png':'jpg'}`,url:URL.createObjectURL(blob),st:{shape,box}};
+  changed(true);toast('已裁剪，原圖仍保留');
+}
+/* ---------- 設為本題背景 ---------- */
+function miniBg(url,mob){
+  return `<div class="mini ${mob?'mob':'desk'}" style="background-image:url(&quot;${url}&quot;)"><div class="mbar"></div><div class="mt"><b style="background:#e21b3c"></b><b style="background:#1368ce"></b><b style="background:#ffa602"></b><b style="background:#26890c"></b></div></div>`;
+}
+async function setQBg(q){
+  if(!q.qimg) return;
+  if(!S.noBgTip){
+    const u=vis(q.qimg).url;
+    const html=`<ul class="bgtip-ul"><li>遊戲元素（例如：問題和答案欄位）會擋住部分背景</li><li>有些裝置會隱藏部分背景。</li></ul>
+      <div class="bgtip-pv"><figure>${miniBg(u,true)}<figcaption>行動裝置</figcaption></figure><figure>${miniBg(u,false)}<figcaption>桌上型裝置</figcaption></figure></div>
+      <label class="bgtip-chk"><input type="checkbox" id="noBgTip"> 不再顯示這則訊息</label>`;
+    const ok=await modal('在遊戲中你將看不到部分背景',html,[{label:'取消',value:false},{label:'確認',value:true,primary:true}],'bgtip');
+    if(!ok) return;
+    const cb=$('#noBgTip');if(cb&&cb.checked) S.noBgTip=true;
+  }
+  if(q.qbg){URL.revokeObjectURL(q.qbg.url);q.qbg.cut&&URL.revokeObjectURL(q.qbg.cut.url)}
+  q.qbg=q.qimg;q.qimg=null;changed(true);toast('已設為本題背景（只套用在這一題）');
+}
+function bgToMedia(q){
+  if(!q.qbg) return;
+  const t=q.qimg;q.qimg=q.qbg;q.qbg=t||null;changed(true);toast(t?'背景與題目圖已互換':'已改回題目圖片');
+}
 
 /* ---------- 參考標題拉把 ---------- */
 (function(){
@@ -2624,11 +2834,15 @@ stage.addEventListener('click',async e=>{
     case 'delopt':{const min=q.type==='jumble'?3:2;if(optCount(q)>min){q.options.splice(k,1);const r=q.oimgs.splice(k,1)[0];r&&URL.revokeObjectURL(r.url);q.answers=q.answers.filter(a=>a!==k+1).map(a=>a>k+1?a-1:a);
       if(q.type!=='jumble'&&q.options.length<2)q.options.push('');changed(true)}break}
     case 'pick':e.stopPropagation();b.closest('.slot,.ans').querySelector('input[type=file]').click();break;
-    case 'rmimg':{e.stopPropagation();const s=b.dataset.slot;const im=getImg(q,s);im&&URL.revokeObjectURL(im.url);putImg(q,s,null);
+    case 'rmimg':{e.stopPropagation();const s=b.dataset.slot;const im=getImg(q,s);if(im){URL.revokeObjectURL(im.url);im.cut&&URL.revokeObjectURL(im.cut.url)}putImg(q,s,null);
       if(s==='qimg'&&q.pin){URL.revokeObjectURL(q.pin.img.url);q.pin=null}changed(true);break}
     case 'aiimg':e.stopPropagation();aiImage(b.dataset.slot);break;
     case 'pinedit':openPinEditor(q);break;
     case 'preview':openPreview(S.cur);break;
+    case 'crop':e.stopPropagation();openCrop(q,b.dataset.slot);break;
+    case 'setbg':e.stopPropagation();setQBg(q);break;
+    case 'bgmedia':bgToMedia(q);break;
+    case 'rmbg':if(q.qbg){URL.revokeObjectURL(q.qbg.url);q.qbg.cut&&URL.revokeObjectURL(q.qbg.cut.url);q.qbg=null;changed(true)}break;
     case 'extra':S.extraOpen=!S.extraOpen;renderStage();save();break;
     case 'prev':if(S.cur>0){S.cur--;render();save();focusQuestion()}break;
     case 'next':if(S.cur<S.qs.length-1)S.cur++;else{S.qs.push(newQ());S.cur=S.qs.length-1}render();save();focusQuestion();break;
@@ -2657,9 +2871,9 @@ rail.addEventListener('click',async e=>{
   const b=e.target.closest('[data-tact]');if(!b) return;
   const i=+b.dataset.i;const q=S.qs[i];if(!q) return;
   if(b.dataset.tact==='dup'){
-    const cp=im=>im?makeImg(im.blob,im.name):null;
+    const cp=im=>{if(!im)return null;const o=makeImg(im.blob,im.name);if(im.cut)o.cut={...makeImg(im.cut.blob,im.cut.name),st:JSON.parse(JSON.stringify(im.cut.st))};return o};
     const c=newQ({...q,id:uid(),options:[...q.options],answers:[...q.answers],slider:{...q.slider},note:q.note===WARMUP?'':q.note,points:q.note===WARMUP?'standard':q.points,
-      qimg:cp(q.qimg),aimg:cp(q.aimg),oimgs:q.oimgs.map(cp),pin:q.pin?{shape:JSON.parse(JSON.stringify(q.pin.shape)),img:cp(q.pin.img)}:null});
+      qimg:cp(q.qimg),aimg:cp(q.aimg),qbg:cp(q.qbg),oimgs:q.oimgs.map(cp),pin:q.pin?{shape:JSON.parse(JSON.stringify(q.pin.shape)),img:cp(q.pin.img)}:null});
     S.qs.splice(i+1,0,c);S.cur=i+1;render();save();toast('已複製為第 '+(i+2)+' 題');
   }else{
     if(selIds.size>1&&selIds.has(q.id)){deleteSelected();return}
