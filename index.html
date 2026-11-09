@@ -617,6 +617,49 @@ footer p{color:var(--muted);font-size:14px}
 @media (min-width:861px){
   .rail{position:relative;top:auto;max-height:var(--railH,calc(100vh - var(--hdr,60px) - 24px));overflow-y:auto;overscroll-behavior:contain}
 }
+/* PNG 去背：用棋盤格底顯示透明 */
+.slot.filled,.optpic,.pinprev,.gcardm .gt,.bg-cur img{background-color:#fff;background-image:conic-gradient(#ececf2 25%,#fff 0 50%,#ececf2 0 75%,#fff 0);background-size:16px 16px}
+/* 隱私說明 */
+.privacy{display:flex;gap:12px;align-items:flex-start;margin-top:14px;background:#e9f7ef;border:1.5px solid #9fd8b6;color:#14532d;border-radius:14px;padding:12px 16px;font-size:14.5px;line-height:1.6}
+.privacy b{font-size:15.5px}
+.pv-ic{font-size:22px;line-height:1.2}
+.pv-mini{display:inline-block;margin-top:8px!important;background:#e9f7ef;color:#14532d!important;border-radius:999px;padding:3px 12px;font-weight:700;font-size:13.5px!important}
+/* 公版主題搜尋 */
+.bg-panel{width:min(860px,96vw)}
+.theme-q{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;font-size:15px;background:#fff}
+.theme-q:focus{outline:none;border-color:var(--accent-2)}
+.theme-res{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:max-content;gap:8px;max-height:320px;overflow:auto}
+.theme-res:empty{display:none}
+.theme-res .msg{grid-column:1/-1;font-size:13px;color:var(--muted)}
+.tthumb{border:2px solid transparent;border-radius:8px;padding:0;background:#fff;overflow:hidden;text-align:left;cursor:pointer}
+.tthumb:hover{border-color:var(--accent)}
+.tthumb img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.tthumb span{display:block;font-size:12px;padding:3px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.theme-alt{font-size:13px}
+.linkish{border:0;background:none;color:var(--accent);text-decoration:underline;padding:0;font-weight:700}
+/* 題庫 */
+.bank-panel{background:#fff;border-radius:18px;padding:20px 22px;width:min(860px,96vw);max-height:92vh;display:flex;flex-direction:column;gap:10px}
+.bank-panel .bg-head{margin:-20px -22px 0}
+.bank-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.bank-top .seg{border:1.5px solid var(--line);border-radius:10px}
+.bank-top .seg button{padding:6px 16px;color:var(--muted)}
+.bank-top .seg button.on{background:var(--accent-soft);color:var(--accent)}
+.bank-note{font-size:13px;color:var(--muted)}
+.bank-cats{display:flex;gap:6px;flex-wrap:wrap}
+.bank-cats button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:4px 12px;font-size:13.5px;font-weight:700;color:var(--muted)}
+.bank-cats button.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.bank-list{flex:1;min-height:200px;overflow:auto;border:1.5px solid var(--line);border-radius:12px}
+.bq{display:flex;gap:12px;align-items:flex-start;padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+.bq:last-child{border-bottom:0}
+.bq:hover{background:#faf8fd}
+.bq input{margin-top:2px}
+.bq .bt{font-weight:700;font-size:15px}
+.bq .bo{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13.5px;color:var(--muted);margin-top:2px}
+.bq .bo .ok{color:var(--accent);font-weight:900}
+.bq .btype{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:6px;font-size:12px;padding:0 6px;margin-right:6px}
+.bank-foot{display:flex;align-items:center;gap:10px}
+.bank-foot #bankCount{font-weight:700;color:var(--muted);font-size:14px}
+@media (max-width:860px){.theme-res{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -636,7 +679,7 @@ footer p{color:var(--muted);font-size:14px}
 <header class="top" id="top">
   <div class="wrap row">
     <a class="brand" href="#" aria-label="回到頂端"><span class="mini" aria-hidden="true"><i style="background:#E21B3C"></i><i style="background:#1368CE"></i><i style="background:#D89E00"></i><i style="background:#26890C"></i></span><span class="kmini">Kahoot</span>題目製作編輯器</a>
-    <nav class="topnav" aria-label="參考連結"><a href="https://kahoot-tools.github.io/info/#bank" target="_blank" rel="noopener">📚 參考題庫</a>
+    <nav class="topnav" aria-label="參考連結"><a href="https://kahoot-tools.github.io/info/#bank" id="bankOpen">📚 參考題庫</a>
     <a href="https://kahoot-tools.github.io/info/#make-notes" target="_blank" rel="noopener">📋 題目設定注意事項</a></nav>
     <div class="grow"></div>
     <span class="savechip" id="saveChip"></span>
@@ -660,6 +703,7 @@ footer p{color:var(--muted);font-size:14px}
 
   <section class="blk">
     <div class="blk-h"><span class="bi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></span><h2>選擇製作方式</h2></div>
+    <div class="privacy"><span class="pv-ic">🔒</span><div><b>安心使用：檔案與題目不會上傳到網路</b><br>上傳的檔案、圖片和題目都只在你的瀏覽器中處理，網站看不到也不會保存；下載後再自行傳給小幫手即可。</div></div>
     <div class="modes">
       <button class="mode" data-mode="upload"><span class="mi" style="background:var(--k0)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg></span><span><b>上傳檔案</b><small>Word、PPT、Excel、PDF、圖片、TXT</small></span></button>
       <button class="mode" data-mode="paste"><span class="mi" style="background:var(--k1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg></span><span><b>貼上文字</b><small>複製題目貼上，或載入範本</small></span></button>
@@ -671,7 +715,7 @@ footer p{color:var(--muted);font-size:14px}
         <div class="up"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg></div>
         <h3>拖曳、點擊或貼上你的題目檔案</h3>
         <p>文件：docx、pptx、xlsx、xls、csv、pdf、txt　圖片：jpeg、jpg、png、gif、webp（單檔 50 MB 內）</p>
-        <p>Word / PPT 裡的圖片會自動放進對應題目；檔案只在你的瀏覽器裡處理</p>
+        <p>Word / PPT 裡的圖片會自動放進對應題目</p><p class="pv-mini">🔒 檔案只在你的瀏覽器中處理，不會上傳到網路</p>
         <span class="tip">擷取的文字會先放到「貼上文字」區，確認後再辨識</span>
         <input type="file" id="fileInput" multiple hidden>
       </div>
@@ -702,7 +746,7 @@ footer p{color:var(--muted);font-size:14px}
       <div class="ed-head">
         <div>
           <div class="blk-h"><span class="bi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></span><h2>題目編輯</h2></div>
-          <div class="statrow"><div class="stat" id="stat"></div><button class="mini-btn danger" id="clearAll">清空全部</button></div>
+          <div class="statrow"><div class="stat" id="stat"></div><button class="mini-btn" id="bankOpen2">📚 從題庫匯入</button><button class="mini-btn danger" id="clearAll">清空全部</button></div>
         </div>
       </div>
 
@@ -797,12 +841,21 @@ footer p{color:var(--muted);font-size:14px}
     <div class="bg-card">
       <div class="bg-ic" style="background:var(--k3)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></div>
       <h3>選用公版背景</h3>
-      <ol><li>打開 <a href="https://kahoot-tools.github.io/themes/" target="_blank" rel="noopener">Kahoot 主題背景預覽器 ↗</a></li><li>挑選喜歡的公版主題後截圖</li><li>回到這裡上傳截圖</li></ol>
-      <button class="btn btn-green" data-bg="theme">上傳公版截圖</button>
+      <p>到 <a href="https://kahoot-tools.github.io/themes/" target="_blank" rel="noopener">Kahoot 主題背景預覽器 ↗</a> 挑好後，複製主題名稱貼到下方，或直接輸入關鍵字搜尋：</p>
+      <input type="search" id="themeQ" class="theme-q" placeholder="貼上主題名稱，例如：花海歡呼新人" autocomplete="off">
+      <div class="theme-res" id="themeRes"></div>
+      <p class="theme-alt">找不到嗎？也可以 <button type="button" class="linkish" data-bg="theme">上傳公版截圖</button></p>
     </div>
   </div>
   <input type="file" hidden id="bgFile" accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp">
   <div id="bgErr"></div>
+</div></div>
+<div class="fbbg" id="bankbg"><div class="bank-panel" role="dialog" aria-modal="true" aria-label="參考題庫">
+  <div class="bg-head"><b>📚 參考題庫</b><button type="button" class="fb-x" id="bankClose" aria-label="關閉">✕</button></div>
+  <div class="bank-top"><div class="seg" id="bankTabs"></div><span class="bank-note">紫色為正確答案，勾選後按「匯入」加到題目最後面</span></div>
+  <div class="bank-cats" id="bankCats"></div>
+  <div class="bank-list" id="bankList"></div>
+  <div class="bank-foot"><button type="button" class="mini-btn" id="bankAll">全選本分類</button><span class="grow"></span><span id="bankCount">已選 0 題</span><button type="button" class="btn btn-purple" id="bankImport" disabled>匯入</button></div>
 </div></div>
 <div class="mbg" id="mbg"><div class="modal" role="dialog" aria-modal="true"><h3 id="mTitle"></h3><div class="mbody" id="mBody"></div><div class="mbtns" id="mBtns"></div></div></div>
 <div class="toast" id="toast"></div>
@@ -989,7 +1042,10 @@ function updateModeText(){
 /* ======== PARSER-START ======== */
 function normalize(s){return s.replace(/[\uFF01-\uFF5E]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).replace(/\u3000/g,' ')}
 function blankRange(str,s,e){return str.slice(0,s)+' '.repeat(e-s)+str.slice(e)}
-function cleanPart(s){return s.replace(/\s*\n\s*/g,' ').replace(/[ \t]+/g,' ').trim().replace(/^[\/\s:：.、)）]+/,'').replace(/[\/\s;；,，、。(（]+$/,'').trim()}
+function cleanPart(s){
+  return s.replace(/([^\x00-\x7F])[ \t]*\n[ \t]*(?=[^\x00-\x7F])/g,'$1').replace(/\s*\n\s*/g,' ').replace(/[ \t]+/g,' ').trim()
+    .replace(/^[\/\s:：.、)）]+/,'').replace(/[\/\s;；,，、。(（]+$/,'').trim();
+}
 const CIRCLED='①②③④⑤⑥';
 const nk=s=>normalize(String(s)).replace(/\s+/g,'').toLowerCase();
 function pickSeq(ms){
@@ -1011,17 +1067,24 @@ function findLabels(n,loose){
   return ms;
 }
 function lineSplit(o,n){
-  // 沒有 A/B/C/D 代號時：第一行是題目，最後一行用頓號分隔，或每行一個選項
+  // 沒有 A/B/C/D 代號：題目可能跨行（以？結尾判斷），選項為頓號分隔的一行或一行一個
   const lines=[];let p=0;
   for(const L of n.split('\n')){if(L.trim())lines.push({s:p,e:p+L.length});p+=L.length+1}
   if(lines.length<2) return null;
-  const txt=r=>o.slice(r.s,r.e);
-  const last=lines[lines.length-1];
-  const parts=txt(last).split(/[、\/／｜|]/).map(s=>s.trim()).filter(Boolean);
-  if(parts.length>=2&&parts.length<=6) return {text:lines.slice(0,-1).map(txt).join(' '),options:parts,optStart:last.s};
-  const rest=lines.slice(1);
-  if(rest.length>=2&&rest.length<=6&&rest.every(r=>txt(r).trim().length<=40)) return {text:txt(lines[0]),options:rest.map(r=>txt(r).trim()),optStart:rest[0].s};
-  return null;
+  const txt=r=>n.slice(r.s,r.e);
+  const splitLine=r=>{const parts=[];const re=/[^、\/|]+/g;let m;const t=txt(r);while((m=re.exec(t))){if(m[0].trim())parts.push({s:r.s+m.index,e:r.s+m.index+m[0].length})}return parts};
+  let qEnd=-1;
+  for(let k=0;k<lines.length-1;k++){if(/[?？:：]\s*$/.test(txt(lines[k]))){qEnd=k;break}}
+  const build=(qLines,optLines)=>{
+    if(!optLines.length) return null;
+    if(optLines.length===1){const parts=splitLine(optLines[0]);if(parts.length>=2&&parts.length<=6)return {qs:qLines[0].s,qe:qLines[qLines.length-1].e,ranges:parts}}
+    if(optLines.length>=2&&optLines.length<=6&&optLines.every(r=>txt(r).trim().length<=60)) return {qs:qLines[0].s,qe:qLines[qLines.length-1].e,ranges:optLines.map(r=>({s:r.s,e:r.e}))};
+    return null;
+  };
+  if(qEnd>=0){const r=build(lines.slice(0,qEnd+1),lines.slice(qEnd+1));if(r)return r}
+  const last=lines[lines.length-1];const parts=splitLine(last);
+  if(parts.length>=2&&parts.length<=6) return {qs:lines[0].s,qe:lines[lines.length-2].e,ranges:parts};
+  return build(lines.slice(0,1),lines.slice(1));
 }
 function resolveAnswers(raw,options){
   if(!raw) return [];
@@ -1044,6 +1107,7 @@ function resolveAnswers(raw,options){
   if(!res.length){const hit=on.map((o,i)=>o&&(o.includes(nk(raw))||nk(raw).includes(o))?i+1:0).filter(Boolean);if(hit.length===1)res=hit}
   return [...new Set(res)].filter(a=>a>=1&&a<=6).sort((a,b)=>a-b);
 }
+const MARK_RE=/✅|☑️|☑|✔️|✔|✓|√|(?<![^\s、,，(（])\*|\*(?![^\s、,，)）])/g;
 function parseBlock(o,n){
   const marks=[];let m;const mre=/⟦圖(\d+)⟧/g;
   while((m=mre.exec(n))) marks.push({num:+m[1],pos:m.index,len:m[0].length});
@@ -1053,25 +1117,43 @@ function parseBlock(o,n){
   let last=null;while((m=ansRe.exec(n))) last=m;
   let rawAns='';
   if(last){
-    if(last[1]){const g=last.index+last[0].lastIndexOf(last[1]);rawAns=o.slice(g,g+last[1].length)}
+    if(last[1]){const g=last.index+last[0].lastIndexOf(last[1]);rawAns=o.slice(g,g+last[1].length).replace(MARK_RE,'')}
     o=blankRange(o,last.index,last.index+last[0].length);n=blankRange(n,last.index,last.index+last[0].length);
   }
-  let text,options=[],optStart=Infinity;
+  // 答案符號 ✅ ☑️ ✔️ √ ✓ ✔ *（先記位置再移除，不放進選項）
+  const ticks=[];MARK_RE.lastIndex=0;
+  while((m=MARK_RE.exec(n))) ticks.push({pos:m.index,len:m[0].length});
+  for(const k of ticks){o=blankRange(o,k.pos,k.pos+k.len);n=blankRange(n,k.pos,k.pos+k.len)}
+  let text='',ranges=[],labelStarts=[],labeled=false,optStart=Infinity;
   let seq=pickSeq(findLabels(n,false));
-  if(seq.length>=2){
-    text=cleanPart(o.slice(0,seq[0].start));
-    options=seq.map((s,i)=>cleanPart(o.slice(s.end,i+1<seq.length?seq[i+1].start:o.length)));optStart=seq[0].start;
-  }else{
+  if(seq.length<2){
     const ls=lineSplit(o,n);
-    if(ls){text=cleanPart(ls.text);options=ls.options.map(cleanPart);optStart=ls.optStart}
-    else{
-      seq=pickSeq(findLabels(n,true));
-      if(seq.length>=2){text=cleanPart(o.slice(0,seq[0].start));options=seq.map((s,i)=>cleanPart(o.slice(s.end,i+1<seq.length?seq[i+1].start:o.length)));optStart=seq[0].start}
-      else text=cleanPart(o);
-    }
+    if(ls){text=cleanPart(o.slice(ls.qs,ls.qe));ranges=ls.ranges;labelStarts=ranges.map(r=>r.s)}
+    else seq=pickSeq(findLabels(n,true));
   }
-  options=options.slice(0,6);
-  const answers=resolveAnswers(rawAns,options);
+  if(!ranges.length&&seq.length>=2){
+    labeled=true;text=cleanPart(o.slice(0,seq[0].start));
+    ranges=seq.map((s,i)=>({s:s.end,e:i+1<seq.length?seq[i+1].start:o.length}));labelStarts=seq.map(s=>s.start);
+  }
+  if(!ranges.length) text=cleanPart(o);
+  ranges=ranges.slice(0,6);labelStarts=labelStarts.slice(0,6);
+  if(ranges.length) optStart=labelStarts[0];
+  let options=ranges.map(r=>cleanPart(o.slice(r.s,r.e)));
+  if(!labeled&&options.length>=2&&options.every((s,k)=>new RegExp('^'+'ABCDEF'[k]+'[ \t]+\\S').test(normalize(s)))) options=options.map(s=>s.replace(/^\S[ \t]+/,''));
+  // 答案符號歸屬
+  const tickAns=[];
+  for(const t of ticks){
+    if(!ranges.length) break;
+    let i=-1;
+    for(let k=0;k<ranges.length;k++){const st=labelStarts[k],en=k+1<ranges.length?labelStarts[k+1]:ranges[k].e+1;if(t.pos>=st&&t.pos<en){i=k;break}}
+    if(i<0){const gap=n.slice(t.pos+t.len,labelStarts[0]);if(t.pos<labelStarts[0]&&!gap.trim()&&!gap.includes('\n'))i=0;else continue}
+    if(labeled&&i+1<ranges.length){
+      const before=n[t.pos-1]||' ',after=n.slice(t.pos+t.len,labelStarts[i+1]);
+      if(/\s/.test(before)&&!after.trim()) i=i+1;
+    }
+    tickAns.push(i+1);
+  }
+  const answers=[...new Set([...resolveAnswers(rawAns,options),...tickAns])].sort((a,b)=>a-b);
   let qimgNum=null,oimgNum=null;
   for(const k of marks){
     if(k.pos<optStart&&qimgNum===null) qimgNum=k.num;
@@ -1092,7 +1174,9 @@ function parseText(raw){
     if((m=L.match(/^\s*【([^】]+)】\s*(?=\S)/))){starts.push({s,e:s+m[0].length,open:m[1].trim()});continue}
     if((m=L.match(/^[ \t]*(?:\((\d{1,3})\)|(?:Q|第)?[ \t]*(\d{1,3})[ \t]*題?[ \t]*(?:\.(?!\d)|[、:)\]]))/i))){
       const num=+(m[1]||m[2]);
-      if(lastNum===null||(num>lastNum&&num<=lastNum+3)){starts.push({s,e:s+m[0].length});lastNum=num}
+      const rest=L.slice(m[0].length);
+      const optLike=!/[?？:：]/.test(rest)&&rest.split(/[、\/]/).length>=3&&rest.split(/[、\/]/).every(x=>x.trim().length<=12);
+      if((lastNum===null||(num>lastNum&&num<=lastNum+3))&&!(optLike&&lastNum!==null)){starts.push({s,e:s+m[0].length});lastNum=num}
     }
   }
   const real=starts.filter(x=>!x.header);
@@ -1876,7 +1960,7 @@ function save(){
   clearTimeout(saveT);$('#saveChip').textContent='儲存中…';$('#saveChip').classList.remove('ok');
   saveT=setTimeout(async()=>{
     const strip=im=>im?{blob:im.blob,name:im.name}:null;
-    const data={v:6,setOpen:S.setOpen,gsOpen:S.gsOpen,cur:S.cur,qNo:S.qNo,cover:strip(S.cover),bg:S.bg?{kind:S.bg.kind,img:strip(S.bg.img)}:null,optPrefix:S.optPrefix,name:S.name,title:S.title,defTime:S.defTime,editing:S.editing,extraOpen:S.extraOpen,
+    const data={v:6,setOpen:S.setOpen,gsOpen:S.gsOpen,cur:S.cur,qNo:S.qNo,cover:strip(S.cover),bg:S.bg?{kind:S.bg.kind,name:S.bg.name||'',img:strip(S.bg.img)}:null,optPrefix:S.optPrefix,name:S.name,title:S.title,defTime:S.defTime,editing:S.editing,extraOpen:S.extraOpen,
       qs:S.qs.map(q=>({...q,qimg:strip(q.qimg),aimg:strip(q.aimg),oimgs:q.oimgs.map(strip),pin:q.pin?{shape:q.pin.shape,img:strip(q.pin.img)}:null}))};
     let ok=false;
     try{await idbSet(data);ok=true}catch(e){
@@ -1892,7 +1976,7 @@ async function restore(){
   try{d=await idbGet()}catch(e){}
   if(!d){try{d=JSON.parse(localStorage.getItem('kahootQEditor')||'null')}catch(e){}}
   if(!d) return false;
-  S.qNo=d.qNo||'none';S.setOpen=!!d.setOpen;S.gsOpen=!!d.gsOpen;S.cover=d.cover&&d.cover.blob?makeImg(d.cover.blob,d.cover.name):null;S.bg=d.bg&&d.bg.img&&d.bg.img.blob?{kind:d.bg.kind,img:makeImg(d.bg.img.blob,d.bg.img.name)}:null;S.optPrefix=d.optPrefix||'none';S.name=d.name||'';S.title=d.title||'';S.defTime=TIMES.includes(d.defTime)?d.defTime:20;S.editing=!!d.editing;S.extraOpen=!!d.extraOpen;
+  S.qNo=d.qNo||'none';S.setOpen=!!d.setOpen;S.gsOpen=!!d.gsOpen;S.cover=d.cover&&d.cover.blob?makeImg(d.cover.blob,d.cover.name):null;S.bg=d.bg&&d.bg.img&&d.bg.img.blob?{kind:d.bg.kind,name:d.bg.name||'',img:makeImg(d.bg.img.blob,d.bg.img.name)}:null;S.optPrefix=d.optPrefix||'none';S.name=d.name||'';S.title=d.title||'';S.defTime=TIMES.includes(d.defTime)?d.defTime:20;S.editing=!!d.editing;S.extraOpen=!!d.extraOpen;
   const mk=im=>im&&im.blob?makeImg(im.blob,im.name):null;
   S.qs=(d.qs||[]).map(q=>{
     const pin=q.pin&&q.pin.img&&q.pin.img.blob?{shape:q.pin.shape,img:mk(q.pin.img)}:null;
@@ -1933,7 +2017,9 @@ function buildRows(){
 async function buildXlsx(){
   await loadScript(LIB.xlsx);
   const {head,rows,maxOpt}=buildRows();
-  const ws=XLSX.utils.aoa_to_sheet([head,...rows]);
+  const aoa=[head,...rows];
+  if(S.title.trim()) aoa.push([],['遊戲標題：'+S.title.trim()]);
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
   ws['!cols']=[{wch:5},{wch:46},...Array(maxOpt).fill({wch:14}),{wch:10},{wch:14},{wch:26}];
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Kahoot');
   return new Uint8Array(XLSX.write(wb,{type:'array',bookType:'xlsx'}));
@@ -1978,10 +2064,10 @@ $('#dlZip').onclick=async()=>{
   try{
     await loadScript(LIB.jszip);
     const zip=new JSZip();const base=baseName();zip.file(base+'.xlsx',await buildXlsx());
-    const lines=[`遊戲標題：${S.title.trim()||'（未填）'}`,`LINE 名稱：${S.name.trim()||'（未填）'}`,`背景：${S.bg?(S.bg.kind==='theme'?'公版截圖':'自訂圖片'):'未提供（由小幫手預設）'}`,''];
+    const lines=[`遊戲標題：${S.title.trim()||'（未填）'}`,`LINE 名稱：${S.name.trim()||'（未填）'}`,`背景：${S.bg?(S.bg.kind==='theme'?(S.bg.name?'公版主題「'+S.bg.name+'」':'公版截圖'):'自訂圖片'):'未提供（由小幫手預設）'}`,''];
     const extOf=im=>{let e=(im.name.split('.').pop()||'').toLowerCase();if(!IMG_EXT.test(e))e=(im.blob.type.split('/')[1]||'png').replace('jpeg','jpg');return e==='jpeg'?'jpg':e};
     if(S.cover){zip.file(`圖片/封面.${extOf(S.cover)}`,S.cover.blob);lines.push(`封面.${extOf(S.cover)}　→　遊戲封面圖`)}
-    if(S.bg){zip.file(`圖片/背景.${extOf(S.bg.img)}`,S.bg.img.blob);lines.push(`背景.${extOf(S.bg.img)}　→　${S.bg.kind==='theme'?'公版背景截圖':'自訂背景圖'}`)}
+    if(S.bg){zip.file(`圖片/背景.${extOf(S.bg.img)}`,S.bg.img.blob);lines.push(`背景.${extOf(S.bg.img)}　→　${S.bg.kind==='theme'?(S.bg.name?'公版主題「'+S.bg.name+'」':'公版背景截圖'):'自訂背景圖'}`)}
     S.qs.forEach((q,i)=>allImgs(q).forEach(([slot,im])=>{
       const no=i+1;
       const nm=slot==='qimg'?`${no}`:slot==='aimg'?`${no}解答`:slot==='pin'?`${no}答案位置`:`${no}-${+slot.slice(1)+1}`;
@@ -2130,7 +2216,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&openMenu){openMenu=
 /* ---------- 遊戲設定收合 ---------- */
 function gsSummary(){
   const qn={none:'無',num:'1、2、3、',q:'Q1、Q2、Q3、'}[S.qNo],op={none:'無',alpha:'A. B. C. D.',num:'1. 2. 3. 4.'}[S.optPrefix];
-  return `封面：${S.cover?'已上傳':'未上傳'}｜背景：${S.bg?(S.bg.kind==='theme'?'公版':'自訂'):'未選擇'}｜題號：${qn}｜選項前綴：${op}`;
+  return `封面：${S.cover?'已上傳':'未上傳'}｜背景：${S.bg?(S.bg.kind==='theme'?(S.bg.name?'公版「'+S.bg.name+'」':'公版'):'自訂'):'未選擇'}｜題號：${qn}｜選項前綴：${op}`;
 }
 function syncGs(){
   $('#gsBody').hidden=!S.gsOpen;$('#gsToggle').classList.toggle('on',S.gsOpen);$('#gsToggle').setAttribute('aria-expanded',S.gsOpen);
@@ -2146,7 +2232,7 @@ function renderGMedia(){
     <span><b>${title}</b><small>${im?extra:desc}</small></span>
     ${im?`<button class="gx" data-gx="${id}" title="移除" aria-label="移除${title}">✕</button>`:''}</div>`;
   $('#gmedia').innerHTML=card('cover','上傳封面圖','選填｜圖片或 GIF（不能放影片）',S.cover,'已上傳，點擊可更換')+
-    card('bg','選擇背景圖','選填｜上傳自訂圖片或選用公版',S.bg&&S.bg.img,S.bg?(S.bg.kind==='theme'?'公版截圖，點擊可更換':'自訂圖片，點擊可更換'):'')+
+    card('bg','選擇背景圖','選填｜上傳自訂圖片或選用公版',S.bg&&S.bg.img,S.bg?(S.bg.kind==='theme'?(S.bg.name?`公版「${esc(S.bg.name)}」，點擊可更換`:'公版截圖，點擊可更換'):'自訂圖片，點擊可更換'):'')+
     '<input type="file" hidden id="coverFile" accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp"><div class="gerr" id="gErr" style="grid-column:1/-1"></div>';
   $('#coverFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
     if(/^video\//.test(f.type)||/\.(mp4|mov|m4v|webm|avi)$/i.test(f.name)){$('#gErr').innerHTML=`<div class="errbox"><div class="eh">ⓘ 封面不能放影片：<b>${esc(f.name)}</b></div>請上傳圖片或 GIF（jpeg、jpg、png、gif、webp）</div>`;return}
@@ -2165,7 +2251,7 @@ $('#gmedia').addEventListener('keydown',e=>{const c=e.target.closest('[data-g]')
 let bgKind='custom';
 function openBg(){
   $('#bgErr').innerHTML='';
-  $('#bgCur').innerHTML=S.bg?`<img src="${S.bg.img.url}" alt="目前背景"><div><b>目前背景</b><br><small style="color:var(--muted)">${S.bg.kind==='theme'?'公版截圖':'自訂圖片'}</small></div>`:'';
+  $('#bgCur').innerHTML=S.bg?`<img src="${S.bg.img.url}" alt="目前背景"><div><b>目前背景</b><br><small style="color:var(--muted)">${S.bg.kind==='theme'?(S.bg.name?'公版「'+esc(S.bg.name)+'」':'公版截圖'):'自訂圖片'}</small></div>`:'';
   $('#bgbg').classList.add('show');
 }
 $('#bgClose').onclick=()=>$('#bgbg').classList.remove('show');
@@ -2173,8 +2259,97 @@ $('#bgbg').onclick=e=>{if(e.target.id==='bgbg')$('#bgbg').classList.remove('show
 document.querySelectorAll('[data-bg]').forEach(b=>b.onclick=()=>{bgKind=b.dataset.bg;$('#bgFile').click()});
 $('#bgFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
   const err=imgError(f);if(err){$('#bgErr').innerHTML=err;return}
-  if(S.bg)URL.revokeObjectURL(S.bg.img.url);S.bg={kind:bgKind,img:makeImg(f,f.name)};
+  if(S.bg)URL.revokeObjectURL(S.bg.img.url);S.bg={kind:bgKind,name:'',img:makeImg(f,f.name)};
   $('#bgbg').classList.remove('show');renderGMedia();save();toast(bgKind==='theme'?'已上傳公版截圖':'已上傳自訂背景')};
+
+const BANKS={"婚禮":[{"cat":"基礎題","rows":[[1,"請問今天是農曆幾月幾號？",["六月廿六","六月廿七","六月廿八","六月廿九"],[1]],[2,"請問今天結婚的新人是？",["玄彬&孫藝珍","林志玲&Akira","王小帥&陳小美","楊過&小龍女"],[2]],[3,"請問新人在家中的排行是？",["都是老大","老大／老二","老二／老么","都是老么"],[0]],[4,"請問今天的宴客地點是？",["圓山大飯店","台北１０１","君品酒店","萊特薇庭"],[3]],[5,"請問今天的菜單上有幾道菜？",["10","11","12","13"],[2]],[6,"請問各位今天是來參加？",["端午划龍舟","告別單身趴","鴻海尾牙","婚禮"],[3]],[7,"請問今天席開幾桌？",["15桌","22桌","35桌","49桌"],[1]]]},{"cat":"時事題","rows":[[8,"2026年10月侵襲台灣的颱風「薔琵」到底有沒有登陸？",["有","沒有"],[1]],[9,"PHP 在科技新聞中通常指的是什麼？",["一種程式語言","一種航空燃料","一種食品添加物","一種醫療影像設備"],[0]],[10,"飛天特斯拉話題爆紅後，台灣網友竟然關心什麼問題？",["要考飛行駕照嗎","飛高會不會耳鳴","手搖飲要放哪裡","ETC 怎麼扣款"],[2]],[11,"Threads 爆紅的「比奇堡發財桌布」，網友聲稱換了之後有什麼好事？",["發票中獎","搶到演唱會門票","順利排便","以上皆有"],[3]],[12,"朋友留言「請去高麗菜那桌坐」，通常是在說什麼？",["你很有智慧","你便祕了，要多吃蔬菜","你被排擠了","你要負責煮火鍋"],[0]],[13,"請填空：「他很壞，＿＿＿」",["壞壞壞","嘟嘟嘟","咚咚咚","啦啦啦"],[1]],[14,"近期流行語「YBSG」最接近什麼意思？",["也不是說哥","要不要試試看","太扯了、太誇張了","有病是不是哥"],[2]],[15,"最近爆紅的台版 GTA《臺北狂飆》，能在遊戲裡做什麼很台灣的事情？",["追垃圾車","搶演唱會門票","夜市擺攤賣雞排","到學校補修學分"],[0]],[16,"最近爆紅的《80 億分之一》人生模擬器，是讓玩家體驗什麼？",["成為億萬富翁","隨機投胎到不同國家的人生","跟全球 80 億人比智商","抽選全球最幸運的人"],[1]],[17,"是誰成功挑戰徒手攀登101大樓？",["Alex Honnold","Alex Rodriguez","Tommy Caldwell","Chris Sharma"],[0]],[18,"請問畫面中這招叫什麼? (附GIF圖)",["剪刀步","閃身步","歐洲步","試探步"],[1]],[19,"2026年FIFA 世界盃足球賽由哪三個國家共同主辦？",["巴西、阿根廷、智利","美國、加拿大、墨西哥","西班牙、葡萄牙、法國","日本、韓國、中國"],[1]],[20,"2026年FIFA 世界盃足球賽冠軍是哪一隊？",["阿根廷","法國","西班牙","英格蘭"],[2]],[21,"2026年FIFA 世界盃足球賽決賽，是哪兩個國家？",["阿根廷v.s西班牙","阿根廷v.s葡萄牙","英格蘭v.s法國","西班牙v.s法國"],[0]],[22,"2026年台灣九合一地方選舉的投票日期是哪一天？",["10月23日","11月28日","12月4日","12月25日"],[1]],[23,"2026 年第 37 屆金曲獎，拿下「歌后」的是誰？",["彭佳慧","蔡依林","單依純","洪佩瑜"],[1]],[24,"近年最常被拿來生成「婚紗照、插畫、照片」的是哪一個？",["GPS","GAS","APT","GPT"],[3]],[25,"2026 年最熱門的「AI 婚禮新科技」如果要幫新人做一件事，最可能是？",["幫忙生成婚紗照","幫忙搶捧花","幫忙喝喜酒","幫忙包紅包"],[0]]]},{"cat":"趣味題","rows":[[26,"請問各位今天參加婚禮的原因？",["見證幸福","尾牙抽獎","吃吃喝喝","物色對象"],[0]],[27,"請問各位今天參加婚禮的原因？",["看笑話","看熱鬧","看你沒有","看看愛情真正的樣子"],[3]],[28,"請選擇最適合形容今日這對新人的成語？",["豺狼虎豹","狼吞虎嚥","郎才女貌","狼狽為奸"],[2]],[29,"以下哪個是新娘可以赤手空拳對付的生物？",["蟑螂","新郎","螳螂","色狼"],[1]],[30,"請問新郎長的像哪位明星？",["金城武","許光漢","彭于晏","以上皆是"],[3]],[31,"全場最美的女人是？",["新娘","花童","我自己","主持人"],[0]],[32,"請問新郎自詡.....？",["桃園彭于晏","新莊吳彥祖","交大金城武","新竹澎恰恰"],[2]],[33,"請問新娘的招式是什麼？",["水之呼吸","炎之呼吸","雷之呼吸","美得不能呼吸"],[3]],[34,"今天新郎的內褲是什麼顏色？",["紅色","藍色","黑色","沒有穿"],[0]],[35,"兩人最初認識是因為……？",["一把菜刀","一把鑰匙","一把青","一把鼻涕一把眼淚"],[1]],[36,"下列何者較高？",["新郎的地位","新娘的地位","新郎躺下比較高","新郎的身高"],[1]],[37,"新郎的腹肌有幾塊？",["六塊","八塊","團結一大塊","十塊"],[2]],[38,"新娘參加賽跑追過第2名後，請問新娘會變成第幾名？",["第一名","第二名","第三名","第四名"],[1]],[39,"請問誰永遠是對的？",["姑婆","三姑六婆","老太婆","老婆"],[3]],[40,"最近有些人為了搶演唱會門票，特地去拜哪位神明？",["財神爺","月老","文昌帝君","土地公"],[1]],[41,"遊戲裡的「台幣戰士」是什麼意思？",["專門玩台灣製遊戲的人","遊戲內專門賺錢的職業","大量課金的玩家","只用新台幣交易的人"],[2]],[42,"當有人說「我給你ㄅ級分」，是在表達什麼？",["不及格","普通","最高評價","很白目"],[2]],[43,"網路流行的「初級大人」，最接近哪種狀態？",["剛滿 18 歲","還沒辦信用卡","在家族裡沒有決定權的大人","駕照考了三次"],[2]],[44,"朋友說「今天又多了一顆金色記憶球」，通常是什麼意思？",["買到黃金","有一段想珍藏的快樂回憶","忘記今天要考試","遊戲抽到金色角色"],[1]],[45,"請問這把聽什麼？(附圖)一二二三三四五五六七中中中發發發",["二萬","五八萬","二五八萬","沒聽"],[2]],[46,"請問這副麻將差哪張胡牌？(附圖)一二二三三四五五六七中中中發發",["東風","二五八萬","沒有聽","相公～"],[3]],[47,"請問下副麻將聽幾個洞？(附圖)一一一二三四五六七八九九九發發發",["三個","五個","七個","九個"],[3]],[48,"唐伯虎點秋香中，含笑半步顛是用什麼做的？(附圖)",["蜂蜜，川貝，桔梗，加上天山雪蓮配製","蜂蜜，人參，桔梗，加上天山雪蓮配製","枇杷，川貝，桔梗，加上天山雪蓮配製","枇杷，人參，桔梗，加上天山雪蓮配製"],[0]],[49,"唐伯虎點秋香中，唐伯虎剛進華夫人家當僕人時的代碼是幾號？",["9453","89757","9817","9527"],[3]],[50,"撲克牌老K中，哪一個花色沒有鬍子？",["紅心","黑桃","方塊","梅花"],[0]],[51,"圖中的客家語暗自sad，是什麼意思？",["暗自難過","好漂亮","謝謝","我真的不知道"],[2]]]},{"cat":"新人題","rows":[[52,"請問圖片中有幾個【新郎】？",["４個","５個","６個","７個"],[0]],[53,"請問圖片中有幾個【新娘】？",["４個","５個","６個","７個"],[1]],[54,"新郎新娘是在哪裡認識的？",["咖啡廳","公司","全聯","夜店"],[1]],[55,"新人交往多久？",["三年","五年","六年","十年"],[2]],[56,"新人的交往紀念日是？",["2月14日","4月1日","5月20日","12月25日"],[2]],[57,"新人沒有一起去過的地方是？",["紐西蘭","日本","澎湖","馬祖"],[3]],[58,"新人第一次出遊的地方是？",["台北新兒童樂園","小琉球","高雄愛河","台東鹿野高台"],[0]],[59,"新人即將去哪裡度蜜月？",["歐洲","馬爾地夫","日本","義大利"],[0]],[60,"新人一起看的第一部電影是？",["變形金剛4","阿凡達","我的少女時代","厲陰宅2"],[3]],[61,"新人一起養的寵物是？",["兔子","貓咪","狗狗","倉鼠"],[0]],[62,"新郎、新娘分別是哪裡人？",["高雄/台北","台東/花蓮","桃園/台中","高雄/台南"],[2]],[63,"新郎是什麼星座？",["家裡座","天蠍座","金牛座","安太座"],[2]],[64,"新郎新娘身高差幾公分？",["１０ｃｍ","１２ｃｍ","１５ｃｍ","２０ｃｍ"],[1]],[65,"新郎新娘差幾歲？",["１歲","２歲","３歲","５歲"],[1]],[66,"新郎今年30歲，請問新郎新娘差幾歲？",["一樣大","２歲","５歲","１２歲"],[3]],[67,"新郎在哪裡向新娘求婚？",["陽明山","貓空","武嶺","北海岸"],[0]],[68,"新郎的職業是？",["軍人","警察","消防員","公務員"],[0]],[69,"新娘被魔法帽分到哪個學院？",["史萊哲林","葛萊分多","雷克勞文","嶺東科大"],[3]],[70,"新郎收到新娘送過最特別的禮物是？",["吵架和好券一張","恐龍裝","四角內褲","柬埔寨機票"],[2]],[71,"新郎最怕的是什麼？",["蟑螂","新娘","媽媽","爸爸"],[1]],[72,"新郎惹怒新娘時，會買什麼食物安撫新娘？",["珍珠奶茶","草莓蛋糕","雞排","豆花"],[0]],[73,"新郎目前任職於哪間公司？",["台積電","裕隆汽車","永大機電","中鋼"],[2]],[74,"請問新娘屬什麼？",["鼠","兔","羊","屬於新郎"],[3]],[75,"請問照片中是誰的小時候？",["新郎","新娘"],[1]],[76,"新娘最討厭的食物是？",["芋頭","香菜","青椒","香菇"],[1]],[77,"新郎新娘分別喜歡的顏色是？",["藍色/粉色","藍色/綠色","黑色/紫色","黃色/綠色"],[0]],[78,"新人的兄弟姊妹加起來共有幾位？",["1位","2位","3位","4位"],[3]],[79,"新娘二進禮服的顏色是？",["紅色","藍色","金色","綠色"],[0]]]},{"cat":"影音題","rows":[[80,"請問這首歌的歌名是？https://youtu.be/s3-ahYZ4h-o",["走在紅毯那一天","今天妳要嫁給我","Marry Me","最重要的決定"],[1]],[81,"(語音題)請問這句客語的中文是？https://www.youtube.com/watch?v=ms7SgDpsjoI",["新娘好讚喔！","新娘好瘦喔！","新娘好漂亮喔！","新娘好溫柔喔！"],[2]]]},{"cat":"進階題","rows":[[82,"請問今天是新人交往多少天？",["1966天","2279天","2543天","3520天"],[1]],[83,"新娘是A型，新郎是AB型，請問未來的孩子出生可能會是什麼血型？",["A型、O型","A型、O型、AB型","A型、B型、AB型","B型、O型"],[2]],[84,"請問新人的名字總共有幾劃？",["33","49","62","75"],[3]],[85,"新人在哪個戶政事務所登記結婚？",["士林戶政","淡水戶政","南屯戶政","北投戶政"],[0]],[86,"新郎在幾月幾號向新娘求婚？",["1月1號","3月20號","5月20號","12月25號"],[2]]]},{"cat":"其他題型","rows":[[87,"【滑桿題】心有靈犀一點通！請滑到新人預想的數字",["999","設定區間500-1000"],[]],[88,"【排列順序】請排列以下嫁娶的先後順序",["文定","迎娶","拜別父母","結婚宴客"],[]],[89,"【排列順序】請排列以下事件發生的先後順序",["新郎求婚","交往六週年","登記結婚","舉辦婚禮"],[]],[90,"【賓客留言】留下給新人祝福的話♥",["預設60秒"],[]]]}],"尾牙":[{"cat":"基礎題","rows":[[1,"請問今天是幾月幾日？",["1月1日","1月2日","1月3日","1月4日"],[0]],[2,"請問各位今天是來參加？",["端午划龍舟","告別單身趴","尾牙","婚禮"],[2]],[3,"尾牙辦在哪裡？",["林酒店","台中擔仔麵","新天地","台南擔仔麵"],[2]],[4,"請問今年尾牙的主題風格是？",["復古風","多巴胺風","台客風","芭比風"],[2]],[5,"尾牙抽獎時，最讓人期待聽到哪一句話？",["謝謝參與","明年再接再厲","這次沒有你的份","最大獎得主是你"],[3]],[6,"今天尾牙第一道菜是？",["菩提上素海中寶","迎賓如意六前菜","清蒸甘露龍虎斑","幸福手作流沙包"],[1]],[7,"請問公司名稱是？",["富士通","富士達","富士山","富士康"],[1]],[8,"請問公司已成立幾年？",["5年","10年","20年","30年"],[3]],[9,"舉辦尾牙的目的是？",["尾牙就是要人多才熱鬧","有人想要愛的表白","凝聚向心力","不要問啦！來啦！喝酒啦！"],[2]],[10,"本次尾牙共有幾道菜？",["14","13","12","11"],[2]]]},{"cat":"時事題","rows":[[11,"2026年10月侵襲台灣的颱風「薔琵」到底有沒有登陸？",["有","沒有"],[1]],[12,"PHP 在科技新聞中通常指的是什麼？",["一種程式語言","一種航空燃料","一種食品添加物","一種醫療影像設備"],[0]],[13,"是誰成功挑戰徒手攀登101大樓？",["Alex Honnold","Alex Rodriguez","Tommy Caldwell","Chris Sharma"],[0]],[14,"請問畫面中這招叫什麼? (附GIF圖)",["剪刀步","閃身步","歐洲步","試探步"],[1]],[15,"2026年FIFA 世界盃足球賽由哪三個國家共同主辦？",["巴西、阿根廷、智利","美國、加拿大、墨西哥","西班牙、葡萄牙、法國","日本、韓國、中國"],[1]],[16,"2026年FIFA 世界盃足球賽冠軍是哪一隊？",["阿根廷","法國","西班牙","英格蘭"],[2]],[17,"2026年FIFA 世界盃足球賽決賽，是哪兩個國家？",["阿根廷v.s西班牙","阿根廷v.s葡萄牙","英格蘭v.s法國","西班牙v.s法國"],[0]],[18,"2026年台灣九合一地方選舉的投票日期是哪一天？",["10月23日","11月28日","12月4日","12月25日"],[1]],[19,"台灣《職業安全衛生法》的職場霸凌防治新制，於 2026 年哪一天正式施行？",["1月1日","4月1日","7月1日","12月31日"],[2]],[20,"台灣自 2026 年起，育嬰留職停薪制度新增了哪一項彈性？",["只能以年為單位申請","可在符合規定下以日為單位申請","所有育嬰留停都必須無薪","只有主管可以申請"],[1]],[21,"2026年5月嘉義藝術節，與哪一個高人氣IP合作掀起一股熱潮？",["Loopy","吉伊卡哇","皮克敏","黃色小鴨"],[2]],[22,"2026 年第 37 屆金曲獎，拿下「歌后」的是誰？",["彭佳慧","蔡依林","單依純","洪佩瑜"],[1]],[23,"飛天特斯拉話題爆紅後，台灣網友竟然關心什麼問題？",["要考飛行駕照嗎","飛高會不會耳鳴","手搖飲要放哪裡","ETC 怎麼扣款"],[2]],[24,"2026 年第61屆金鐘獎，拿下戲劇節目女主角的是誰？",["柯佳嬿","邵雨薇","楊貴媚","鍾欣凌"],[2]],[25,"2026 年第61屆金鐘獎，拿下戲劇節目男主角的是誰？",["周渝民","莊凱勛","陳澤耀","曾敬驊"],[1]]]},{"cat":"趣味題","rows":[[26,"最近有些人為了搶演唱會門票，特地去拜哪位神明？",["財神爺","月老","文昌帝君","土地公"],[1]],[27,"遊戲裡的「台幣戰士」是什麼意思？",["專門玩台灣製遊戲的人","遊戲內專門賺錢的職業","大量課金的玩家","只用新台幣交易的人"],[2]],[28,"Threads 爆紅的「比奇堡發財桌布」，網友聲稱換了之後有什麼好事？",["發票中獎","搶到演唱會門票","順利排便","以上皆有"],[3]],[29,"當有人說「我給你ㄅ級分」，是在表達什麼？",["不及格","普通","最高評價","很白目"],[2]],[30,"朋友留言「請去高麗菜那桌坐」，通常是在說什麼？",["你很有智慧","你便祕了，要多吃蔬菜","你被排擠了","你要負責煮火鍋"],[0]],[31,"請填空：「他很壞，＿＿＿」",["壞壞壞","嘟嘟嘟","咚咚咚","啦啦啦"],[1]],[32,"近期流行語「YBSG」最接近什麼意思？",["也不是說哥","要不要試試看","太扯了、太誇張了","有病是不是哥"],[2]],[33,"最近爆紅的台版 GTA《臺北狂飆》，能在遊戲裡做什麼很台灣的事情？",["追垃圾車","搶演唱會門票","夜市擺攤賣雞排","到學校補修學分"],[0]],[34,"網路流行的「初級大人」，最接近哪種狀態？",["剛滿 18 歲","還沒辦信用卡","在家族裡沒有決定權的大人","駕照考了三次"],[2]],[35,"朋友說「今天又多了一顆金色記憶球」，通常是什麼意思？",["買到黃金","有一段想珍藏的快樂回憶","忘記今天要考試","遊戲抽到金色角色"],[1]],[36,"最近爆紅的《80 億分之一》人生模擬器，是讓玩家體驗什麼？",["成為億萬富翁","隨機投胎到不同國家的人生","跟全球 80 億人比智商","抽選全球最幸運的人"],[1]],[37,"上班族一天中最期待的時間通常是什麼？",["早會時間","下班時間","加班時間","開會時間"],[1]],[38,"公司尾牙最常見的活動之一是什麼？",["變裝秀","抽獎","成果發表","期中考"],[1]],[39,"如果可以選一種超能力帶去上班，你最可能想要哪一種？",["瞬間完成工作","隨時瞬間移動","讓時間暫停","以上皆可能是熱門選擇"],[3]],[40,"如果你突然中了尾牙最大獎，最合理的第一步是什麼？",["立刻辭職","買冰島的機票","發文炫耀","確認中獎資格與領獎方式"],[3]],[41,"《海綿寶寶》中，派大星最常被設定成海綿寶寶的什麼人？",["老闆","鄰居兼好友","老師","計程車司機"],[1]],[42,"《魷魚遊戲》中，參賽者最初穿著什麼顏色的運動服？",["紅色","藍色","綠色","黑色"],[2]],[43,"請問下副麻將聽幾個洞？一一一二三四五六七八九九九發發發",["三個","五個","七個","九個"],[3]],[44,"唐伯虎點秋香中，含笑半步顛是用什麼做的？",["蜂蜜，川貝，桔梗，加上天山雪蓮配製","蜂蜜，人參，桔梗，加上天山雪蓮配製","枇杷，川貝，桔梗，加上天山雪蓮配製","枇杷，人參，桔梗，加上天山雪蓮配製"],[0]],[45,"唐伯虎點秋香中，唐伯虎剛進華夫人家中當僕人時的代碼是幾號？",["9453","89757","9817","9527"],[3]],[46,"《賭俠》中周星祖的法文名字是什麼？",["今晚打太極","今晚打電動","Sit down please","今晚打老虎"],[3]],[47,"撲克牌老K中，哪一個花色沒有鬍子？",["紅心","黑桃","方塊","梅花"],[0]],[48,"米老鼠有幾根手指？",["3根","4根","5根","6根"],[1]],[49,"Hello Kitty的身高是幾顆蘋果高？",["3","7","4","5"],[3]],[50,"哪個月有28天？",["1月","2月","12月","每個月都有"],[3]],[51,"什麼車沒有輪子？",["腳踏車","火車","風車","汽車"],[2]],[52,"小明參加賽跑追過第2名後，請問小明會變成第幾名？",["第一名","第二名","第三名","第四名"],[1]],[53,"瑪利歐的耀西是什麼動物？",["龍","蜥蜴","烏龜","矮袋鼠"],[2]],[54,"《甄嬛傳》中，華妃最具代表性的經典台詞是哪一句？",["臣妾做不到啊","賤人就是矯情","皇上，臣妾冤枉","你這個磨人的小妖精"],[1]],[55,"「山無稜，天地合，才敢與君絕」是那一部劇情金句？",["還珠格格","後宮甄嬛傳","如懿傳","延禧攻略"],[0]],[56,"哪個水果視力最差？",["草莓","蘋果","芒果","葡萄"],[2]],[57,"如果把一個成人的全部血管連接起來，其長度接近多少公里？",["10公里","10萬公里","1000公里","1000萬公里"],[1]],[58,"哪個選項答案不等於10？",["2*5","6*4-2*7","9*8-5*5*5+9*7","6*6-22"],[3]],[59,"圓周率小數點第4位？",["3","4","5","6"],[2]],[60,"1=5、2=15、3=215、4=315、5=？",["415","45","1","2115"],[2]]]},{"cat":"公司題","rows":[[61,"請問現任總經理/董事長是誰？",["郭台銘","張忠謀","王永慶","陳志強"],[3]],[62,"請問公司目前在哪裡沒有據點？",["台中","台南","台東","新竹"],[2]],[63,"請問公司的吉祥物是？",["熊大","旺財","阿龍","大津"],[2]],[64,"請問公司是哪一年成立的？",["1893","1989","1983","1999"],[3]],[65,"請問公司的統一編號是？",["12345678","12262611","12262266","12626211"],[1]],[66,"公司股票代碼是多少？",["2454","2230","2330","2232"],[2]],[67,"目前公司員工數大約為多少人？",["300","500","1000","1500"],[2]],[68,"公司企業使命不包含哪一個？",["誠信篤實","卓越創新","利他貢獻","利潤至上"],[3]],[69,"請問公司地址在哪條路上？",["忠明南路","忠孝路","忠明路","忠勇路"],[0]],[70,"請問公司有幾位女生的HR呢？",["5位","6位","7位","8位"],[0]],[71,"下圖哪一個是公司LOGO？",["圖片1","圖片2","圖片3","圖片4"],[1]],[72,"下列何者不在5S的規範裡面?",["整理","整頓","整潔","清掃"],[2]],[73,"下列哪一種行為最有助於減少辦公室溝通誤會？",["所有事情都不回覆","只用表情符號交代工作","重要事項確認內容與期限","把所有訊息都設為靜音"],[2]],[74,"請問台灣的三節獎金不包含哪個節日？",["清明節","中秋節","端午節","春節"],[0]]]},{"cat":"知識題","rows":[[75,"請問傳統尾牙要吃以下哪種食物？",["刈包","小籠包","叉燒包","奶黃包"],[0]],[76,"「尾牙」的傳統習俗，與早期商家祭拜哪位神明有關？",["媽祖","土地公","月老","文昌帝君"],[1]],[77,"傳統「尾牙」中的「牙」，主要與什麼習俗有關？",["牙齒保健","染黑齒習俗","商家祭拜土地公的作牙習俗","因為大家會「牙」起來"],[2]],[78,"台灣傳統習俗中的「頭牙」，通常是農曆哪一天？",["正月初一","二月初二","五月初五","八月十五"],[1]],[79,"人工智慧（AI）最適合用來協助哪一項工作？",["在所有情況下保證答案正確","協助整理資料、生成草稿與分析資訊","完全取代所有人的判斷","保證任何投資獲利"],[1]],[80,"台灣在全球半導體產業中，最具代表性的優勢之一是什麼？",["生產紙張","先進晶圓製造","生產汽車輪胎","開採鑽石"],[1]],[81,"為什麼飛機窗戶通常是圓角，而不是尖銳的正方形？",["比較美觀","可減少尖角造成的應力集中","比較容易清潔窗簾","為了讓飛機飛得比較快"],[1]],[82,"哪一種動物的指紋與人類指紋非常相似，甚至可能讓人難以單靠外觀區分？",["無尾熊","海龜","金魚","蝴蝶"],[0]],[83,"為什麼手機在低溫環境下，有時會突然掉電或自動關機？",["低溫會讓手機變重","低溫可能降低鋰電池的輸出能力","低溫會讓螢幕吸收電力","低溫會讓電池永久變成磁鐵"],[1]],[84,"一個圓的半徑變成原來的 2 倍，面積會變成原來的幾倍？",["2 倍","3 倍","4 倍","8 倍"],[2]],[85,"一個數列為 2、6、12、20、30，下一個數字是什麼？",["36","40","42","48"],[2]],[86,"光從太陽傳到地球，約需要多久？",["8 秒","8 分 20 秒","80 分鐘","24 小時"],[1]],[87,"人體的紅血球主要負責哪一項工作？",["製造膽汁","運送氧氣","消化脂肪","製造胰島素"],[1]],[88,"下列哪一種氣體在地球大氣中所占比例最高？",["氧氣","二氧化碳","氮氣","氫氣"],[2]],[89,"若一個細菌每分鐘數量增加為原來的 2 倍，從 1 個開始，5分鐘後有多少個？",["16 個","25 個","32 個","64 個"],[2]],[90,"如果一件商品先漲價 20%，再降價 20%，最後價格與原價相比如何？",["完全相同","高 4%","低 4%","低 2%"],[2]],[91,"下列何者為台灣保育類動物？",["櫻花鉤吻蝦","台灣雲豹","台灣鯛","梅花鹿"],[1]],[92,"北極熊皮膚的顏色是什麼？",["黑色","白色","褐色","杏色"],[0]],[93,"台幣100元上的建築物是？",["國父紀念館","行政院","中正紀念堂","中山樓"],[3]],[94,"想要快速解酒、改善宿醉症狀，哪項方法不適用？",["補充水分","睡眠充足","洗冷水澡","吃頓豐盛早餐"],[2]],[95,"三個人彼此各握手一次，總共握手幾次？",["2 次","3 次","6 次","9 次"],[1]],[96,"請問英文He is in the pink的意思是？",["他看起來很健康","他穿粉紅色衣服","他看起來戀愛了","他看起來像芭比"],[0]],[97,"下列哪一部電影的全球票房最高？",["阿凡達","復仇者聯盟：終局之戰","阿凡達：水之道","鐵達尼號"],[0]],[98,"受驚嚇的長頸鹿會有什麼動作？",["躲在樹叢","奔跑","埋頭","把頭伸高"],[3]],[99,"下列哪個是人體含水量最高的器官？",["大腦","眼球","心臟","皮膚"],[1]],[100,"人類通常有幾對染色體？",["12 對","23 對","32 對","46 對"],[1]],[101,"請問大腦分泌什麼激素會令人感覺到幸福與快樂？",["內啡肽","酪氨酸","多巴胺","甲状腺素"],[2]],[102,"哪種食物原料是台灣特有種，全世界只有台灣才有生長？",["仙草","愛玉","粉圓","芋頭"],[1]]]},{"cat":"特殊題型","rows":[[103,"【圖標答題】請從圖片一堆貓頭鷹中找到貓咪 (附圖檔)",[],[]],[104,"【排列順序】請排列以下員工的身高(從高到矮)",["員工A","員工B","員工C","員工D"],[]],[105,"【文字雲】留下新年祝福話",[],[]]]}]};
+/* ---------- 參考題庫匯入 ---------- */
+let bankKey=Object.keys(BANKS)[0],bankCat='全部';const bankSel=new Set();
+function bankRows(){const cats=BANKS[bankKey];return (bankCat==='全部'?cats:cats.filter(c=>c.cat===bankCat)).flatMap(c=>c.rows.map(r=>({r,cat:c.cat})))}
+const rowKey=r=>bankKey+'|'+r[0];
+function bankType(t){const m=t.match(/^【([^】]+)】/);return m?m[1]:''}
+function renderBank(){
+  $('#bankTabs').innerHTML=Object.keys(BANKS).map(k=>`<button type="button" data-bk="${k}" class="${k===bankKey?'on':''}">${k}</button>`).join('');
+  const cats=['全部',...BANKS[bankKey].map(c=>c.cat)];
+  $('#bankCats').innerHTML=cats.map(c=>`<button type="button" data-bc="${c}" class="${c===bankCat?'on':''}">${c}</button>`).join('');
+  $('#bankList').innerHTML=bankRows().map(({r})=>{
+    const [no,q,opts,ans]=r;const k=rowKey(r);const ty=bankType(q);
+    return `<label class="bq"><input type="checkbox" data-bkey="${esc(k)}" ${bankSel.has(k)?'checked':''}><div><div class="bt">${ty?`<span class="btype">${esc(ty)}</span>`:''}${esc(q.replace(/^【[^】]+】/,''))}</div>
+      <div class="bo">${opts.map((o,i)=>`<span class="${ans.includes(i)?'ok':''}">${ans.includes(i)?'✓ ':''}${esc(o)}</span>`).join('')}</div></div></label>`;
+  }).join('');
+  $('#bankCount').textContent=`已選 ${bankSel.size} 題`;$('#bankImport').disabled=!bankSel.size;
+}
+function bankToQ(r){
+  let [no,q,opts,ans]=r;let text=q,note='',type='quiz',time;
+  const urls=text.match(/https?:\/\/\S+/g);if(urls){text=text.replace(/https?:\/\/\S+/g,'').trim();note='影片連結：'+urls.join(' ')}
+  const ty=bankType(text);text=text.replace(/^【[^】]+】\s*/,'');
+  let options=[...opts],answers=ans.map(i=>i+1),slider;
+  if(/滑桿/.test(ty)){type='slider';const rg=opts.join(' ').match(/(\d+)\s*[-~～]\s*(\d+)/);const a=opts.find(o=>/^\d+(\.\d+)?$/.test(o.trim()));slider={min:rg?rg[1]:'0',max:rg?rg[2]:'100',ans:a||''};options=['','','',''];answers=[]}
+  else if(/排列|排序/.test(ty)){type='jumble';options=opts.slice(0,4);answers=[]}
+  else if(/文字雲/.test(ty)){type='wordcloud';options=['','','',''];answers=[]}
+  else if(/圖標/.test(ty)){type='pin';options=['','','',''];answers=[]}
+  else if(/留言|開放/.test(ty)){type='open';const t=opts.join(' ').match(/(\d+)\s*秒/);if(t)time=+t[1];options=['','','',''];answers=[];if(!note)note=ty}
+  else if(/語音/.test(q)&&!note) note='語音題';
+  while(options.length<(type==='jumble'?3:4)) options.push('');
+  const x={text,options,answers,type,note,points:'standard'};if(slider)x.slider=slider;if(time&&TIMES.includes(time))x.time=time;
+  return newQ(x);
+}
+function openBank(e){if(e)e.preventDefault();renderBank();$('#bankbg').classList.add('show')}
+$('#bankOpen').onclick=openBank;$('#bankOpen2').onclick=openBank;
+$('#bankClose').onclick=()=>$('#bankbg').classList.remove('show');
+$('#bankbg').onclick=e=>{if(e.target.id==='bankbg')$('#bankbg').classList.remove('show')};
+$('#bankTabs').onclick=e=>{const b=e.target.closest('[data-bk]');if(!b)return;bankKey=b.dataset.bk;bankCat='全部';renderBank()};
+$('#bankCats').onclick=e=>{const b=e.target.closest('[data-bc]');if(!b)return;bankCat=b.dataset.bc;renderBank()};
+$('#bankList').onchange=e=>{const c=e.target.closest('[data-bkey]');if(!c)return;c.checked?bankSel.add(c.dataset.bkey):bankSel.delete(c.dataset.bkey);$('#bankCount').textContent=`已選 ${bankSel.size} 題`;$('#bankImport').disabled=!bankSel.size};
+$('#bankAll').onclick=()=>{const rows=bankRows();const all=rows.every(({r})=>bankSel.has(rowKey(r)));rows.forEach(({r})=>all?bankSel.delete(rowKey(r)):bankSel.add(rowKey(r)));renderBank()};
+$('#bankImport').onclick=()=>{
+  const picked=[];Object.entries(BANKS).forEach(([bk,cats])=>cats.forEach(c=>c.rows.forEach(r=>{if(bankSel.has(bk+'|'+r[0]))picked.push(r)})));
+  if(!picked.length) return;
+  const empty=S.qs.length===1&&!S.qs[0].text.trim()&&!S.qs[0].options.some(Boolean);
+  const qs=picked.map(bankToQ);
+  if(empty) S.qs=[];
+  const first=!S.qs.length;const startIdx=S.qs.length;
+  S.qs.push(...qs);if(first&&!S.qs[0].note) warmup(S.qs[0]);
+  S.cur=startIdx;S.editing=true;bankSel.clear();
+  $('#bankbg').classList.remove('show');render();save();
+  setTimeout(()=>{$('#editor').scrollIntoView({behavior:'smooth',block:'start'})},50);
+  toast(`已從題庫匯入 ${qs.length} 題`);
+};
+
+/* ---------- 公版主題：貼上名稱自動找圖 ---------- */
+const THEMES_URL='https://kahoot-tools.github.io/themes/';
+let themesP=null;
+function loadThemes(){
+  if(themesP) return themesP;
+  themesP=fetch(THEMES_URL).then(r=>{if(!r.ok)throw new Error(r.status);return r.text()}).then(t=>{
+    const i=t.indexOf('const D=');if(i<0) throw new Error('找不到主題資料');
+    const s=t.indexOf('[',i);const re=/\}\](?=\s*[;,\n])/g;re.lastIndex=s;const m=re.exec(t);if(!m) throw new Error('主題資料格式不符');return JSON.parse(t.slice(s,m.index+2));
+  }).catch(err=>{themesP=null;throw err});
+  return themesP;
+}
+const tnorm=s=>normalize(String(s)).replace(/\s+/g,'').toLowerCase();
+let themeT;
+$('#themeQ').addEventListener('input',e=>{clearTimeout(themeT);themeT=setTimeout(()=>searchTheme(e.target.value),200)});
+async function searchTheme(q){
+  const box=$('#themeRes');const k=tnorm(q);
+  if(!k){box.innerHTML='';return}
+  box.innerHTML='<div class="msg">載入主題清單中…</div>';
+  let D;
+  try{D=await loadThemes()}catch(err){box.innerHTML='<div class="msg">目前無法讀取主題清單（需在網站版使用），請改用「上傳公版截圖」。</div>';return}
+  const exact=D.filter(t=>tnorm(t.n)===k);
+  const list=exact.length?exact:D.filter(t=>tnorm(t.n).includes(k));
+  if(exact.length===1){pickTheme(exact[0]);return}
+  box.innerHTML=list.length?list.slice(0,15).map((t,i)=>`<button type="button" class="tthumb" data-tn="${esc(t.n)}"><img src="${t.s}" alt=""><span>${esc(t.n)}</span></button>`).join(''):'<div class="msg">找不到這個主題名稱，請確認是否完整複製，或改用「上傳公版截圖」。</div>';
+}
+$('#themeRes').addEventListener('click',async e=>{const b=e.target.closest('[data-tn]');if(!b)return;const D=await loadThemes();const t=D.find(x=>x.n===b.dataset.tn);if(t)pickTheme(t)});
+async function pickTheme(t){
+  const m=t.s.match(/^data:([^;]+);base64,(.*)$/);if(!m) return;
+  const blob=b64ToBlob(m[2],m[1]);const ext=(m[1].split('/')[1]||'jpg').replace('jpeg','jpg');
+  if(S.bg)URL.revokeObjectURL(S.bg.img.url);
+  S.bg={kind:'theme',name:t.n,img:makeImg(blob,`${t.n}.${ext}`)};
+  $('#themeQ').value='';$('#themeRes').innerHTML='';
+  $('#bgbg').classList.remove('show');renderGMedia();save();toast(`已選用公版主題「${t.n}」`);
+}
 
 /* ---------- 參考標題拉把 ---------- */
 (function(){
