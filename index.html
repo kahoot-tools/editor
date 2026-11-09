@@ -86,7 +86,7 @@ input[type=checkbox]:checked{background:var(--accent) url("data:image/svg+xml,%3
 .blk-sub{color:var(--muted);margin-top:4px}
 
 /* mode buttons */
-.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:16px}
+.modes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:16px}
 .mode{display:flex;align-items:center;gap:14px;text-align:left;background:#fff;border:2px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:0 6px 0 var(--line);transition:transform .12s,box-shadow .12s,background .15s,color .15s,border-color .15s}
 .mode:hover{transform:translateY(-3px);box-shadow:0 9px 0 var(--line);border-color:#d3c4e6}
 .mode:active{transform:translateY(4px);box-shadow:0 2px 0 var(--line)}
@@ -309,7 +309,7 @@ footer p{color:var(--muted);font-size:14px}
 
 @media (max-width:860px){
   .modes{grid-template-columns:minmax(0,1fr)}
-  .mode small{display:none}
+  .mode small{display:block;font-size:12.5px;margin-top:1px}
   .mode{padding:12px 16px}
   .guide{grid-template-columns:minmax(0,1fr)}
   .frame{padding:16px;border-radius:20px}
@@ -649,6 +649,8 @@ footer p{color:var(--muted);font-size:14px}
 .bank-cats{display:flex;gap:6px;flex-wrap:wrap}
 .bank-cats button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:4px 12px;font-size:13.5px;font-weight:700;color:var(--muted)}
 .bank-cats button.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.bankpanel{display:flex;flex-direction:column;gap:10px}
+.bankpanel .bank-list{max-height:56vh}
 .bank-list{flex:1;min-height:200px;overflow:auto;border:1.5px solid var(--line);border-radius:12px}
 .bq{display:flex;gap:12px;align-items:flex-start;padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer}
 .bq:last-child{border-bottom:0}
@@ -801,6 +803,20 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
   .studio.side-open .sidecol::before{content:"";position:fixed;inset:0;background:rgba(31,26,44,.32);z-index:-1}
   body.sheet{overflow:hidden}
 }
+/* v21 */
+.tfopt{flex:1;min-width:0;font-size:16px;padding:4px;align-self:center;color:inherit}
+.slot-gap{visibility:hidden;pointer-events:none}
+.gs-toggle{border-style:solid!important;border-color:var(--line)!important}
+.gcardm{border-style:solid!important;border-color:var(--line)!important}
+.ed-head>div{flex:1;min-width:0}
+.ed-head .blk-h{flex-wrap:wrap;row-gap:8px}
+.ed-head .blk-h h2{white-space:nowrap}
+.clearbtn{margin-left:auto;white-space:nowrap}
+.blk-h .stat{margin:0 0 0 4px;font-size:14px;white-space:nowrap;align-self:center}
+.ph-q{background:rgba(255,255,255,.94)!important;color:#1f1d1d}
+.ph-no,.ph-type{background:rgba(255,255,255,.82)!important}
+.ph-hint{background:rgba(255,255,255,.88)!important}
+@media (min-width:861px){.sidecol{margin-top:76px}}
 /* 玩家手機 */
 .pv-phone{position:relative;aspect-ratio:10/16;width:calc(var(--H)*.625);container-type:inline-size;overflow:hidden;border-radius:18px;border:7px solid #1b1919;background:#ece4da center/cover no-repeat;display:flex;flex-direction:column;color:#333;font-family:"Montserrat","Noto Sans TC",sans-serif}
 .pv-phone>*{position:relative;z-index:1}
@@ -900,6 +916,8 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 .opact button svg{width:17px;height:17px}
 .qarea>*{position:relative}
 .qarea.hasbg{background:center/cover no-repeat;border-radius:14px;padding:12px;margin:12px -4px 0}
+.qmedia{position:relative}
+.qmedia .bgbar{position:absolute;left:8px;right:8px;bottom:8px;margin:0}
 .bgbar{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap;margin-top:10px}
 .bgbar span{margin-right:auto;background:rgba(255,255,255,.92);border-radius:6px;padding:5px 10px;font-size:13px;color:#333}
 .bgbar button{border:0;background:#fff;border-radius:6px;height:34px;padding:0 12px;font-size:14px;border:1px solid #d9d4e2;display:inline-flex;align-items:center;gap:5px;cursor:pointer;color:#333}
@@ -952,6 +970,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     <div class="privacy"><span class="pv-ic">🔒</span><div><b>安心使用：檔案與題目不會上傳到網路</b><br>上傳的檔案、圖片和題目都只在你的瀏覽器中處理，網站看不到也不會保存；下載後再自行傳給小幫手即可。</div></div>
     <div class="modes">
       <button class="mode" data-mode="upload"><span class="mi" style="background:var(--k0)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg></span><span><b>上傳檔案</b><small>Word、PPT、Excel、PDF、圖片、TXT</small></span></button>
+      <button class="mode" data-mode="bank"><span class="mi" style="background:#864cbf"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg></span><span><b>挑選題庫</b><small>從婚禮、尾牙題庫勾選現成題目</small></span></button>
       <button class="mode" data-mode="paste"><span class="mi" style="background:var(--k1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg></span><span><b>貼上文字</b><small>複製題目貼上，或載入範本</small></span></button>
       <button class="mode" data-mode="edit"><span class="mi" style="background:var(--k3)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></span><span><b>直接編輯</b><small>不用檔案，從第 1 題開始輸入</small></span></button>
     </div>
@@ -966,6 +985,14 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
         <input type="file" id="fileInput" multiple hidden>
       </div>
       <div class="filelist" id="filelist"></div>
+    </div>
+
+    <div class="panel bankpanel" id="pBank" hidden>
+      <div class="pastehead"><b>📚 挑選題庫</b></div>
+      <div class="bank-top"><div class="seg" id="bankTabs"></div><span class="bank-note">紫色為正確答案，勾選後按「匯入」進入題目編輯</span></div>
+  <div class="bank-cats" id="bankCats"></div>
+  <div class="bank-list" id="bankList"></div>
+  <div class="bank-foot"><button type="button" class="mini-btn" id="bankAll">全選本分類</button><span class="grow"></span><span id="bankCount">已選 0 題</span><button type="button" class="btn btn-purple" id="bankImport" disabled>匯入</button></div>
     </div>
 
     <div class="panel" id="pPaste" hidden>
@@ -993,8 +1020,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     <div class="frame">
       <div class="ed-head">
         <div>
-          <div class="blk-h"><span class="bi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></span><button type="button" class="mini-btn backbtn" id="backInput" title="回到上傳／貼上文字，繼續辨識題目">← 返回繼續識別</button><h2>題目編輯</h2></div>
-          <div class="statrow"><div class="stat" id="stat"></div><button class="mini-btn" id="bankOpen2">📚 從題庫匯入</button><button class="mini-btn danger" id="clearAll">清空全部</button></div>
+          <div class="blk-h"><span class="bi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></span><button type="button" class="mini-btn backbtn" id="backInput" title="回到上傳／貼上文字，繼續辨識題目">← 返回繼續識別</button><h2>題目編輯</h2><div class="stat" id="stat"></div><button class="mini-btn danger clearbtn" id="clearAll">清空全部</button></div>
         </div>
       </div>
 
@@ -1098,13 +1124,6 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
   </div>
   <input type="file" hidden id="bgFile" accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp">
   <div id="bgErr"></div>
-</div></div>
-<div class="fbbg" id="bankbg"><div class="bank-panel" role="dialog" aria-modal="true" aria-label="參考題庫">
-  <div class="bg-head"><b>📚 參考題庫</b><button type="button" class="fb-x" id="bankClose" aria-label="關閉">✕</button></div>
-  <div class="bank-top"><div class="seg" id="bankTabs"></div><span class="bank-note">紫色為正確答案，勾選後按「匯入」加到題目最後面</span></div>
-  <div class="bank-cats" id="bankCats"></div>
-  <div class="bank-list" id="bankList"></div>
-  <div class="bank-foot"><button type="button" class="mini-btn" id="bankAll">全選本分類</button><span class="grow"></span><span id="bankCount">已選 0 題</span><button type="button" class="btn btn-purple" id="bankImport" disabled>匯入</button></div>
 </div></div>
 <div class="mbg" id="mbg"><div class="modal" role="dialog" aria-modal="true"><h3 id="mTitle"></h3><div class="mbody" id="mBody"></div><div class="mbtns" id="mBtns"></div></div></div>
 <div class="toast" id="toast"></div>
@@ -1753,6 +1772,7 @@ function newQ(x={}){
   if(TYPES[q.type]) clampTime(q);
   if(!TYPES[q.type]) q.type='quiz';
   if(!Array.isArray(q.oimgs)) q.oimgs=[];
+  if(q.type==='tf'){q.options=['是','否','',''];q.oimgs=[]}
   if(!q.slider) q.slider={min:'0',max:'50',ans:''};
   while(q.options.length<4) q.options.push('');
   delete q.multi;
@@ -1816,7 +1836,8 @@ function composeNote(q){
 /* ================= 畫面 ================= */
 function setMode(m){
   document.querySelectorAll('.mode').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
-  $('#pUpload').hidden=m!=='upload';$('#pPaste').hidden=m!=='paste';
+  $('#pUpload').hidden=m!=='upload';$('#pPaste').hidden=m!=='paste';$('#pBank').hidden=m!=='bank';
+  if(m==='bank') renderBank();
   if(m==='edit'){
     S.editing=true;
     if(!S.qs.length){S.qs.push(newQ());warmup(S.qs[0]);S.cur=0;save()}
@@ -1839,6 +1860,11 @@ function watchRail(){
 window.addEventListener('resize',()=>syncRailH());
 function setHdr(){const t=$('#top');if(t)document.documentElement.style.setProperty('--hdr',t.offsetHeight+'px')}
 window.addEventListener('resize',setHdr);
+function showQuestionTop(){
+  const cv=document.querySelector('#stage .canvas');if(!cv) return;
+  if(document.activeElement&&document.activeElement.blur) document.activeElement.blur();
+  const y=cv.getBoundingClientRect().top+scrollY-($('#top').offsetHeight+8);window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+}
 function focusQuestion(){
   const st=$('#stage');if(!st) return;
   const wide=!matchMedia('(max-width:860px)').matches;
@@ -1863,13 +1889,13 @@ function renderDone(start,n){
    <div class="done-main"><h2>識別完成</h2><p>共辨識出 ${n} 題${S.qs.length>n?`（加上原本的，目前共 ${S.qs.length} 題）`:''}，接下來可以逐題編輯</p>
    <div class="done-sum"><div><b>${n}</b>題目</div><div><b>${imgs}</b>張圖片</div><div class="${bad.length?'w':''}"><b>${bad.length}</b>待確認</div></div>
    ${bad.length?`<ul class="done-list">${bad.slice(0,6).map(([no,is])=>`<li>⚠ 第 ${no} 題：${esc(is.join('、'))}</li>`).join('')}${bad.length>6?`<li>…還有 ${bad.length-6} 題，進入編輯後可在左側看到紅點</li>`:''}</ul>`:'<p class="done-ok">✓ 每一題都有題目、選項與答案</p>'}
-   <div class="done-btns"><button type="button" class="btn btn-purple" id="goEdit">進入題目編輯 →</button><button type="button" class="btn btn-ghost" id="goBack">← 返回繼續識別</button></div></div>`;
+   <div class="done-btns"><button type="button" class="btn btn-ghost" id="goBack">← 返回繼續識別</button><button type="button" class="btn btn-purple" id="goEdit">進入題目編輯 →</button></div></div>`;
   $('#goEdit').onclick=()=>{setView('edit');setTimeout(()=>focusQuestion(),50)};
   $('#goBack').onclick=backToInput;
 }
 function backToInput(){
   setView('input');
-  if(!$('#pUpload').hidden||!$('#pPaste').hidden) return;
+  if(!$('#pUpload').hidden||!$('#pPaste').hidden||!$('#pBank').hidden) return;
   setMode('paste');
 }
 function render(){
@@ -1932,11 +1958,11 @@ function tilesHTML(q){
     const ci=colorIdx(q,k);const im=q.oimgs[k];const filled=optFilled(q,k);const right=t!=='poll'&&q.answers.includes(k+1);
     const ph=t==='tf'?(k?'否':'是'):`新增答案 ${k+1}${k>=2?'（選填）':''}`;
     const ov=im?0:overBy(q.options[k],75);
-    const body=im?`<div class="optpic"><img src="${vis(im).url}" alt="選項 ${k+1} 圖片"></div>`:`${S.optPrefix!=='none'?`<span class="opre">${optPre(k).trim()}</span>`:''}<textarea data-f="opt" data-k="${k}" rows="1" placeholder="${ph}">${esc(q.options[k]||'')}</textarea>`;
-    const imgBtn=im?`<span class="opact"><button data-act="crop" data-slot="o${k}" title="編輯圖片裁剪內容" aria-label="裁剪選項 ${k+1} 圖片">${CROP_IC}</button><button data-act="rmimg" data-slot="o${k}" title="刪除圖片（保留選項）" aria-label="刪除選項 ${k+1} 圖片">${TRASH_IC}</button></span>`:`<button class="oimgbtn" data-act="pick" data-slot="o${k}" title="加入以圖片作答選項" aria-label="選項 ${k+1} 改用圖片">${IMG_ICON}</button>`;
+    const body=t==='tf'?`<span class="tfopt">${k?'否':'是'}</span>`:im?`<div class="optpic"><img src="${vis(im).url}" alt="選項 ${k+1} 圖片"></div>`:`${S.optPrefix!=='none'?`<span class="opre">${optPre(k).trim()}</span>`:''}<textarea data-f="opt" data-k="${k}" rows="1" placeholder="${ph}">${esc(q.options[k]||'')}</textarea>`;
+    const imgBtn=t==='tf'?'':im?`<span class="opact"><button data-act="crop" data-slot="o${k}" title="編輯圖片裁剪內容" aria-label="裁剪選項 ${k+1} 圖片">${CROP_IC}</button><button data-act="rmimg" data-slot="o${k}" title="刪除圖片（保留選項）" aria-label="刪除選項 ${k+1} 圖片">${TRASH_IC}</button></span>`:`<button class="oimgbtn" data-act="pick" data-slot="o${k}" title="加入以圖片作答選項" aria-label="選項 ${k+1} 改用圖片">${IMG_ICON}</button>`;
     const rm=(t!=='tf'&&n>2)?`<button class="rm" data-act="delopt" data-k="${k}" title="刪除此選項" aria-label="刪除選項">✕</button>`:'';
     const chk=t!=='poll'?`<button class="chk ${right?'on':''}" data-act="ans" data-k="${k}" aria-label="把選項 ${k+1} 設為正確答案" title="勾選為正確答案（勾 2 個以上自動變複選題）">${CHECK}</button>`:'';
-    return `<div class="ans c${ci} ${filled?'filled':''} ${right?'right':''} ${im?'hasimg':''}" data-slot="o${k}" data-k="${k}"><span class="ocnt ${ov?'over':''}">${ov?'-'+ov:(q.options[k]||'').length+'/75'}</span><span class="shape s${ci}"><svg><use href="#sh${ci}"/></svg></span>${body}${imgBtn}${rm}${chk}<input type="file" hidden accept="${FILE_ACCEPT}" data-file="o${k}"></div>`;
+    return `<div class="ans c${ci} ${filled?'filled':''} ${right?'right':''} ${im?'hasimg':''}" data-slot="o${k}" data-k="${k}">${t==='tf'?'':`<span class="ocnt ${ov?'over':''}">${ov?'-'+ov:(q.options[k]||'').length+'/75'}</span>`}<span class="shape s${ci}"><svg><use href="#sh${ci}"/></svg></span>${body}${imgBtn}${rm}${chk}<input type="file" hidden accept="${FILE_ACCEPT}" data-file="o${k}"></div>`;
   }).join('');
   const anyImg=q.oimgs.slice(0,n).some(Boolean);
   return `<div class="answers">${tiles}</div>
@@ -1993,8 +2019,7 @@ function renderStage(){
       <div class="cv-top"><span class="qbadge">第 ${S.cur+1} 題／共 ${S.qs.length} 題</span><span class="cvr"><button type="button" class="pvbtn" data-act="preview" title="預覽主持視角與玩家手機畫面">${EYE_IC}<span class="lbl">預覽</span></button><button type="button" class="setbtn" data-side="open" title="題目設定" aria-label="題目設定">${SLIDERS_IC}<span class="lbl">題目設定</span></button><button type="button" class="timepill" id="pill" data-side="time" title="點擊修改答題秒數"><span class="tic">⏱ </span>${timeLabel(q.time)}</button></span></div>
       <div class="qarea ${q.qbg||S.bg?'hasbg':''}" ${q.qbg||S.bg?`style="background-image:url(&quot;${q.qbg?vis(q.qbg).url:S.bg.img.url}&quot;)"`:''}>
       <div class="qbox ${qNoLabel(S.cur)?'haspre':''}">${qNoLabel(S.cur)?`<span class="qpre">${qNoLabel(S.cur).trim()}</span>`:''}<textarea data-f="text" rows="1" placeholder="${t==='slide'?'輸入投影片標題':'開始輸入你的題目'}">${esc(q.text)}</textarea><span class="cnt"></span></div>
-      ${q.qbg?'':`<div class="qmedia">${slotHTML(q,'qimg',t==='pin'?'題目圖（必填）':'')}</div>`}
-      ${q.qbg?`<div class="bgbar"><span>🖼 此題已套用專屬背景（每題只能放一張圖）</span><button data-act="bgmedia" title="把背景改回題目圖片">設為媒體內容</button><button data-act="crop" data-slot="qbg" title="編輯背景裁剪內容">${CROP_IC}</button><button data-act="rmbg" title="移除此題背景">${TRASH_IC}</button></div>`:''}
+      <div class="qmedia">${q.qbg?`<div class="slot filled slot-gap" aria-hidden="true"><img src="${vis(q.qbg).url}" alt=""></div><div class="bgbar"><span>🖼 已設為本題背景</span><button data-act="bgmedia" title="把背景改回題目圖片">設為媒體內容</button><button data-act="crop" data-slot="qbg" title="編輯背景裁剪內容">${CROP_IC}</button><button data-act="rmbg" title="移除此題背景">${TRASH_IC}</button></div>`:slotHTML(q,'qimg',t==='pin'?'題目圖（必填）':'')}</div>
       ${body}
       </div>
       <div class="noterow"><span class="lb">備註</span><input data-f="note" value="${esc(q.note)}" placeholder="答案解釋文字、影片連結、口頭說明等"><select data-act="preset"><option value="">＋常用</option>${NOTE_PRESETS.map(([l,v])=>`<option value="${v}">${l}</option>`).join('')}</select></div>
@@ -2021,6 +2046,7 @@ function fitSize(ta){
 }
 function autosize(ta){if(!ta)return;fitSize(ta);ta.style.height='auto';ta.style.height=ta.scrollHeight+'px'}
 function autosizeAll(){document.querySelectorAll('#stage textarea[data-f=text],#stage textarea[data-f=opt]').forEach(autosize)}
+let stageW=0;new ResizeObserver(es=>{const w=Math.round(es[0].contentRect.width);if(w!==stageW){stageW=w;requestAnimationFrame(autosizeAll)}}).observe(document.getElementById('stage'));
 window.addEventListener('resize',()=>autosizeAll());
 function refreshMeta(){
   const q=cur();if(!q) return;
@@ -2406,7 +2432,7 @@ window.addEventListener('scroll',()=>{
 $('#toTop').onclick=()=>{const ed=$('#editor');window.scrollTo({top:ed.getBoundingClientRect().top+scrollY-76,behavior:'smooth'})};
 document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>{
   const m=b.dataset.mode;
-  if(m!=='edit'&&b.classList.contains('on')){b.classList.remove('on');$('#pUpload').hidden=true;$('#pPaste').hidden=true;return}
+  if(m!=='edit'&&b.classList.contains('on')){b.classList.remove('on');$('#pUpload').hidden=true;$('#pPaste').hidden=true;$('#pBank').hidden=true;return}
   setMode(m);
   if(m==='paste') setTimeout(()=>$('#paste').focus(),30);
 });
@@ -2480,7 +2506,7 @@ const SLIDERS_IC='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" st
 let openMenu=null;
 function setType(q,nt){
   q.type=nt;
-  if(nt==='tf'){if(!q.options[0].trim()&&!q.options[1].trim()){q.options[0]='是';q.options[1]='否'}q.answers=q.answers.filter(a=>a<=2).slice(0,1)}
+  if(nt==='tf'){q.options=['是','否','',''];q.oimgs.forEach(im=>im&&URL.revokeObjectURL(im.url));q.oimgs=[];q.answers=q.answers.filter(a=>a<=2).slice(0,1)}
   if(nt==='jumble'){if(q.options.length>4)q.options=q.options.slice(0,4);while(q.options.length<3)q.options.push('')}
   if(TYPES[nt].noPoints&&q.points==='standard') q.points='none';
   if(clampTime(q)) toast(`${TYPES[nt].label}最少 ${timeLabel(minTime(nt))}，已自動調整`);
@@ -2612,10 +2638,9 @@ function bankToQ(r){
   const x={text,options,answers,type,note,points:'standard'};if(slider)x.slider=slider;if(time&&TIMES.includes(time))x.time=time;
   return newQ(x);
 }
-function openBank(e){if(e)e.preventDefault();renderBank();$('#bankbg').classList.add('show')}
-$('#bankOpen').onclick=openBank;$('#bankOpen2').onclick=openBank;
-$('#bankClose').onclick=()=>$('#bankbg').classList.remove('show');
-$('#bankbg').onclick=e=>{if(e.target.id==='bankbg')$('#bankbg').classList.remove('show')};
+function openBank(e){if(e)e.preventDefault();$('#top').classList.remove('navopen');if(S.view!=='input')setView('input',true);setMode('bank');
+  const y=$('#pBank').getBoundingClientRect().top+scrollY-($('#top').offsetHeight+10);window.scrollTo({top:Math.max(0,y),behavior:'smooth'})}
+$('#bankOpen').onclick=openBank;
 $('#bankTabs').onclick=e=>{const b=e.target.closest('[data-bk]');if(!b)return;bankKey=b.dataset.bk;bankCat='全部';renderBank()};
 $('#bankCats').onclick=e=>{const b=e.target.closest('[data-bc]');if(!b)return;bankCat=b.dataset.bc;renderBank()};
 $('#bankList').onchange=e=>{const c=e.target.closest('[data-bkey]');if(!c)return;c.checked?bankSel.add(c.dataset.bkey):bankSel.delete(c.dataset.bkey);$('#bankCount').textContent=`已選 ${bankSel.size} 題`;$('#bankImport').disabled=!bankSel.size};
@@ -2629,7 +2654,7 @@ $('#bankImport').onclick=()=>{
   const first=!S.qs.length;const startIdx=S.qs.length;
   S.qs.push(...qs);if(first&&!S.qs[0].note) warmup(S.qs[0]);
   S.cur=startIdx;S.editing=true;bankSel.clear();
-  $('#bankbg').classList.remove('show');save();setView('edit');
+  save();setView('edit');
   toast(`已從題庫匯入 ${qs.length} 題`);
 };
 
@@ -3001,7 +3026,7 @@ makeSortable(thumbs,{itemSel:'.titem',axis:()=>isRow()?'x':'y',longPress:true,ig
     if(e&&e.shiftKey){const a=Math.min(selAnchor,i),b=Math.max(selAnchor,i);selIds.clear();for(let k=a;k<=b;k++)selIds.add(S.qs[k].id)}
     else if(e&&(e.ctrlKey||e.metaKey)){if(selIds.has(id)&&selIds.size>1){selIds.delete(id)}else selIds.add(id);selAnchor=i;if(!selIds.has(id)){const f=S.qs.findIndex(q=>selIds.has(q.id));S.cur=f;render();save();return}}
     else{selIds.clear();selIds.add(id);selAnchor=i}
-    S.cur=i;render();save();if(isRow()&&!(e&&(e.shiftKey||e.ctrlKey||e.metaKey)))focusQuestion();
+    S.cur=i;render();save();if(isRow()&&!(e&&(e.shiftKey||e.ctrlKey||e.metaKey)))showQuestionTop();
   },
   onStart:it=>{
     const id=S.qs[+it.dataset.i].id;
