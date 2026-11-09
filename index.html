@@ -1,0 +1,2307 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kahoot 題目製作編輯器</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Montserrat:wght@800;900&display=swap">
+<style>
+/* 版面：頂部列 → 立體紫色橫幅 → 三個模式按鈕（點選後展開）→ 白色大框編輯區（標題／匯出設定／左側縮圖＋置中畫布）→ 匯入說明 → 頁尾 LINE */
+:root{
+  --bg:#f5f3f8; --surface:#ffffff; --sunken:#efecf4; --ink:#1f1a2c; --muted:#6a6380; --line:#e2dded;
+  --accent:#5a2b85; --accent-2:#7a45ad; --accent-dark:#3f1d5f; --accent-soft:#efe6f7; --accent-ink:#fff;
+  --good:#1d8549; --bad:#c3313d; --warn:#a86a00;
+  --k0:#e21b3c; --k1:#1368ce; --k2:#d89e00; --k3:#26890c; --k4:#0aa3a3; --k5:#864cbf;
+  --font:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --lift:0 2px 0 var(--line),0 14px 32px rgba(90,43,133,.09);
+  --r:16px; color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:84px;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15.5px;line-height:1.65;-webkit-font-smoothing:antialiased}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(900px 500px at 100% -10%,#e9def6 0,transparent 60%),radial-gradient(700px 500px at -10% 40%,#efe7f8 0,transparent 60%)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent-2);outline-offset:2px;border-radius:8px}
+h1,h2,h3{font-weight:900;line-height:1.3;margin:0;letter-spacing:.01em;text-wrap:balance}
+p{margin:0}
+[hidden]{display:none!important}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:max(16px,env(safe-area-inset-left,0px))}
+input[type=checkbox]{appearance:none;-webkit-appearance:none;width:24px;height:24px;border:2.5px solid var(--accent);border-radius:7px;background:#fff;display:inline-grid;place-items:center;margin:0;cursor:pointer;flex:none;transition:.12s}
+input[type=checkbox]:checked{background:var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/18px no-repeat}
+
+/* buttons (立體) */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:11px 18px;font-weight:700;font-size:15px;line-height:1;text-decoration:none;cursor:pointer;white-space:nowrap;transition:transform .08s,box-shadow .08s,background .15s}
+.btn:active{transform:translateY(3px)}
+.btn-purple{background:var(--accent);color:#fff;box-shadow:0 4px 0 var(--accent-dark)}
+.btn-purple:active{box-shadow:0 1px 0 var(--accent-dark)}
+.btn-green{background:var(--k3);color:#fff;box-shadow:0 4px 0 #1a5e08}
+.btn-green:active{box-shadow:0 1px 0 #1a5e08}
+.btn-blue{background:var(--k1);color:#fff;box-shadow:0 4px 0 #0c4a94}
+.btn-blue:active{box-shadow:0 1px 0 #0c4a94}
+.btn-line{background:#06C755;color:#fff;border-radius:999px;box-shadow:0 3px 0 #04913e}
+.btn-ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line);box-shadow:0 3px 0 var(--line)}
+.btn-ghost:hover{border-color:var(--accent-2)}
+.btn-ghost:active{box-shadow:0 0 0 var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;filter:grayscale(.4)}
+
+/* top */
+.top{position:sticky;top:0;z-index:30;background:rgba(245,243,248,.88);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);transition:box-shadow .25s}
+.top.scrolled{box-shadow:0 6px 20px rgba(90,43,133,.10)}
+.top .row{display:flex;align-items:center;gap:12px;padding-block:12px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:900;font-size:19px;color:var(--ink);text-decoration:none;white-space:nowrap}
+.mini{display:grid;grid-template-columns:repeat(2,8px);gap:2px}
+.mini i{width:8px;height:8px;border-radius:2px}
+.kmini{font-family:Montserrat,sans-serif;font-weight:900;font-size:15px;color:var(--accent);border:2.5px solid var(--accent);border-radius:8px;padding:0 6px;line-height:1.35;letter-spacing:-.02em;background:#fff}
+.grow{flex:1}
+.savechip{font-size:13px;color:var(--muted);white-space:nowrap}
+.savechip.ok{color:var(--good)}
+
+/* banner */
+.banner{position:relative;margin-top:8px;border-radius:26px;padding:40px 40px 36px;color:#fff;overflow:hidden;
+  background:radial-gradient(520px 260px at 85% 0%,rgba(255,255,255,.16),transparent 70%),linear-gradient(135deg,#6e36a3 0%,#5a2b85 55%,#45206b 100%);
+  box-shadow:0 8px 0 #3a1a59,0 26px 50px rgba(69,32,107,.30)}
+.float{position:absolute;filter:drop-shadow(0 10px 14px rgba(0,0,0,.25));opacity:.95;animation:bob 6s ease-in-out infinite}
+.float.f1{right:8%;top:18%;width:64px;transform:rotate(-12deg)}
+.float.f2{right:20%;top:52%;width:46px;animation-delay:-1.5s}
+.float.f3{right:4%;bottom:12%;width:54px;animation-delay:-3s}
+.float.f4{right:28%;top:12%;width:36px;animation-delay:-4.5s}
+@keyframes bob{0%,100%{translate:0 0}50%{translate:0 -10px}}
+@media (prefers-reduced-motion:reduce){.float{animation:none}}
+.banner h1{position:relative;font-size:clamp(30px,4.8vw,50px);display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px;text-shadow:0 3px 0 rgba(0,0,0,.18)}
+.kbox{font-family:Montserrat,sans-serif;font-weight:900;letter-spacing:-.03em;background:#fff;color:var(--accent);border-radius:14px;padding:0 16px 4px;line-height:1.25;box-shadow:0 6px 0 #FACC15,0 10px 18px rgba(0,0,0,.2);transform:rotate(-3deg);display:inline-block;text-shadow:none}
+.lead{position:relative;margin-top:16px;font-size:clamp(15.5px,2vw,18px);color:#efe4fb;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.hl{background:#FFD84D;color:#2c1446;font-weight:900;padding:2px 10px;border-radius:8px;box-shadow:0 3px 0 #d9a800}
+.maker{position:relative;margin-top:10px;font-size:13px;letter-spacing:.04em;color:#cdb8ea}
+
+/* section heads */
+.blk{margin-top:30px}
+.blk-h{display:flex;align-items:center;gap:10px}
+.blk-h .bi{width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.blk-h h2{font-size:24px}
+.blk-sub{color:var(--muted);margin-top:4px}
+
+/* mode buttons */
+.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:16px}
+.mode{display:flex;align-items:center;gap:14px;text-align:left;background:#fff;border:2px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:0 6px 0 var(--line);transition:transform .12s,box-shadow .12s,background .15s,color .15s,border-color .15s}
+.mode:hover{transform:translateY(-3px);box-shadow:0 9px 0 var(--line);border-color:#d3c4e6}
+.mode:active{transform:translateY(4px);box-shadow:0 2px 0 var(--line)}
+.mode .mi{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;color:#fff;flex:none;box-shadow:0 4px 0 rgba(0,0,0,.18)}
+.mode b{display:block;font-size:20px;font-weight:900;line-height:1.3}
+.mode small{display:block;color:var(--muted);font-size:13.5px;line-height:1.5;margin-top:2px}
+.mode.on{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 6px 0 var(--accent-dark)}
+.mode.on small{color:#e3d3f5}
+.mode.on .mi{background:#fff!important;color:var(--accent)}
+
+.panel{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;margin-top:18px;box-shadow:var(--lift);animation:pIn .2s ease-out}
+@keyframes pIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.drop{border:2.5px dashed #cbbbe0;border-radius:16px;padding:30px 16px;text-align:center;background:var(--sunken);cursor:pointer;transition:.15s}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop .up{width:56px;height:56px;margin:0 auto;border-radius:16px;background:var(--accent);color:#fff;display:grid;place-items:center;box-shadow:0 5px 0 var(--accent-dark)}
+.drop h3{font-size:20px;margin-top:14px}
+.drop p{color:var(--muted);font-size:14px;margin-top:4px}
+.drop .tip{display:inline-block;margin-top:12px;background:#fff;color:var(--accent);border-radius:999px;padding:4px 14px;font-size:13px;font-weight:700;border:1.5px solid #d9c9ec}
+.filelist{margin-top:12px;display:grid;gap:8px}
+.fileitem{display:flex;justify-content:space-between;gap:10px;background:var(--sunken);border-radius:10px;padding:8px 12px;font-size:14px}
+.fileitem .st{color:var(--muted);white-space:nowrap}
+.fileitem .st.ok{color:var(--good)}
+.errbox{border:1.5px solid var(--bad);border-radius:10px;background:#fff;color:var(--ink);padding:10px 14px;text-align:center;font-size:14px;line-height:1.6}
+.errbox b{font-weight:900}
+.errbox .eh{display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;flex-wrap:wrap}
+.pastehead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.pastehead b{font-size:16px}
+.tpl{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);font-weight:700}
+.tpl select{border:2px solid var(--accent);border-radius:10px;padding:7px 10px;background:#fff;color:var(--accent);font-weight:700;box-shadow:0 3px 0 #d9c9ec}
+#paste{width:100%;min-height:280px;border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;resize:vertical;line-height:1.75;background:var(--sunken);outline:none}
+#paste:focus{border-color:var(--accent-2);background:#fff}
+.pastefoot{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.hint-inline{font-size:13px;color:var(--muted)}
+.chip{border:1.5px solid var(--line);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700;background:#fff;color:var(--muted)}
+.go{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:18px}
+.go .btn{font-size:17px;padding:15px 36px;border-radius:14px}
+.mode-text{font-size:13px;color:var(--muted)}
+.mode-text b{color:var(--accent)}
+
+/* big editor frame */
+.frame{background:#fff;border-radius:26px;padding:24px;margin-top:16px;border:1px solid var(--line);box-shadow:0 3px 0 var(--line),0 24px 60px rgba(90,43,133,.12)}
+.ed-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:14px}
+.stat{font-size:14px;font-weight:700;margin-top:4px;color:var(--muted)}
+.stat .bad{color:var(--bad)} .stat .good{color:var(--good)}
+.dl{display:flex;gap:10px;flex-wrap:wrap}
+.titlebox{margin-top:18px;background:var(--sunken);border-radius:16px;padding:14px 16px}
+.titlerow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.titlerow label{font-weight:900;white-space:nowrap}
+.titlerow input{flex:1;min-width:200px;border:2px solid var(--line);border-radius:12px;padding:10px 14px;background:#fff;font-size:16px;font-weight:700;outline:none}
+.titlerow input:focus{border-color:var(--accent-2)}
+.titlerow .tag{font-size:12px;font-weight:700;background:#f8d7e3;color:#a2284f;border-radius:999px;padding:2px 9px;margin-left:2px}
+.tgen{margin-top:12px;background:linear-gradient(135deg,#f7f0ff,#fbeaf3);border:1px solid #e5d6f3;border-radius:16px;padding:14px 16px;max-width:620px}
+.tgen-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.tgen-top small{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px;line-height:1.6}
+.tgen-body{display:flex;align-items:center;gap:14px;margin-top:10px}
+.tgen-win{flex:1;min-width:0;height:56px;overflow:hidden;background:#fff;border-radius:12px;border:2px solid var(--accent);box-shadow:inset 0 6px 8px -6px rgba(0,0,0,.25),inset 0 -6px 8px -6px rgba(0,0,0,.25);position:relative;cursor:pointer}
+.tgen-reel div{height:56px;display:flex;align-items:center;justify-content:center;padding:0 12px;text-align:center;font-weight:700;font-size:16px;line-height:1.25;color:var(--muted)}
+.tgen-win.done .tgen-reel div:last-child{color:var(--ink)}
+.tgen-lever{flex:none;position:relative;width:34px;height:64px;border:0;background:none;cursor:pointer;padding:0}
+.tgen-lever .stick{position:absolute;left:50%;bottom:6px;width:6px;height:46px;margin-left:-3px;background:#8a7a90;border-radius:3px;transform-origin:50% 100%}
+.tgen-lever .ball{position:absolute;left:50%;top:0;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ff9a8a,#d9534f);box-shadow:0 2px 4px rgba(0,0,0,.25);transform-origin:50% 52px}
+.tgen-lever::after{content:"";position:absolute;left:50%;bottom:0;width:20px;height:10px;margin-left:-10px;background:#6d5f75;border-radius:4px}
+.tgen-lever.pull .stick{animation:tgStick .6s}.tgen-lever.pull .ball{animation:tgBall .6s}
+@keyframes tgStick{40%{transform:scaleY(-.3)}100%{transform:none}}
+@keyframes tgBall{40%{transform:translateY(52px)}100%{transform:none}}
+.tgen-act{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.tgen-act .btn{padding:9px 14px;font-size:14px}
+.exbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;margin-top:12px;padding:14px 16px;border:1.5px dashed var(--line);border-radius:16px;font-size:14.5px}
+.exbar .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.exbar .grow{flex:1}
+.exbar .lb{color:var(--muted);font-weight:700;white-space:nowrap}
+.exbar input[type=text]{border:1.5px solid var(--line);border-radius:10px;padding:7px 10px;width:180px;background:#fff}
+.exbar select{border:1.5px solid var(--line);border-radius:10px;padding:6px 8px;background:#fff}
+.ck{display:flex;align-items:center;gap:10px;font-weight:700;cursor:pointer}
+.seg{display:inline-flex;border:2px solid var(--accent);border-radius:12px;overflow:hidden;box-shadow:0 3px 0 #d9c9ec}
+.seg button{border:0;background:#fff;padding:7px 14px;font-size:14px;font-weight:700;color:var(--accent)}
+.seg button+button{border-left:2px solid var(--accent)}
+.seg button.on{background:var(--accent);color:#fff}
+.mini-btn{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:6px 12px;font-size:13.5px;font-weight:700;box-shadow:0 2px 0 var(--line)}
+.mini-btn:hover{border-color:var(--accent-2)}
+.mini-btn.danger{color:var(--bad)}
+
+/* studio */
+.studio{display:grid;grid-template-columns:186px minmax(0,1fr);gap:22px;margin-top:18px;align-items:start}
+#thumbs{display:flex;flex-direction:column;gap:12px;position:relative}
+.rail{position:sticky;top:76px;max-height:calc(100vh - 92px);overflow:auto;display:flex;flex-direction:column;gap:12px;padding:4px 6px 12px 2px;scrollbar-width:thin}
+.titem{position:relative;user-select:none;-webkit-user-select:none;transition:transform .12s}
+.thumb{position:relative;background:#fff;border:2px solid var(--line);border-radius:14px;padding:6px;cursor:pointer;box-shadow:0 4px 0 var(--line);transition:border-color .12s,box-shadow .12s;touch-action:pan-y}
+.thumb:hover{border-color:#cdbde2}
+.titem.on .thumb{border-color:var(--accent);box-shadow:0 4px 0 var(--accent)}
+.titem.dragging{transform:scale(1.05) rotate(-1.5deg);z-index:3}
+.titem.dragging .thumb{box-shadow:0 14px 28px rgba(90,43,133,.3);border-color:var(--accent-2)}
+.tn{position:absolute;left:6px;top:6px;background:#fff;border:1px solid var(--line);border-radius:6px;font-size:12px;font-weight:900;padding:0 6px;line-height:18px;z-index:1}
+.titem.on .tn{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tdot{position:absolute;right:8px;top:8px;width:11px;height:11px;border-radius:50%;background:var(--bad);border:2px solid #fff;z-index:1}
+.tv{aspect-ratio:16/7;border-radius:9px;background:linear-gradient(160deg,#f1ebf8,#e4daf1);display:grid;place-items:center;overflow:hidden;color:#bfaed6}
+.tv img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.tt{font-size:12.5px;line-height:1.4;margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.8em;font-weight:500}
+.tbars{display:flex;gap:3px;margin-top:5px}
+.tbars i{flex:1;height:5px;border-radius:2px;opacity:.3}
+.tbars i.c{opacity:1}
+.tbtns{display:flex;gap:6px;margin-top:8px}
+.tbtns button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:8px;padding:3px 0;font-size:12px;font-weight:700;color:var(--muted)}
+.tbtns button:hover{border-color:var(--accent-2);color:var(--accent)}
+.tbtns button.del:hover{border-color:var(--bad);color:var(--bad)}
+.add-q{flex:none;border:2px solid var(--accent);background:#fff;border-radius:14px;padding:12px;font-weight:900;color:var(--accent);font-size:15px;box-shadow:0 4px 0 #d9c9ec;transition:background .12s,color .12s,transform .08s,box-shadow .08s}
+.add-q:hover{background:var(--accent);color:#fff;box-shadow:0 4px 0 var(--accent-dark)}
+.add-q:active{background:var(--accent-dark);color:#fff;transform:translateY(3px);box-shadow:0 1px 0 var(--accent-dark)}
+.stage{min-width:0;max-width:820px;width:100%;margin:0 auto}
+.setbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.set{display:flex;flex-direction:column;gap:3px;font-size:13px;font-weight:700;color:var(--muted)}
+.set select{border:2px solid var(--line);border-radius:12px;padding:9px 10px;background:#fff;font-weight:700;color:var(--ink);font-size:15px;box-shadow:0 3px 0 var(--line)}
+.set select:focus{border-color:var(--accent-2);outline:none}
+.canvas{position:relative;margin-top:14px;border-radius:20px;padding:16px 18px 18px;background:linear-gradient(165deg,#f3eefa 0%,#ebe3f6 55%,#e4d9f2 100%);overflow:hidden;box-shadow:inset 0 0 0 1px #e3d8f0}
+.canvas::before{content:"";position:absolute;left:-80px;top:130px;width:0;height:0;border-left:220px solid transparent;border-right:220px solid transparent;border-bottom:380px solid rgba(255,255,255,.35);pointer-events:none}
+.canvas::after{content:"";position:absolute;right:-140px;bottom:-160px;width:420px;height:420px;border-radius:50%;background:rgba(255,255,255,.3);pointer-events:none}
+.canvas > *{position:relative;z-index:1}
+.cv-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.qbadge{font-size:14px;font-weight:700;color:var(--muted)}
+.timepill{display:inline-flex;align-items:center;gap:4px;background:#864CBF;color:#fff;border-radius:999px;padding:4px 6px 4px 12px;box-shadow:0 4px 0 #5f2f91;font-family:Montserrat,var(--font);font-weight:800}
+.timepill select{appearance:none;-webkit-appearance:none;border:0;background:transparent;color:#fff;font-weight:800;font-size:16px;padding:2px 22px 2px 2px;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 2px center;background-size:14px}
+.timepill select option{color:var(--ink)}
+.qbox{position:relative;margin-top:12px;background:#fff;border-radius:10px;box-shadow:0 4px 0 rgba(90,43,133,.15)}
+.qbox textarea{display:block;width:100%;border:0;background:transparent;resize:none;text-align:center;font-size:22px;font-weight:900;padding:16px 56px;line-height:1.45;outline:none;min-height:66px}
+.qbox textarea::placeholder{color:#9a91ab;font-weight:500}
+.cnt{position:absolute;right:12px;bottom:8px;font-size:12px;color:#a59db8}
+.cnt.over{color:var(--bad);font-weight:700}
+.slot{position:relative;background:rgba(255,255,255,.78);border-radius:10px;box-shadow:0 4px 0 rgba(90,43,133,.12);min-height:176px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:14px;text-align:center;outline:none;transition:background .15s;cursor:pointer}
+.slot:hover{background:#fff}
+.slot.over,.slot:focus-visible{background:#fff;box-shadow:0 0 0 3px var(--k1)}
+.slot .si{color:#8c7fa3}
+.slot b{font-size:15px}
+.slot small{color:var(--muted);font-size:12.5px;line-height:1.5}
+.slot .sbtns{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;justify-content:center}
+.slot .sbtns button{border:0;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:700;background:#fff;box-shadow:0 3px 0 rgba(0,0,0,.14)}
+.slot .sbtns button:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.14)}
+.slot .sbtns .ai{background:linear-gradient(90deg,#7a45ad,#d6337a);color:#fff}
+.slot.filled{padding:0;overflow:hidden;background:#fff;cursor:default}
+.slot.filled img{width:100%;height:100%;max-height:300px;object-fit:contain;display:block}
+.slot .stag{position:absolute;left:8px;top:8px;background:var(--accent);color:#fff;font-size:12px;font-weight:700;border-radius:999px;padding:1px 10px}
+.slot .sact{position:absolute;right:8px;bottom:8px;display:flex;gap:6px}
+.slot .sact button{width:36px;height:36px;border-radius:50%;border:0;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25);display:grid;place-items:center;font-weight:700}
+.slot .errbox{margin-bottom:6px}
+.slot.loading::after{content:"生成中…";position:absolute;inset:0;display:grid;place-items:center;background:rgba(255,255,255,.88);font-weight:900;color:var(--accent);border-radius:10px}
+.qmedia{margin:14px auto 0;max-width:520px}
+.body-ta{width:100%;margin-top:12px;border:0;border-radius:10px;padding:12px 14px;min-height:110px;resize:vertical;box-shadow:0 4px 0 rgba(90,43,133,.12);outline:none}
+.answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.ans{display:flex;align-items:stretch;background:#fff;border-radius:10px;box-shadow:0 4px 0 rgba(90,43,133,.15);min-height:80px;padding:8px;gap:8px;transition:box-shadow .12s}
+
+.ans .shape{width:46px;border-radius:6px;display:grid;place-items:center;flex:none;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.ans .shape svg{width:24px;height:24px}
+.ans input{flex:1;min-width:0;border:0;outline:none;font-size:16px;font-weight:700;padding:0 4px;background:transparent}
+.ans input::placeholder{color:#9a91ab;font-weight:500}
+.ans .optimg{flex:1;min-width:0;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-weight:700}
+.ans .optimg img{height:62px;max-width:60%;object-fit:cover;border-radius:6px}
+.ans .rm{border:0;background:none;color:#b9aec9;font-size:15px;padding:0 4px;opacity:0;transition:opacity .15s}
+.ans:hover .rm,.ans:focus-within .rm{opacity:1}
+.ans .rm:hover{color:var(--bad)}
+.chk{flex:none;align-self:center;width:46px;height:46px;border-radius:50%;border:3px solid #d4c9e3;background:#fff;color:transparent;display:grid;place-items:center;transition:.12s}
+.chk svg{width:26px;height:26px}
+.chk:hover{border-color:var(--accent-2);color:#d4c9e3}
+.chk.on{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 3px 0 var(--accent-dark)}
+.chk.lock{cursor:default}
+.ord{flex:none;align-self:center;width:34px;height:34px;border-radius:10px;background:var(--sunken);display:grid;place-items:center;font-weight:900;color:var(--muted)}
+.s0{background:var(--k0)}.s1{background:var(--k1)}.s2{background:var(--k2)}.s3{background:var(--k3)}.s4{background:var(--k4)}.s5{background:var(--k5)}
+.addmore{display:block;margin:14px auto 0;border:0;border-radius:10px;background:#fff;padding:10px 20px;font-weight:900;box-shadow:0 4px 0 rgba(90,43,133,.18)}
+.addmore:hover{background:var(--accent);color:#fff}
+.addmore:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(90,43,133,.18)}
+.typehint{text-align:center;color:var(--muted);font-size:13.5px;margin-top:10px}
+.noterow{display:flex;gap:8px;align-items:center;margin-top:16px;background:rgba(255,255,255,.8);border-radius:12px;padding:8px 10px}
+.noterow .lb{font-weight:900;font-size:14px;white-space:nowrap}
+.noterow input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:10px;padding:7px 10px;background:#fff}
+.noterow select{border:1.5px solid var(--line);border-radius:10px;padding:6px;background:#fff;max-width:120px}
+.extra{margin-top:12px;background:rgba(255,255,255,.62);border-radius:14px;padding:12px}
+.extra-h{font-weight:900;font-size:14px;display:flex;align-items:center;gap:6px}
+.extra-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:12px;margin-top:8px}
+.extra .slot{min-height:150px}
+.oi-h{font-weight:700;font-size:13.5px;margin-bottom:6px}
+.oi-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.oslot{position:relative;aspect-ratio:4/3;border-radius:8px;background:#fff;box-shadow:0 3px 0 rgba(90,43,133,.12);overflow:hidden;display:flex;flex-direction:column;cursor:pointer;outline:none}
+.oslot.over,.oslot:focus-visible{box-shadow:0 0 0 3px var(--k1)}
+.oslot .obar{height:22px;display:flex;align-items:center;justify-content:center;flex:none}
+.oslot .obar svg{width:12px;height:12px}
+.oslot .oin{flex:1;display:grid;place-items:center;font-size:12px;color:var(--muted);font-weight:700}
+.oslot img{position:absolute;inset:22px 0 0;width:100%;height:calc(100% - 22px);object-fit:cover}
+.oslot .orm{position:absolute;right:4px;bottom:4px;width:26px;height:26px;border-radius:50%;border:0;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);font-size:12px;z-index:1}
+.oi-note{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.55}
+.oi-err{margin-top:6px}
+.exnote{font-size:12.5px;color:var(--muted);margin-top:8px;padding-left:4px}
+.issues{margin-top:6px;color:var(--bad);font-size:13.5px;font-weight:700;padding-left:4px}
+.issues:empty{display:none}
+.navbtns{display:flex;justify-content:space-between;margin-top:14px}
+
+/* guide + footer */
+.guide{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
+.gcard{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px 20px;font-size:15px;box-shadow:var(--lift)}
+.gcard h3{font-size:18px;margin-bottom:6px}
+.k{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:0 8px;font-weight:700;font-size:14px}
+.note-p{background:var(--accent-soft);border-radius:10px;padding:8px 12px;margin-top:10px;font-size:14px}
+.note-p b{color:var(--accent)}
+footer{background:#ebe4f4;margin-top:50px}
+footer .wrap{padding-block:30px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
+footer h2{font-size:22px}
+footer p{color:var(--muted);font-size:14px}
+.line-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+.lineid{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 8px 6px 14px;font-weight:700;color:var(--ink)}
+.lineid button{border:0;border-radius:999px;background:#06C755;color:#fff;font-weight:700;font-size:12px;padding:6px 10px;cursor:pointer}
+.copyright{text-align:center;font-size:12.5px;color:var(--muted);padding:0 0 18px}
+
+/* modal + toast */
+.mbg{position:fixed;inset:0;background:rgba(31,26,44,.45);display:none;align-items:center;justify-content:center;z-index:60;padding:16px}
+.mbg.show{display:flex}
+.modal{background:#fff;border-radius:20px;max-width:520px;width:100%;padding:22px 24px;box-shadow:0 8px 0 var(--line),0 24px 60px rgba(0,0,0,.3)}
+.modal h3{font-size:20px;margin-bottom:8px}
+.mbody{font-size:15px;line-height:1.7;max-height:55vh;overflow:auto}
+.mbody textarea,.mbody select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;margin-top:4px}
+.mbtns{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:12px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:70;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+
+@media (max-width:860px){
+  .modes{grid-template-columns:minmax(0,1fr)}
+  .mode small{display:none}
+  .mode{padding:12px 16px}
+  .guide{grid-template-columns:minmax(0,1fr)}
+  .frame{padding:16px;border-radius:20px}
+  .exbar{grid-template-columns:minmax(0,1fr)}
+  .studio{grid-template-columns:minmax(0,1fr)}
+  .rail{position:fixed;left:0;right:0;bottom:0;top:auto;max-height:none;flex-direction:row;overflow-x:auto;overflow-y:hidden;background:#fff;border-top:1px solid var(--line);padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));z-index:25;box-shadow:0 -6px 18px rgba(90,43,133,.10);gap:8px}
+  .titem{flex:none;width:134px}
+  .thumb{touch-action:pan-x;padding:4px}
+  .tv{aspect-ratio:16/8}
+  .tt{font-size:12px}
+  .tbars{display:none}
+  .tbtns{margin-top:5px}
+  .add-q .lg{display:none}
+  .add-q{width:64px;align-self:stretch;font-size:30px;padding:0;position:sticky;right:0;background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 4px 0 var(--accent-dark)}
+  body.has-editor{padding-bottom:160px}
+  body.has-editor .toast{bottom:172px}
+  .extra-grid{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:560px){
+  .banner{padding:28px 20px 26px}
+  .float.f1{width:44px;top:10%}.float.f2,.float.f4{display:none}.float.f3{width:38px}
+  .savechip{display:none}
+  .answers{grid-template-columns:minmax(0,1fr)}
+  .qbox textarea{font-size:19px;padding:14px 18px 22px}
+  .canvas{padding:12px}
+  .setbar{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .setbar .set:first-child{grid-column:1/-1}
+  .slot small{display:none}
+  .top .btn-line{padding:8px 12px;font-size:13px}
+  .brand{font-size:16px}
+}
+/* v3 */
+.titem{will-change:transform}
+.titem.dragging{transition:none!important}
+.ans{position:relative}
+.ans:not(.filled) .chk{display:none}
+.oimgbtn,.oimgx{flex:none;align-self:center;width:30px;height:30px;border-radius:7px;border:0;background:var(--sunken);color:#6a6380;display:grid;place-items:center}
+.oimgbtn:hover{background:var(--accent-soft);color:var(--accent)}
+.oimgx{background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);position:absolute;right:62px;top:8px;width:30px;height:30px;font-size:13px;z-index:2}
+.ans.hasimg{min-height:120px}
+.oimgbtn svg{width:16px;height:16px}
+.optpic{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:6px;padding:4px}
+.optpic img{max-width:100%;max-height:120px;object-fit:contain;display:block}
+.optnote{margin-top:10px;background:#fff8e1;border:1.5px solid #f3d27a;color:#7a5600;border-radius:10px;padding:8px 12px;font-size:13.5px;font-weight:700;text-align:center}
+.ta-main input,.ta-sub input{width:100%;border:0;outline:none;border-radius:10px;background:#fff;box-shadow:0 4px 0 rgba(90,43,133,.15);padding:14px 16px;font-size:18px;font-weight:700}
+.ta-main{max-width:560px;margin:14px auto 0}
+.ta-sub-h{text-align:center;margin:14px 0 8px;font-weight:900;font-size:14px;color:var(--accent)}
+.ta-sub{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ta-sub input{font-size:15px;padding:11px 14px}
+.slider-box{margin-top:14px;background:#fff;border-radius:12px;box-shadow:0 4px 0 rgba(90,43,133,.15);padding:14px 16px;display:grid;grid-template-columns:96px minmax(0,1fr) 96px;gap:14px;align-items:end}
+.slider-box label,.slider-ans label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:900}
+.slider-box input,.slider-ans input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--sunken);font-size:16px;font-weight:700}
+.track{position:relative;height:46px;background:repeating-linear-gradient(90deg,#d6cde3 0 4px,transparent 4px 14px);border-radius:4px;margin-bottom:2px}
+.track .mk{position:absolute;bottom:52px;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:12.5px;font-weight:900;border-radius:999px;padding:2px 10px;white-space:nowrap;box-shadow:0 3px 0 var(--accent-dark)}
+.track .mk::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--accent)}
+.track .ln{position:absolute;top:-4px;bottom:-4px;width:4px;background:var(--accent);border-radius:2px;transform:translateX(-50%)}
+.slider-ans{display:flex;justify-content:center;margin-top:14px}
+.slider-ans label{width:200px;text-align:center}
+.jlist{display:flex;flex-direction:column;gap:10px;margin:14px auto 0;max-width:620px;position:relative}
+.jitem{display:flex;align-items:stretch;gap:8px;background:#fff;border-radius:10px;box-shadow:0 4px 0 rgba(90,43,133,.15);padding:8px;min-height:64px;will-change:transform}
+.jitem.dragging{box-shadow:0 14px 28px rgba(90,43,133,.3);z-index:5}
+.jitem .shape{width:46px;border-radius:6px;display:grid;place-items:center;flex:none;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.jitem .shape svg{width:22px;height:22px}
+.jitem input{flex:1;min-width:0;border:0;outline:none;font-size:16px;font-weight:700;background:transparent}
+.jitem .ordn{align-self:center;font-weight:900;color:var(--muted);width:22px;text-align:center}
+.grip{flex:none;align-self:center;width:38px;height:38px;border-radius:8px;display:grid;place-items:center;color:#8c7fa3;cursor:grab;touch-action:none;font-size:20px;background:var(--sunken)}
+.grip:active{cursor:grabbing;background:var(--accent-soft)}
+.jitem .rm{border:0;background:none;color:#b9aec9;font-size:15px;padding:0 4px}
+.jitem .rm:hover{color:var(--bad)}
+.infocard{display:flex;align-items:center;gap:18px;margin:14px auto 0;max-width:640px;background:#fff;border-radius:12px;box-shadow:0 4px 0 rgba(90,43,133,.15);padding:12px}
+.infocard .ill{width:150px;flex:none;border-radius:8px;background:var(--sunken);display:grid;place-items:center;padding:10px}
+.infocard p{font-size:15px;line-height:1.7}
+.pinbar{display:flex;justify-content:center;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center;font-weight:700;color:var(--muted);font-size:14px}
+.pinprev{position:relative;max-width:520px;margin:12px auto 0;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 0 rgba(90,43,133,.15)}
+.pinprev img{display:block;width:100%;max-height:300px;object-fit:contain}
+.pinprev .stag{position:absolute;left:8px;top:8px;background:var(--good);color:#fff;font-size:12px;font-weight:700;border-radius:999px;padding:1px 10px}
+.extra{margin-top:12px;background:transparent;padding:0}
+.extra-t{display:flex;align-items:center;gap:8px;border:2px dashed #cbbbe0;background:rgba(255,255,255,.7);border-radius:12px;padding:10px 14px;font-weight:900;color:var(--accent);width:100%;text-align:left}
+.extra-t:hover{border-color:var(--accent);background:#fff}
+.extra-t .badge{background:var(--accent);color:#fff;font-size:12px;border-radius:999px;padding:1px 9px}
+.extra-t .chev{margin-left:auto;width:9px;height:9px;border-right:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(45deg) translateY(-3px);transition:transform .15s}
+.extra-t.on .chev{transform:rotate(-135deg) translateY(-2px)}
+.extra-body{margin-top:10px;max-width:520px;margin-inline:auto}
+.timepill{padding:5px 14px 5px 12px;font-size:16px;cursor:default}
+.mbody input[type=text]{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;margin-top:8px;font-size:16px}
+/* pin editor */
+.pin-bg{position:fixed;inset:0;background:rgba(31,26,44,.55);z-index:65;display:flex;align-items:center;justify-content:center;padding:12px}
+.pin-modal{background:#fff;border-radius:20px;width:min(980px,100%);max-height:96vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.pin-head{padding:16px 22px;font-weight:900;font-size:18px;border-bottom:1px solid var(--line)}
+.pin-main{display:flex;gap:14px;padding:16px;background:var(--sunken);min-height:0;flex:1}
+.pin-tools{display:flex;flex-direction:column;gap:6px;background:#fff;border-radius:12px;padding:6px;align-self:flex-start;box-shadow:0 2px 0 var(--line)}
+.pin-tools button{width:44px;height:44px;border:0;border-radius:10px;background:#fff;display:grid;place-items:center;color:var(--ink)}
+.pin-tools button:hover{background:var(--sunken)}
+.pin-tools button.on{background:var(--accent);color:#fff}
+.pin-tools hr{border:0;border-top:1px solid var(--line);margin:2px 4px;width:36px}
+.pin-stage{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.pin-stage canvas{touch-action:none;cursor:crosshair;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.15);background:#fff;max-width:100%}
+.pin-tip{font-size:13px;color:var(--muted)}
+.pin-foot{display:flex;justify-content:center;gap:12px;padding:14px;border-top:1px solid var(--line)}
+/* feedback + totop */
+.btn-fb{background:#F06C8F;color:#fff;padding:12px 22px;font-size:15px;border-radius:999px;box-shadow:0 4px 0 #c9476b}
+.btn-fb:hover{background:#E4557C}
+.btn-fb:active{box-shadow:0 1px 0 #c9476b}
+.fb-side{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.fb-side small{color:var(--muted);font-size:12.5px}
+.fbbg{position:fixed;inset:0;background:rgba(31,26,44,.45);display:none;align-items:center;justify-content:center;z-index:66;padding:14px}
+.fbbg.show{display:flex}
+.fb-panel{background:#fff;border-radius:18px;padding:20px 22px;display:grid;gap:8px;width:min(640px,94vw);max-height:94vh;overflow:auto}
+.fb-head{display:flex;justify-content:space-between;align-items:center;margin:-20px -22px 8px;padding:16px 22px;background:#F06C8F;color:#fff;border-radius:18px 18px 0 0}
+.fb-head b{font-size:17px}
+.fb-x{border:0;background:transparent;color:#fff;font-size:18px;cursor:pointer}
+.fb-frame{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.fb-frame iframe{display:block;width:100%;height:min(66vh,620px);border:0}
+.fb-note{font-size:13px;color:var(--muted)}
+.totop{position:fixed;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px));z-index:35;width:52px;height:52px;border-radius:50%;border:3px solid #fff;background:var(--accent);color:#fff;box-shadow:0 4px 0 var(--accent-dark),0 8px 18px rgba(90,43,133,.3);display:grid;place-items:center;opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .2s,transform .2s,visibility .2s}
+.totop.show{opacity:1;visibility:visible;transform:none}
+.totop svg{width:22px;height:22px}
+.totop:active{transform:translateY(3px)}
+@media (max-width:860px){
+  #thumbs{flex-direction:row;gap:8px}
+  .totop{bottom:calc(178px + env(safe-area-inset-bottom,0px))}
+  .ta-sub{grid-template-columns:minmax(0,1fr)}
+  .slider-box{grid-template-columns:70px minmax(0,1fr) 70px;gap:8px}
+  .infocard .ill{width:96px}
+  .pin-main{flex-direction:column}
+  .pin-tools{flex-direction:row;align-self:center}
+  .pin-tools hr{border-top:0;border-left:1px solid var(--line);width:auto;height:30px;margin:7px 2px}
+}
+/* v4 */
+@media (max-width:560px){.top .row{gap:8px}.top .dl{gap:6px}.top .dl .btn{padding:8px 10px;font-size:13px}.brand{gap:6px}.kmini{font-size:13px;padding:0 5px}.mini{display:none}}
+.qbox.haspre textarea{padding-left:74px;padding-right:62px}
+@media (max-width:560px){.qbox.haspre textarea{padding-left:62px;padding-right:44px;text-align:left}}
+.top .dl{display:flex;gap:8px;flex-wrap:nowrap}.btn .short{display:none}
+@media (max-width:560px){.btn .full{display:none}.btn .short{display:inline}}
+.statrow{display:flex;align-items:center;gap:12px;margin-top:4px}.statrow .stat{margin-top:0}
+.top .row{padding-block:10px;flex-wrap:wrap}
+@media (max-width:860px){.topnav{order:5;width:100%;margin-left:-10px}}
+.top .dl .btn{padding:10px 14px;font-size:14px}
+.navrow{padding-bottom:8px}
+.topnav{display:flex;gap:2px;flex-wrap:wrap;margin-left:6px}
+.topnav a{color:var(--ink);text-decoration:none;font-weight:700;font-size:14.5px;padding:6px 10px;border-radius:10px}
+.topnav a:hover{background:var(--accent-soft);color:var(--accent)}
+.rules{font-size:13.5px;color:var(--muted);background:var(--sunken);border-radius:10px;padding:8px 12px;max-width:560px}
+.rules b{color:var(--accent)}
+.gmedia{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+.gcardm{display:flex;align-items:center;gap:12px;background:#fff;border:2px dashed #cbbbe0;border-radius:14px;padding:10px 12px;cursor:pointer;text-align:left;width:100%;transition:border-color .15s,background .15s;min-height:76px}
+.gcardm:hover{border-color:var(--accent);background:#fdfbff}
+.gcardm.has{border-style:solid;border-color:var(--accent)}
+.gcardm .gt{width:96px;aspect-ratio:16/9;border-radius:8px;background:var(--sunken);display:grid;place-items:center;overflow:hidden;flex:none;color:#a99bc0}
+.gcardm .gt img{width:100%;height:100%;object-fit:cover}
+.gcardm b{display:block;font-size:15.5px}
+.gcardm small{display:block;color:var(--muted);font-size:12.5px;line-height:1.45}
+.gcardm .gx{margin-left:auto;flex:none;width:30px;height:30px;border-radius:50%;border:0;background:var(--sunken);font-size:13px}
+.gcardm .gx:hover{background:#fde2e4;color:var(--bad)}
+.gnote{font-size:12.5px;color:var(--muted);margin-top:8px}
+.gerr{margin-top:8px}
+.bg-panel{background:#fff;border-radius:18px;padding:20px 22px;width:min(720px,96vw);max-height:94vh;overflow:auto;display:grid;gap:12px}
+.bg-head{display:flex;justify-content:space-between;align-items:center;margin:-20px -22px 0;padding:16px 22px;background:var(--accent);color:#fff;border-radius:18px 18px 0 0}
+.bg-head b{font-size:17px}
+.bg-opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.bg-card{border:1.5px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 0 var(--line)}
+.bg-card h3{font-size:18px}
+.bg-card p,.bg-card ol{font-size:14px;color:var(--muted);margin:0}
+.bg-card ol{padding-left:20px;line-height:1.8}
+.bg-card .btn{align-self:flex-start;margin-top:auto}
+.bg-ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;box-shadow:0 4px 0 rgba(0,0,0,.15)}
+.bg-cur{display:flex;align-items:center;gap:12px;background:var(--sunken);border-radius:12px;padding:10px}
+.bg-cur:empty{display:none}
+.bg-cur img{width:160px;aspect-ratio:16/9;object-fit:cover;border-radius:8px}
+.qpre{position:absolute;left:14px;top:50%;transform:translateY(-50%);background:var(--accent);color:#fff;font-weight:900;font-size:14px;border-radius:8px;padding:2px 8px;z-index:1}
+.qbox .cnt{top:8px;bottom:auto}
+.cnt.over{background:var(--bad);color:#fff!important;border-radius:999px;padding:0 8px;font-size:13px}
+.ans.filled{color:#fff}
+.ans.filled.c0{background:var(--k0)}.ans.filled.c1{background:var(--k1)}.ans.filled.c2{background:var(--k2)}.ans.filled.c3{background:var(--k3)}.ans.filled.c4{background:var(--k4)}.ans.filled.c5{background:var(--k5)}
+.ans.filled{box-shadow:0 4px 0 rgba(0,0,0,.22)}
+.ans.filled .shape{background:transparent!important;box-shadow:none}
+.ans.filled input{color:#fff}
+.ans.filled input::placeholder{color:rgba(255,255,255,.7)}
+.ans.filled .oimgbtn{background:rgba(255,255,255,.22);color:#fff}
+.ans.filled .rm{color:rgba(255,255,255,.75)}
+.ans.filled .chk{background:transparent;border-color:#fff}
+.ans.filled .chk:hover{color:rgba(255,255,255,.6)}
+.ans.filled .chk.on{background:var(--accent);border-color:#fff;color:#fff;box-shadow:0 0 0 2px var(--accent),0 3px 0 var(--accent-dark)}
+.ans.right{}
+.opre{flex:none;align-self:center;font-weight:900;font-size:15px;opacity:.9}
+.ocnt{position:absolute;right:8px;top:3px;font-size:11px;font-weight:700;color:#9a91ab;line-height:1.2;z-index:3;display:none;pointer-events:none}
+.ans.filled .ocnt{color:rgba(255,255,255,.85)}
+.ans:focus-within .ocnt,.jitem:focus-within .ocnt,.tawrap:focus-within .ocnt{display:block}
+.ocnt.over{display:block;top:-10px;background:var(--bad);color:#fff!important;font-size:12px;font-weight:900;border-radius:999px;padding:0 8px;box-shadow:0 2px 0 rgba(0,0,0,.2)}
+.tawrap{position:relative;display:block}
+.jitem{position:relative}
+.ttype{position:absolute;left:34px;top:6px;background:var(--accent-soft);color:var(--accent);border-radius:6px;font-size:11.5px;font-weight:900;padding:0 6px;line-height:18px;z-index:1}
+.titem.on .ttype{background:#fff}
+@media (max-width:860px){
+  .gmedia,.bg-opts{grid-template-columns:minmax(0,1fr)}
+  .top .dl .btn{padding:9px 10px;font-size:13px}
+}
+@media (max-width:560px){
+  .brand .kmini+span,.brand{font-size:15px}
+  .top .dl .btn .lg2{display:none}
+}
+/* 題號／前綴選項：低調樣式 */
+#qNo,#optPrefix{border:1.5px solid var(--line);box-shadow:none;border-radius:10px}
+#qNo button,#optPrefix button{color:var(--muted);font-weight:500;padding:6px 12px}
+#qNo button+button,#optPrefix button+button{border-left:1.5px solid var(--line)}
+#qNo button.on,#optPrefix button.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
+/* 陰影：只保留題目框與選項框 */
+*,*::before,*::after{box-shadow:none!important;text-shadow:none!important}
+.float{filter:none}
+.qbox{box-shadow:0 4px 0 rgba(90,43,133,.15)!important}
+.ans,.jitem,.ta-main input,.ta-sub input{box-shadow:0 4px 0 rgba(90,43,133,.15)!important}
+.ans.filled{box-shadow:0 4px 0 rgba(0,0,0,.22)!important}
+.slot.over,.slot:focus-visible,.oslot.over,.oslot:focus-visible{box-shadow:0 0 0 3px var(--k1)!important}
+.btn:active,.mode:hover,.mode:active,.add-q:active,.addmore:active,.slot .sbtns button:active,.totop:active{transform:none}
+/* v7：標題動畫 */
+.stage{container-type:inline-size}
+@container (max-width:620px){.answers{grid-template-columns:minmax(0,1fr)}}
+@keyframes kpop{0%{transform:scale(.2) rotate(-18deg);opacity:0}55%{transform:scale(1.15) rotate(3deg);opacity:1}75%{transform:scale(.95) rotate(-4deg)}100%{transform:rotate(-3deg)}}
+@keyframes rise{from{transform:translateY(18px);opacity:0}to{transform:none;opacity:1}}
+@keyframes flyin{from{scale:0;rotate:-150deg;opacity:0}to{scale:1;rotate:0deg;opacity:.95}}
+@keyframes shine{from{left:-60%}to{left:130%}}
+.banner .kbox{animation:kpop .8s cubic-bezier(.2,1.2,.4,1) both;position:relative;overflow:hidden}
+.banner .kbox::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);animation:shine .9s .9s ease-out both}
+.banner h1>span:last-child{animation:rise .6s .3s ease-out both;display:inline-block}
+.banner .lead{animation:rise .6s .5s ease-out both}
+.banner .maker{animation:rise .6s .65s ease-out both}
+.float{animation:flyin .7s cubic-bezier(.2,1.4,.4,1) both,bob 6s ease-in-out 1.4s infinite}
+.float.f1{animation-delay:.55s,1.4s}.float.f2{animation-delay:.7s,2s}.float.f3{animation-delay:.85s,2.6s}.float.f4{animation-delay:1s,3.2s}
+@media (prefers-reduced-motion:reduce){.banner *,.banner *::after{animation:none!important}}
+/* 遊戲設定收合 */
+.gs-toggle{display:flex;align-items:center;gap:10px;width:100%;margin-top:12px;border:1.5px dashed #cbbbe0;background:rgba(255,255,255,.7);border-radius:12px;padding:9px 14px;color:var(--accent);font-weight:900;text-align:left}
+.gs-toggle:hover{border-color:var(--accent);background:#fff}
+.gs-sum{font-weight:500;font-size:13px;color:var(--muted);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gs-toggle .chev{margin-left:auto;width:9px;height:9px;border-right:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(45deg) translateY(-3px);transition:transform .15s;flex:none}
+.gs-toggle.on .chev{transform:rotate(-135deg) translateY(-2px)}
+.gs-body{animation:pIn .2s ease-out}
+.titlebox .exbar{margin-top:12px;background:#fff;border-style:solid;border-color:var(--line)}
+/* 右側題目設定 */
+.studio{grid-template-columns:186px minmax(0,1fr) 64px}
+.studio.side-open{grid-template-columns:186px minmax(0,1fr) 330px}
+.sidecol{position:sticky;top:76px;display:flex;gap:10px;align-items:flex-start;min-width:0}
+.sidetabs{width:64px;flex:none;display:flex;flex-direction:column;gap:6px}
+.sidetab{width:64px;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12.5px;font-weight:700;color:var(--ink)}
+.sidetab:hover{border-color:var(--accent-2)}
+.sidetab.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.sidepanel{flex:1;min-width:0;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:4px 14px 14px;max-height:calc(100vh - 92px);overflow:auto}
+.sp-head{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.sp-head b{font-size:16px}
+.sp-x{border:0;background:none;font-size:18px;color:var(--muted);width:32px;height:32px;border-radius:8px}
+.sp-x:hover{background:var(--sunken)}
+.sp-field{position:relative;padding:12px 0;border-bottom:1px solid var(--line)}
+.sp-field:last-child{border-bottom:0}
+.sp-lb{font-weight:900;font-size:14px;margin-bottom:6px}
+.sp-sel{width:100%;display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px;font-size:15px;text-align:left}
+.sp-sel:hover{border-color:#cdbde2}
+.sp-sel.open{border-color:var(--k1)}
+.sp-sel .dd{margin-left:auto;width:9px;height:9px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-3px);flex:none}
+.sp-sel.open .dd{transform:rotate(-135deg) translateY(-1px)}
+.sp-link{border:0;background:none;padding:6px 0 0;font-size:13px;color:var(--muted);text-decoration:underline}
+.sp-link:hover{color:var(--accent)}
+.sp-na{font-size:13.5px;color:var(--muted);background:var(--sunken);border-radius:10px;padding:9px 12px}
+.smenu{position:absolute;left:0;right:0;top:calc(100% - 6px);z-index:20;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:6px;max-height:420px;overflow:auto;border-color:#d8cce8}
+.sp-field:has(.sp-link) .smenu{top:calc(100% - 30px)}
+.sm-item{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;border:0;background:none;border-radius:8px;padding:9px 12px;font-size:15px;text-align:left}
+.sm-item:hover{background:var(--sunken)}
+.sm-item.on{color:var(--accent)}
+.sm-item.two span{display:flex;flex-direction:column}
+.sm-item.two small{color:var(--muted);font-size:12.5px;margin-top:2px}
+.sm-g{font-weight:900;font-size:13px;color:var(--muted);padding:8px 6px 6px}
+.sm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.tcard{display:flex;flex-direction:column;align-items:center;gap:4px;border:1.5px solid transparent;background:var(--sunken);border-radius:10px;padding:10px 4px;font-size:13px;font-weight:700}
+.tcard:hover{border-color:#cdbde2;background:#fff}
+.tcard.on{border-color:var(--k1);background:#fff}
+.cvr{display:flex;align-items:center;gap:8px}
+.timepill{border:0;cursor:pointer}
+.setbtn{display:none;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;color:var(--accent)}
+@media (max-width:1100px){.studio.side-open{grid-template-columns:170px minmax(0,1fr) 300px}}
+@media (max-width:860px){
+  .studio,.studio.side-open{grid-template-columns:minmax(0,1fr)}
+  .setbtn{display:inline-block}
+  .sidecol{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:40;display:none}
+  .studio.side-open .sidecol{display:block}
+  .sidecol .sidetabs{display:none}
+  .sidepanel{border-radius:18px 18px 0 0;max-height:72vh;border:1.5px solid #d8cce8;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+}
+.smenu{position:static!important;margin-top:6px}
+.sp-field:has(.sp-link) .smenu{top:auto}
+.studio.side-open{grid-template-columns:186px minmax(0,1fr) 280px}
+.studio.side-open .sidetabs{display:none}
+@media (max-width:1100px){.studio.side-open{grid-template-columns:170px minmax(0,1fr) 260px}}
+@media (max-width:860px){.studio.side-open{grid-template-columns:minmax(0,1fr)}}
+/* 窄螢幕：縮圖列只在編輯區內黏在底部 */
+@media (max-width:860px){
+  .studio{display:flex;flex-direction:column;gap:14px}
+  .stage{order:1}
+  .rail{order:2;position:sticky;left:auto;right:auto;top:auto;bottom:0;width:100%;border:1.5px solid var(--line);border-radius:14px 14px 0 0;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));margin-bottom:-24px;background:rgba(255,255,255,.97)}
+  .sidecol{order:3}
+  body.has-editor{padding-bottom:0}
+  body.has-editor .toast{bottom:28px}
+  .totop{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+  .add-q{border-radius:10px}
+}
+
+/* 網頁版：縮圖列跟著頁面一起捲動，滑鼠在縮圖列上才單獨捲動 */
+@media (min-width:861px){
+  .rail{position:relative;top:auto;max-height:var(--railH,calc(100vh - var(--hdr,60px) - 24px));overflow-y:auto;overscroll-behavior:contain}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="sh0" viewBox="0 0 20 20"><path d="M10 2 19 18H1z" fill="#fff"/></symbol>
+    <symbol id="sh1" viewBox="0 0 20 20"><path d="M10 1 19 10 10 19 1 10z" fill="#fff"/></symbol>
+    <symbol id="sh2" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5" fill="#fff"/></symbol>
+    <symbol id="sh3" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" fill="#fff"/></symbol>
+    <symbol id="sh4" viewBox="0 0 20 20"><path d="M10 1.5 18.5 7.7 15.3 18H4.7L1.5 7.7z" fill="#fff"/></symbol>
+    <symbol id="sh5" viewBox="0 0 20 20"><path d="M5.5 2h9l4.5 8-4.5 8h-9L1 10z" fill="#fff"/></symbol>
+    <symbol id="i-img" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5L5 20"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<header class="top" id="top">
+  <div class="wrap row">
+    <a class="brand" href="#" aria-label="回到頂端"><span class="mini" aria-hidden="true"><i style="background:#E21B3C"></i><i style="background:#1368CE"></i><i style="background:#D89E00"></i><i style="background:#26890C"></i></span><span class="kmini">Kahoot</span>題目製作編輯器</a>
+    <nav class="topnav" aria-label="參考連結"><a href="https://kahoot-tools.github.io/info/#bank" target="_blank" rel="noopener">📚 參考題庫</a>
+    <a href="https://kahoot-tools.github.io/info/#make-notes" target="_blank" rel="noopener">📋 題目設定注意事項</a></nav>
+    <div class="grow"></div>
+    <span class="savechip" id="saveChip"></span>
+    <div class="dl">
+      <button class="btn btn-green" id="dlExcel">⬇ <span class="full">下載Excel</span><span class="short">Excel</span></button>
+      <button class="btn btn-purple" id="dlZip" disabled title="有上傳圖片時才需要">⬇ <span class="full">Excel+圖片(ZIP)</span><span class="short">ZIP</span></button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="banner">
+    <svg class="float f1" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2 19 18H1z" fill="#E21B3C" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg>
+    <svg class="float f2" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1 19 10 10 19 1 10z" fill="#1368CE" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg>
+    <svg class="float f3" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="#D89E00" stroke="#fff" stroke-width="1.4"/></svg>
+    <svg class="float f4" viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="16" height="16" rx="1.5" fill="#26890C" stroke="#fff" stroke-width="1.4"/></svg>
+    <h1><span class="kbox">Kahoot</span><span>題目製作編輯器</span></h1>
+    <p class="lead"><span class="hl">AI 自動識別題目</span><span>✨ 支援純文字、Word、PPT、Excel、PDF、圖片、TXT 檔案</span></p>
+    <p class="maker">skyeva / 羿璇（小天）製作</p>
+  </section>
+
+  <section class="blk">
+    <div class="blk-h"><span class="bi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></span><h2>選擇製作方式</h2></div>
+    <div class="modes">
+      <button class="mode" data-mode="upload"><span class="mi" style="background:var(--k0)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg></span><span><b>上傳檔案</b><small>Word、PPT、Excel、PDF、圖片、TXT</small></span></button>
+      <button class="mode" data-mode="paste"><span class="mi" style="background:var(--k1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg></span><span><b>貼上文字</b><small>複製題目貼上，或載入範本</small></span></button>
+      <button class="mode" data-mode="edit"><span class="mi" style="background:var(--k3)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></span><span><b>直接編輯</b><small>不用檔案，從第 1 題開始輸入</small></span></button>
+    </div>
+
+    <div class="panel" id="pUpload" hidden>
+      <div class="drop" id="drop" tabindex="0">
+        <div class="up"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg></div>
+        <h3>拖曳、點擊或貼上你的題目檔案</h3>
+        <p>文件：docx、pptx、xlsx、xls、csv、pdf、txt　圖片：jpeg、jpg、png、gif、webp（單檔 50 MB 內）</p>
+        <p>Word / PPT 裡的圖片會自動放進對應題目；檔案只在你的瀏覽器裡處理</p>
+        <span class="tip">擷取的文字會先放到「貼上文字」區，確認後再辨識</span>
+        <input type="file" id="fileInput" multiple hidden>
+      </div>
+      <div class="filelist" id="filelist"></div>
+    </div>
+
+    <div class="panel" id="pPaste" hidden>
+      <div class="pastehead">
+        <b>貼上題目文字</b>
+        <label class="tpl">載入範本
+          <select id="tplSel"><option value="">選擇範本…</option><option value="general">通用版</option><option value="wedding">婚禮版</option><option value="party">尾牙春酒版</option></select>
+        </label>
+      </div>
+      <textarea id="paste" placeholder="請在此貼上題目文字"></textarea>
+      <div class="pastefoot">
+        <span class="hint-inline">選項可用 A/B/C/D、頓號分隔或一行一個；答案可寫代號或選項文字。⟦圖1⟧ 代表檔案擷取到的圖片。</span>
+        <button class="chip" id="clearPaste">清空</button>
+      </div>
+      <div class="go">
+        <button class="btn btn-purple" id="parseBtn">✦ 開始辨識題目</button>
+        <div class="mode-text" id="modeText"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk" id="editor" hidden>
+    <div class="frame">
+      <div class="ed-head">
+        <div>
+          <div class="blk-h"><span class="bi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></span><h2>題目編輯</h2></div>
+          <div class="statrow"><div class="stat" id="stat"></div><button class="mini-btn danger" id="clearAll">清空全部</button></div>
+        </div>
+      </div>
+
+      <div class="titlebox">
+        <div class="titlerow">
+          <label for="gTitle">遊戲標題</label>
+          <input id="gTitle" type="text" maxlength="95" placeholder="例：快問快答挑戰賽（顯示在遊戲開始與頒獎台）">
+          <button class="btn btn-ghost" id="tgenToggle" type="button">🎰 參考標題<span class="tag">婚禮適用</span></button>
+        </div>
+        <div class="tgen" id="tgen" hidden>
+          <div class="tgen-top"><b>沒有想法嗎？看看參考標題吧！</b><small>婚禮適用</small></div>
+          <div class="tgen-body">
+            <div class="tgen-win" aria-live="polite"><div class="tgen-reel" id="tgenReel"><div>點右邊拉桿抽一個標題</div></div></div>
+            <button type="button" class="tgen-lever" id="tgenLever" aria-label="轉動標題產生器"><span class="stick"></span><span class="ball"></span></button>
+          </div>
+          <div class="tgen-act" id="tgenAct" hidden><button type="button" class="btn btn-purple" id="tgenUse">使用這個標題</button><button type="button" class="btn btn-ghost" id="tgenAgain">再換一個</button></div>
+        </div>
+        <button type="button" class="gs-toggle" id="gsToggle" aria-expanded="false"><span class="gs-t">更多設定</span><span class="gs-sum" id="gsSum"></span><span class="chev"></span></button>
+        <div class="gs-body" id="gsBody" hidden>
+          <div class="gmedia" id="gmedia"></div>
+          <p class="gnote">封面圖、背景圖皆為選填，若無附圖將由小幫手預設，或收到帳號後再自行更換。</p>
+          <div class="exbar">
+        <span class="row"><span class="lb">題目題號</span><span class="seg" id="qNo"><button data-v="none">無</button><button data-v="num">1、2、3、</button><button data-v="q">Q1、Q2、Q3、</button></span></span>
+        <span class="row"><span class="lb">選項前綴</span><span class="seg" id="optPrefix"><button data-v="none">無</button><button data-v="alpha">A. B. C. D.</button><button data-v="num">1. 2. 3. 4.</button></span></span>
+        <span class="grow"></span>
+        <span class="row"><span class="lb">答題秒數</span><select id="bulkTime"></select><button class="mini-btn" id="applyTime">套用全部</button></span>
+      </div>
+        </div>
+      </div>
+
+      <div class="studio">
+        <aside class="rail" id="rail" aria-label="題目縮圖，可拖曳調整順序">
+          <div id="thumbs"></div>
+          <button class="add-q" id="addQ" title="新增題目">＋<span class="lg"> 加入題目</span></button>
+        </aside>
+        <div class="stage" id="stage"></div>
+        <aside class="sidecol" id="side" aria-label="題目設定"></aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="blk-h"><span class="bi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17.5h.01"/></svg></span><h2>匯入說明</h2></div>
+    <div class="guide">
+      <div class="gcard">
+        <h3>如何匯入 Kahoot？</h3>
+        到 Kahoot 選擇 <span class="k">建立</span> › <span class="k">空白</span> › <span class="k">新增題目</span> › <span class="k">匯入</span> › 最下方 <span class="k">匯入試算表</span>，上傳下載的 Excel 即可。
+        <div class="note-p"><b>下載前</b>請確認每題都有勾選正確答案；文字雲、票選、開放式問答等不計對錯的題型可不勾。</div>
+      </div>
+      <div class="gcard">
+        <h3>有附圖片的題目</h3>
+        每題可放 <b>題目圖</b>、<b>解答圖</b>，選項也可以換成圖片。有圖片時下載 <b>ZIP</b>（Excel＋依題號命名的圖片），整包傳給我們即可。
+        <div class="note-p">請用 LINE 的<b>「檔案」</b>傳送 ZIP，不要用「相片」，避免被壓縮。</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <h2>有問題嗎？</h2>
+      <p style="margin-top:4px">傳訊息給官方帳號小幫手，我們會盡快回覆。</p>
+      <div class="line-row"><div class="lineid">LINE ID：<span>@791kunoo</span><button type="button" id="copyLine">複製</button></div><a class="btn btn-line" href="https://lin.ee/VGkH9Ps" target="_blank" rel="noopener">加入 LINE 官方帳號</a></div>
+    </div>
+    <div class="fb-side">
+      <button class="btn btn-fb" id="fbOpen" type="button"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg>意見反饋</button>
+      <small>您的建議能讓服務更好</small>
+    </div>
+  </div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.</div>
+</footer>
+
+<div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
+  <div class="fb-head"><b>意見反饋表 | 想說點什麼呢？</b><button type="button" class="fb-x" id="fbClose" aria-label="關閉">✕</button></div>
+  <div class="fb-frame"><iframe id="fbFrame" title="意見反饋表單"></iframe></div>
+  <p class="fb-note">若有圖片可直接傳到小幫手官方帳號 <a class="btn btn-line" href="https://lin.ee/VGkH9Ps" target="_blank" rel="noopener" style="padding:5px 12px;font-size:12.5px;margin-left:4px">LINE 官方帳號</a></p>
+  <p class="fb-note">表單沒有顯示嗎？<a href="https://docs.google.com/forms/d/e/1FAIpQLSe8DgYAie8HViYgseAP_XsMHZ1oOv5uTvJi5FaDqrIeeH3DoQ/viewform" target="_blank" rel="noopener">在新視窗開啟表單 ↗</a></p>
+</div></div>
+<button class="totop" id="toTop" type="button" aria-label="回到題目編輯"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+
+<div class="fbbg" id="bgbg"><div class="bg-panel" role="dialog" aria-modal="true" aria-label="選擇背景圖">
+  <div class="bg-head"><b>選擇背景圖</b><button type="button" class="fb-x" id="bgClose" aria-label="關閉">✕</button></div>
+  <div class="bg-cur" id="bgCur"></div>
+  <div class="bg-opts">
+    <div class="bg-card">
+      <div class="bg-ic" style="background:var(--k1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg></div>
+      <h3>上傳自訂圖片</h3>
+      <p>建議橫式 16:9（例如 1920×1080），jpeg、jpg、png、gif、webp，50 MB 內。</p>
+      <button class="btn btn-purple" data-bg="custom">選擇圖片</button>
+    </div>
+    <div class="bg-card">
+      <div class="bg-ic" style="background:var(--k3)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></div>
+      <h3>選用公版背景</h3>
+      <ol><li>打開 <a href="https://kahoot-tools.github.io/themes/" target="_blank" rel="noopener">Kahoot 主題背景預覽器 ↗</a></li><li>挑選喜歡的公版主題後截圖</li><li>回到這裡上傳截圖</li></ol>
+      <button class="btn btn-green" data-bg="theme">上傳公版截圖</button>
+    </div>
+  </div>
+  <input type="file" hidden id="bgFile" accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp">
+  <div id="bgErr"></div>
+</div></div>
+<div class="mbg" id="mbg"><div class="modal" role="dialog" aria-modal="true"><h3 id="mTitle"></h3><div class="mbody" id="mBody"></div><div class="mbtns" id="mBtns"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= 設定 ================= */
+// 之後串接 GPT 圖片生成時，填入中繼伺服器網址（例如 Cloudflare Worker）。留空＝不使用 GPT。
+const IMAGE_API = '';
+
+const TIMES=[5,10,15,20,30,45,60,90,120,180,240];
+const WARMUP='暖身題(不計分)';
+const IMG_EXT=/^(jpe?g|png|gif|webp)$/i, IMG_MIME=/^image\/(jpeg|png|gif|webp)$/i, MAX_IMG=50*1024*1024;
+const LIB={
+  xlsx:'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+  jszip:'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+  mammoth:'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js',
+  pdf:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+  pdfw:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
+  tess:'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'
+};
+const TITLES=["新郎&新娘 婚禮問答大挑戰","新郎&新娘 婚禮問答挑戰賽","新郎&新娘 婚禮問答題","新郎&新娘 快問快答挑戰賽","新郎&新娘 快問快答","新郎&新娘's wedding Q&A","新郎&新娘's wedding Game！","Wedding Q&A","Our Wedding Q&A","About Us","快問快答挑戰賽","婚禮問答遊戲","婚禮問答挑戰","婚禮快問快答","婚禮趣味問答","婚禮問答小遊戲","新郎新娘知多少","新郎新娘問答題","新郎新娘快問快答","婚禮問答Q&A","新郎&新娘 大囍的日子","大囍之日問答題","隨堂測驗","婚禮期末考","你夠了解新人嗎？","新人熟悉度考驗","大獎爭奪戰","誰是真愛粉♥手速搶答挑戰賽","婚禮有獎徵答小遊戲","獎品爭奪戰！誰是我們的真愛粉","婚禮小遊戲","婚禮期末考挑戰賽","新人QA大會考","婚禮小測驗","婚禮小測驗：你有多懂這對新人？","新人熟悉度考驗 大獎爭奪戰","最強親友認證賽","婚禮默契大考驗","誰最懂兩位新人 婚禮獎金爭霸戰","新郎與新娘的愛情小學堂","新郎&新娘 幸福問答題","愛情小考 你有多了解他們？","關於新郎新娘的快問快答","婚禮大作戰","見證愛情！關於我們的大小事","新郎與新娘的愛情默契大考驗","婚禮知識＋","愛情旅程大問答","新郎＆新娘 幸福搶分賽","甜蜜婚禮小測驗：你有多了解新人？","知識王爭霸戰","關於新郎與新娘的愛情大哉問！","Love Quiz | 新郎♥新娘","婚禮最強親友王","新郎&新娘愛情大哉問","我們結婚了～"];
+const TEMPLATES={
+general:`暖身題：請問今天是幾月幾號？
+5月20日、5月21日、5月22日、5月23日
+答案：5月20日
+
+1、請問今年是西元幾年？
+2023、2025、2026、2027
+答案：2026
+
+2、請問哪個月有28號？
+1月、2月、10月、每個月都有
+答案：每個月都有
+
+3、請問台積電股票代碼是多少？
+0050、2330、2454、2308
+答案：2330
+
+4、請問 紅色+黃色=？
+粉色、橘色、藍色、綠色
+答案：橘色
+
+5、瑪利歐的耀西是什麼動物？
+龍、蜥蜴、烏龜、矮袋鼠
+答案：烏龜`,
+wedding:`暖身題：請問今天是幾月幾號？
+5月20日、5月21日、5月22日、5月23日
+答案：5月20日
+
+1、請問新人的名字是？
+陳漢典＆ＬＵＬＵ、新郎＆新娘、楊過＆小龍女、周杰倫＆昆凌
+答案：新郎＆新娘
+
+2、請問各位今天參加婚禮的原因？
+看笑話、看熱鬧、看你沒有、看看愛情真正的樣子
+答案：看看愛情真正的樣子
+
+3、新郎新娘是怎麼認識的？
+交友軟體、公司同事、玩遊戲認識、路上搭訕
+答案：公司同事
+
+4、朋友留言「請去高麗菜那桌坐」，通常是在說什麼？
+你很有智慧
+你便祕了，要多吃蔬菜
+你被排擠了
+你要負責煮火鍋
+答案：你很有智慧
+
+5、全場最美的女人是？
+新娘、花童、我自己、主持人
+答案：新娘
+
+6、請問新郎長的像哪位明星？
+金城武、許光漢、彭于晏、以上皆是
+答案：以上皆是
+
+7、下列何者較高？
+新郎的地位、新娘的地位、新郎的身高、新郎躺下比較高
+答案：新娘的地位
+
+8、新郎今年30歲，請問新郎新娘差幾歲？
+一樣大、２歲、５歲、１２歲
+答案：１２歲
+
+【留言時間】留下想對新人說的話吧！`,
+party:`暖身題：請問各位今天是來參加？
+端午划龍舟、告別單身趴、尾牙、婚禮
+答案：尾牙
+
+1、尾牙抽獎時，最讓人期待聽到哪一句話？
+謝謝參與、明年再接再厲、這次沒有你的份、最大獎得主是你
+答案：最大獎得主是你
+
+2、如果可以選一種超能力帶去上班，你最可能想要哪一種？
+瞬間完成工作、隨時瞬間移動、讓時間暫停、以上皆可能是熱門選擇
+答案：以上皆可能是熱門選擇
+
+3、米老鼠有幾根手指？
+3根、4根、5根、6根
+答案：4根
+
+4、《甄嬛傳》中，華妃最具代表性的經典台詞是哪一句？
+臣妾做不到啊、賤人就是矯情、皇上，臣妾冤枉、你這個磨人的小妖精
+答案：賤人就是矯情
+
+5、2026年FIFA 世界盃足球賽冠軍是哪一隊？
+阿根廷、法國、西班牙、英格蘭
+答案：西班牙
+
+6、2026 年第 37 屆金曲獎，拿下「歌后」的是誰？
+彭佳慧、蔡依林、單依純、洪佩瑜
+答案：蔡依林
+
+7、最近有些人為了搶演唱會門票，特地去拜哪位神明？
+財神爺、月老、文昌帝君、土地公
+答案：月老
+
+8、請填空：「他很壞，＿＿＿」
+壞壞壞、嘟嘟嘟、咚咚咚、啦啦啦
+答案：嘟嘟嘟
+
+9、1=5、2=15、3=215、4=315、5=？
+415、45、1、2115
+答案：1
+
+10、北極熊皮膚的顏色是什麼？
+黑色、白色、褐色、杏色
+答案：黑色`
+};
+
+const S={qs:[],cur:0,qNo:'none',optPrefix:'none',name:'',title:'',defTime:20,editing:false,extraOpen:false,cover:null,bg:null,setOpen:false,gsOpen:false};
+const POOL=new Map(); let poolSeq=0;
+const loading=new Set();
+let aiSample=null, aiImages=false, downloadsCap=null;
+
+const $=s=>document.querySelector(s);
+const uid=()=>Math.random().toString(36).slice(2,10);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const timeLabel=t=>t<60?`${t} 秒`:t%60?`${Math.floor(t/60)} 分鐘 ${t%60} 秒`:`${t/60} 分鐘`;
+const cur=()=>S.qs[S.cur];
+/* ================= 小工具 ================= */
+const loaded={};
+function loadScript(url){
+  if(loaded[url]) return loaded[url];
+  return loaded[url]=new Promise((res,rej)=>{const s=document.createElement('script');s.src=url;s.onload=res;s.onerror=()=>{delete loaded[url];rej(new Error('元件載入失敗，請確認網路'))};document.head.appendChild(s)});
+}
+let toastT;
+function toast(m,ms=2600){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),ms)}
+function modal(title,html,buttons){
+  return new Promise(res=>{
+    $('#mTitle').textContent=title;$('#mBody').innerHTML=html;
+    const box=$('#mBtns');box.innerHTML='';
+    buttons.forEach(b=>{const el=document.createElement('button');el.className='btn '+(b.primary?'btn-purple':'btn-ghost');el.textContent=b.label;el.onclick=()=>{$('#mbg').classList.remove('show');res(b.value)};box.appendChild(el)});
+    $('#mbg').classList.add('show');
+  });
+}
+function copyText(t){
+  const fb=()=>{const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(e){}ta.remove()};
+  try{if(navigator.clipboard)return navigator.clipboard.writeText(t).catch(fb)}catch(e){}
+  fb();return Promise.resolve();
+}
+function imgError(file,noGif){
+  const name=file.name||'圖片';const ext=(name.split('.').pop()||'').toLowerCase();
+  if(noGif&&(ext==='gif'||/gif/i.test(file.type))) return `<div class="errbox"><div class="eh">ⓘ 圖標答題不支援 <b>${esc(name)}</b>（GIF）</div>請以下列格式上傳你的檔案：<br><b>圖片：</b>jpeg、jpg、png、webp</div>`;
+  if(!(IMG_MIME.test(file.type)||IMG_EXT.test(ext))) return `<div class="errbox"><div class="eh">ⓘ 不支援 <b>${esc(name)}</b> 格式</div>請以下列格式上傳你的檔案：<br><b>圖片：</b>jpeg、jpg、png、gif、webp</div>`;
+  if(file.size>MAX_IMG) return `<div class="errbox"><div class="eh">ⓘ <b>${esc(name)}</b> 超過 50 MB</div>請壓縮或換一張較小的圖片</div>`;
+  return '';
+}
+const mimeOf=ext=>({jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp'})[ext.toLowerCase()]||'';
+function makeImg(blob,name){return {blob,name:name||'image.png',url:URL.createObjectURL(blob)}}
+function b64ToBlob(b64,type){const bin=atob(b64);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type})}
+
+/* ================= Claude 頁面能力（只在 Claude 裡有） ================= */
+if(window.claude&&typeof window.claude.use==='function'){
+  window.claude.use('sample').then(async s=>{if(!s)return;aiSample=s;try{aiImages=!!(await s.limits()).images}catch(e){}updateModeText();if(S.qs.length)renderStage()}).catch(()=>{});
+  window.claude.use('downloads').then(d=>{downloadsCap=d||null}).catch(()=>{});
+}
+const canAiImage=()=>!!(IMAGE_API||aiSample);
+function updateModeText(){
+  $('#modeText').innerHTML=aiSample?'辨識方式：<b>AI 智慧辨識</b>（失敗時自動改用規則辨識）':'辨識方式：<b>規則辨識</b>（題號、選項、「答案：」標示）';
+}
+
+/* ================= 解析 ================= */
+/* ======== PARSER-START ======== */
+function normalize(s){return s.replace(/[\uFF01-\uFF5E]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).replace(/\u3000/g,' ')}
+function blankRange(str,s,e){return str.slice(0,s)+' '.repeat(e-s)+str.slice(e)}
+function cleanPart(s){return s.replace(/\s*\n\s*/g,' ').replace(/[ \t]+/g,' ').trim().replace(/^[\/\s:：.、)）]+/,'').replace(/[\/\s;；,，、。(（]+$/,'').trim()}
+const CIRCLED='①②③④⑤⑥';
+const nk=s=>normalize(String(s)).replace(/\s+/g,'').toLowerCase();
+function pickSeq(ms){
+  let best=[];
+  for(let k=0;k<ms.length;k++){
+    if(ms[k].idx!==0) continue;
+    const seq=[ms[k]];let want=1;
+    for(let j=k+1;j<ms.length&&want<6;j++) if(ms[j].idx===want&&ms[j].start>=seq[seq.length-1].end){seq.push(ms[j]);want++}
+    if(seq.length>best.length) best=seq;
+    if(seq.length>=4) break;
+  }
+  return best;
+}
+function findLabels(n,loose){
+  const ms=[];let m;
+  const re=loose?/(?<![A-Za-z])([A-F])(?![a-z])/g:/\(\s*([A-Fa-f])\s*\)|(?<![A-Za-z])([A-F])\s*[.、:)](?!\d)/g;
+  while((m=re.exec(n))) ms.push({idx:(m[1]||m[2]).toUpperCase().charCodeAt(0)-65,start:m.index,end:m.index+m[0].length});
+  if(!loose){const rc=/[①②③④⑤⑥]/g;while((m=rc.exec(n))) ms.push({idx:CIRCLED.indexOf(m[0]),start:m.index,end:m.index+1});ms.sort((a,b)=>a.start-b.start)}
+  return ms;
+}
+function lineSplit(o,n){
+  // 沒有 A/B/C/D 代號時：第一行是題目，最後一行用頓號分隔，或每行一個選項
+  const lines=[];let p=0;
+  for(const L of n.split('\n')){if(L.trim())lines.push({s:p,e:p+L.length});p+=L.length+1}
+  if(lines.length<2) return null;
+  const txt=r=>o.slice(r.s,r.e);
+  const last=lines[lines.length-1];
+  const parts=txt(last).split(/[、\/／｜|]/).map(s=>s.trim()).filter(Boolean);
+  if(parts.length>=2&&parts.length<=6) return {text:lines.slice(0,-1).map(txt).join(' '),options:parts,optStart:last.s};
+  const rest=lines.slice(1);
+  if(rest.length>=2&&rest.length<=6&&rest.every(r=>txt(r).trim().length<=40)) return {text:txt(lines[0]),options:rest.map(r=>txt(r).trim()),optStart:rest[0].s};
+  return null;
+}
+function resolveAnswers(raw,options){
+  if(!raw) return [];
+  raw=raw.trim().replace(/[。.,，、\s]+$/,'');
+  const on=options.map(nk);
+  const whole=on.indexOf(nk(raw));
+  if(whole>=0&&on[whole]) return [whole+1];
+  const one=t=>{
+    const i=on.indexOf(nk(t));if(i>=0&&on[i]) return i+1;
+    const nt=normalize(t).trim();
+    if(/^[A-Fa-f]$/.test(nt)) return nt.toUpperCase().charCodeAt(0)-64;
+    if(/^[1-6]$/.test(nt)) return +nt;
+    if(CIRCLED.includes(nt)&&nt.length===1) return CIRCLED.indexOf(nt)+1;
+    return null;
+  };
+  const toks=raw.split(/\s*(?:[、,，\/&＆]|及|和|與)\s*/).filter(Boolean);
+  let res=toks.map(one);
+  if(res.some(x=>x===null)&&/^[A-Fa-f]{2,6}$/.test(normalize(raw).trim())) res=[...normalize(raw).trim()].map(c=>c.toUpperCase().charCodeAt(0)-64);
+  res=res.filter(x=>x!==null);
+  if(!res.length){const hit=on.map((o,i)=>o&&(o.includes(nk(raw))||nk(raw).includes(o))?i+1:0).filter(Boolean);if(hit.length===1)res=hit}
+  return [...new Set(res)].filter(a=>a>=1&&a<=6).sort((a,b)=>a-b);
+}
+function parseBlock(o,n){
+  const marks=[];let m;const mre=/⟦圖(\d+)⟧/g;
+  while((m=mre.exec(n))) marks.push({num:+m[1],pos:m.index,len:m[0].length});
+  for(const k of marks){o=blankRange(o,k.pos,k.pos+k.len);n=blankRange(n,k.pos,k.pos+k.len)}
+  // 答案（必須在行首、空白或括號後，避免誤判題目裡的「答案」兩字）
+  const ansRe=/(?<![^\s(])\(?\s*(?:正確答案|答案|解答|正解|ans(?:wer)?)\s*(?:[:=]\s*|(?=[A-F1-6①②③④⑤⑥](?:\s*[),、&\/及和與]|\s*$)))([^\n)]*)\)?/gim;
+  let last=null;while((m=ansRe.exec(n))) last=m;
+  let rawAns='';
+  if(last){
+    if(last[1]){const g=last.index+last[0].lastIndexOf(last[1]);rawAns=o.slice(g,g+last[1].length)}
+    o=blankRange(o,last.index,last.index+last[0].length);n=blankRange(n,last.index,last.index+last[0].length);
+  }
+  let text,options=[],optStart=Infinity;
+  let seq=pickSeq(findLabels(n,false));
+  if(seq.length>=2){
+    text=cleanPart(o.slice(0,seq[0].start));
+    options=seq.map((s,i)=>cleanPart(o.slice(s.end,i+1<seq.length?seq[i+1].start:o.length)));optStart=seq[0].start;
+  }else{
+    const ls=lineSplit(o,n);
+    if(ls){text=cleanPart(ls.text);options=ls.options.map(cleanPart);optStart=ls.optStart}
+    else{
+      seq=pickSeq(findLabels(n,true));
+      if(seq.length>=2){text=cleanPart(o.slice(0,seq[0].start));options=seq.map((s,i)=>cleanPart(o.slice(s.end,i+1<seq.length?seq[i+1].start:o.length)));optStart=seq[0].start}
+      else text=cleanPart(o);
+    }
+  }
+  options=options.slice(0,6);
+  const answers=resolveAnswers(rawAns,options);
+  let qimgNum=null,oimgNum=null;
+  for(const k of marks){
+    if(k.pos<optStart&&qimgNum===null) qimgNum=k.num;
+    else if(oimgNum===null) oimgNum=k.num;
+    else if(qimgNum===null) qimgNum=k.num;
+  }
+  while(options.length<4&&options.length>0) options.push('');
+  if(!options.length) options=['','','',''];
+  return {text,options,answers,qimgNum,oimgNum};
+}
+function parseText(raw){
+  const o=raw.replace(/\r\n?/g,'\n');const n=normalize(o);
+  const starts=[];let lastNum=null,p=0;
+  for(const L of n.split('\n')){
+    const s=p;p+=L.length+1;let m;
+    if(/^\s*【[^】]*】\s*$/.test(L)){starts.push({s,e:s+L.length,header:true});lastNum=0;continue}
+    if((m=L.match(/^\s*暖身題\s*[:.、]?\s*/))){starts.push({s,e:s+m[0].length,warm:true});lastNum=0;continue}
+    if((m=L.match(/^\s*【([^】]+)】\s*(?=\S)/))){starts.push({s,e:s+m[0].length,open:m[1].trim()});continue}
+    if((m=L.match(/^[ \t]*(?:\((\d{1,3})\)|(?:Q|第)?[ \t]*(\d{1,3})[ \t]*題?[ \t]*(?:\.(?!\d)|[、:)\]]))/i))){
+      const num=+(m[1]||m[2]);
+      if(lastNum===null||(num>lastNum&&num<=lastNum+3)){starts.push({s,e:s+m[0].length});lastNum=num}
+    }
+  }
+  const real=starts.filter(x=>!x.header);
+  const out=[];
+  if(real.length){
+    const pre=(n.slice(0,real[0].s).match(/⟦圖\d+⟧/g)||[]).join('');
+    starts.forEach((st,i)=>{
+      if(st.header) return;
+      const end=i+1<starts.length?starts[i+1].s:n.length;
+      const px=st===real[0]?pre:'';
+      const q=parseBlock(px+o.slice(st.e,end),px+n.slice(st.e,end));
+      if(st.warm){q.note=WARMUP;q.points='none'}
+      if(st.open){q.type='open';q.note=st.open;q.options=['','','',''];q.answers=[]}
+      out.push(q);
+    });
+  }else{
+    const re=/\n\s*\n/g;let m,s=0;const rs=[];
+    while((m=re.exec(n))){rs.push([s,m.index]);s=m.index+m[0].length}rs.push([s,n.length]);
+    rs.forEach(([a,b])=>out.push(parseBlock(o.slice(a,b),n.slice(a,b))));
+  }
+  return out.filter(q=>q.text||q.options.some(Boolean));
+}
+/* ======== PARSER-END ======== */
+
+function enrich(p){
+  const q={type:'quiz',points:'standard',...p,multi:(p.answers||[]).length>1,note:p.note||''};
+  const tags=[[/分數加倍|雙倍分數|兩倍分數/,x=>x.points='double'],[/不計分/,x=>x.points='none'],[/複選/,x=>x.multi=true],
+    [/文字雲/,x=>x.type='wordcloud'],[/票選|投票/,x=>x.type='poll'],[/是非/,x=>x.type='tf'],[/開放式/,x=>x.type='open'],[/排列|排序題/,x=>x.type='jumble']];
+  q.text=(q.text||'').replace(/[\(（]([^()（）]{1,12})[\)）]/g,(all,inner)=>{let hit=false;for(const [re,fn] of tags) if(re.test(inner)){fn(q);hit=true}return hit?'':all}).trim();
+  const pick=num=>{if(num==null)return null;const it=POOL.get(num);return it?makeImg(it.blob,it.name):null};
+  q.qimg=pick(p.qimgNum);q.aimg=pick(p.oimgNum);q.oimgs=[];
+  delete q.qimgNum;delete q.oimgNum;
+  return q;
+}
+
+async function aiParse(text){
+  const prompt=`你是 Kahoot 題目整理助手。以下文字來自客戶上傳的檔案或貼上的內容（可能有 OCR 錯字、排版混亂）。
+請找出所有題目，只輸出 JSON 陣列，每題格式：
+{"question":"題目文字（去掉題號與「暖身題：」字樣）","options":["選項1","選項2"],"answers":[正確選項編號，從1起算],"type":"quiz|tf|poll|wordcloud|open|jumble","points":"standard|double|none","note":"其他備註或空字串","qimg":"","aimg":""}
+規則：
+- 保留原文用字與繁體中文，只修正明顯 OCR 錯字，不要改寫。選項最多 6 個，去掉 A/B/C/D 代號；選項可能用頓號分隔或一行一個。
+- 答案可能寫代號，也可能直接寫選項文字，請換成編號。不要自己猜：原文沒標答案就給 []；複選就全部列出。
+- 「暖身題」→ points 為 none、note 為「暖身題(不計分)」；分數加倍→double；【留言時間】這類沒有選項的→type open、note 填括號內文字；文字雲、票選、是非、排序題設定對應 type，否則 quiz。
+- 文字中的 ⟦圖N⟧ 代表檔案裡的圖片：在題目附近的填進 qimg，在選項或答案之後的填進 aimg，值填原本的 ⟦圖N⟧；沒有就空字串。
+- 只輸出 JSON。
+
+文字：
+${text.slice(0,40000)}`;
+  let v=await aiSample.json(prompt,{modelTier:'default'});
+  if(v&&!Array.isArray(v)) v=v.questions||v.items||[];
+  if(!Array.isArray(v)||!v.length) throw new Error('AI 沒有回傳題目');
+  const num=s=>{const m=String(s||'').match(/⟦圖(\d+)⟧/);return m?+m[1]:null};
+  return v.map(x=>{
+    let options=(Array.isArray(x.options)?x.options:[]).map(s=>String(s??'').trim()).slice(0,6);
+    while(options.length<4) options.push('');
+    const answers=[...new Set((Array.isArray(x.answers)?x.answers:[]).map(Number).filter(a=>a>=1&&a<=6))].sort((a,b)=>a-b);
+    const q=enrich({text:String(x.question??'').trim(),options,answers,note:String(x.note??'').trim(),qimgNum:num(x.qimg),oimgNum:num(x.aimg)});
+    if(TYPES[x.type]) q.type=x.type;
+    if(['standard','double','none'].includes(x.points)) q.points=x.points;
+    return q;
+  });
+}
+
+/* ================= 檔案擷取 ================= */
+function addPool(blob,name){
+  const ext=(name.split('.').pop()||'').toLowerCase();
+  if(!IMG_EXT.test(ext)||blob.size>MAX_IMG||blob.size<1500) return '';
+  const n=++poolSeq;POOL.set(n,{blob,name});return `⟦圖${n}⟧`;
+}
+async function readTxt(file){
+  const buf=await file.arrayBuffer();
+  try{return new TextDecoder('utf-8',{fatal:true}).decode(buf)}catch(e){}
+  try{return new TextDecoder('big5').decode(buf)}catch(e){return new TextDecoder().decode(buf)}
+}
+async function readDocx(file){
+  await loadScript(LIB.mammoth);
+  let k=0;
+  const r=await mammoth.convertToHtml({arrayBuffer:await file.arrayBuffer()},{convertImage:mammoth.images.imgElement(async img=>{
+    const ext=(img.contentType||'').split('/')[1]||'png';
+    const blob=b64ToBlob(await img.read('base64'),img.contentType);
+    const mk=addPool(blob,`word圖片${++k}.${ext==='jpeg'?'jpg':ext}`);
+    return {src:mk?'marker:'+mk:'skip:'};
+  })});
+  const doc=new DOMParser().parseFromString(r.value,'text/html');
+  const lines=[];const BLOCK=/^(P|H[1-6]|LI|TR)$/;
+  const txt=node=>{
+    if(node.nodeType===3) return node.data;
+    if(node.nodeName==='IMG'){const s=node.getAttribute('src')||'';return s.startsWith('marker:')?s.slice(7):''}
+    if(node.nodeName==='BR') return '\n';
+    let s=[...node.childNodes].map(txt).join('');
+    if(node.nodeName==='TD'||node.nodeName==='TH') s+=' ';
+    return s;
+  };
+  const walk=el=>{for(const c of el.children){if(BLOCK.test(c.nodeName))lines.push(txt(c));else walk(c)}};
+  walk(doc.body);
+  return lines.join('\n');
+}
+function resolvePath(base,target){
+  if(target.startsWith('/')) return target.slice(1);
+  const parts=base.split('/');parts.pop();
+  for(const seg of target.split('/')){if(seg==='..')parts.pop();else if(seg!=='.')parts.push(seg)}
+  return parts.join('/');
+}
+async function readPptx(file){
+  await loadScript(LIB.jszip);
+  const zip=await JSZip.loadAsync(await file.arrayBuffer());
+  const names=Object.keys(zip.files).filter(n=>/^ppt\/slides\/slide\d+\.xml$/.test(n)).sort((a,b)=>(+a.match(/(\d+)\.xml/)[1])-(+b.match(/(\d+)\.xml/)[1]));
+  const A='http://schemas.openxmlformats.org/drawingml/2006/main',R='http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  const out=[];
+  for(const nm of names){
+    const doc=new DOMParser().parseFromString(await zip.file(nm).async('string'),'application/xml');
+    const rels={};
+    const relFile=zip.file(nm.replace('slides/','slides/_rels/')+'.rels');
+    if(relFile){const rd=new DOMParser().parseFromString(await relFile.async('string'),'application/xml');for(const r of rd.getElementsByTagName('Relationship'))rels[r.getAttribute('Id')]=r.getAttribute('Target')}
+    const items=[];
+    const walk=el=>{for(const c of el.children){
+      if(c.localName==='bg') continue;
+      if(c.localName==='p'&&c.namespaceURI===A){const t=[...c.getElementsByTagNameNS(A,'t')].map(x=>x.textContent).join('');if(t.trim())items.push(t);continue}
+      if(c.localName==='blip'){const id=c.getAttributeNS(R,'embed');if(id&&rels[id])items.push({path:resolvePath(nm,rels[id])});continue}
+      walk(c);
+    }};
+    walk(doc.documentElement);
+    const lines=[];
+    for(const it of items){
+      if(typeof it==='string'){lines.push(it);continue}
+      const f=zip.file(it.path);if(!f) continue;
+      const fname=it.path.split('/').pop();const mime=mimeOf(fname.split('.').pop()||'');
+      if(!mime) continue;
+      const mk=addPool(new Blob([await f.async('arraybuffer')],{type:mime}),'ppt_'+fname);
+      if(mk) lines.push(mk);
+    }
+    out.push(lines.join('\n'));
+  }
+  return out.join('\n\n');
+}
+async function readSheet(file){
+  await loadScript(LIB.xlsx);
+  const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});
+  const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});
+  for(let r=0;r<Math.min(rows.length,15);r++){
+    const h=rows[r].map(c=>String(c).trim().toLowerCase());
+    const qi=h.findIndex(c=>/^question|題目/.test(c));const a1=h.findIndex(c=>/answer\s*1|選項\s*1/.test(c));
+    if(qi>=0&&a1>=0){
+      const ai=[1,2,3,4,5,6].map(k=>h.findIndex(c=>new RegExp('(answer|選項)\\s*'+k+'(?!\\d)').test(c)));
+      const ti=h.findIndex(c=>/time|秒|時間/.test(c));
+      const ci=h.findIndex(c=>/correct|答案/.test(c)&&!/answer\s*\d|選項/.test(c));
+      const ni=h.findIndex(c=>/備註|note|remark/.test(c));
+      const qs=[];
+      for(const row of rows.slice(r+1)){
+        const text=String(row[qi]??'').trim().replace(/^\d{1,3}\s*[.、]\s*/,'');if(!text) continue;
+        let options=ai.filter(i=>i>=0).map(i=>String(row[i]??'').trim());
+        while(options.length>4&&!options[options.length-1]) options.pop();
+        while(options.length<4) options.push('');
+        const answers=ci>=0?[...new Set((String(row[ci]).match(/[1-6]/g)||[]).map(Number))]:[];
+        const t=ti>=0?parseInt(row[ti]):NaN;
+        const q=enrich({text,options,answers,note:ni>=0?String(row[ni]??'').trim():''});
+        if(TIMES.includes(t)) q.time=t;
+        if(/分數加倍/.test(q.note)) q.points='double';
+        if(/不計分/.test(q.note)) q.points='none';
+        qs.push(q);
+      }
+      if(qs.length) return {questions:qs};
+    }
+  }
+  return {text:rows.map(r=>r.map(c=>String(c).trim()).filter(Boolean).join('、')).filter(Boolean).join('\n')};
+}
+async function readPdf(file,setSt){
+  await loadScript(LIB.pdf);await loadScript(LIB.pdfw);
+  pdfjsLib.GlobalWorkerOptions.workerSrc=LIB.pdfw;
+  const pdf=await pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+  let text='';
+  for(let p=1;p<=pdf.numPages;p++){
+    setSt(`讀取第 ${p}/${pdf.numPages} 頁`);
+    const tc=await (await pdf.getPage(p)).getTextContent();let lastY=null;
+    for(const it of tc.items){const y=it.transform?it.transform[5]:null;if(lastY!==null&&y!==null&&Math.abs(y-lastY)>2&&!text.endsWith('\n'))text+='\n';text+=it.str;if(it.hasEOL)text+='\n';lastY=y}
+    text+='\n\n';
+  }
+  if(text.replace(/\s/g,'').length>=15*pdf.numPages) return text;
+  let out='';
+  for(let p=1;p<=pdf.numPages;p++){
+    setSt(`掃描檔，辨識第 ${p}/${pdf.numPages} 頁`);
+    const page=await pdf.getPage(p);const vp=page.getViewport({scale:2});
+    const cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;
+    await page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+    out+=await readImage(await new Promise(r=>cv.toBlob(r,'image/png')),setSt)+'\n\n';
+  }
+  return out;
+}
+let tessWorker=null;
+async function readImage(blob,setSt){
+  if(aiSample&&aiImages){
+    try{setSt('AI 辨識圖片中…');const r=await aiSample('請把圖片中的文字逐字轉成純文字（繁體中文），保留題號、選項代號與答案標示，依原本排版換行。只輸出文字。',{images:[blob],modelTier:'default'});return r.text||''}catch(e){console.warn(e)}
+  }
+  setSt('載入文字辨識（第一次較久）…');
+  await loadScript(LIB.tess);
+  if(!tessWorker) tessWorker=await Tesseract.createWorker('chi_tra+eng');
+  setSt('圖片文字辨識中…');
+  const {data}=await tessWorker.recognize(blob);
+  return data.text.replace(/([\u3400-\u9fff\uff00-\uffef])[ \t]+(?=[\u3400-\u9fff\uff00-\uffef])/g,'$1');
+}
+const DOC_EXT=['pdf','txt','docx','pptx','xlsx','xls','csv'];
+async function extractFile(file,setSt){
+  const ext=(file.name.split('.').pop()||'').toLowerCase();
+  if(IMG_EXT.test(ext)||IMG_MIME.test(file.type)) return {text:await readImage(file,setSt)};
+  if(ext==='pdf') return {text:await readPdf(file,setSt)};
+  if(ext==='txt') return {text:await readTxt(file)};
+  if(ext==='docx') return {text:await readDocx(file)};
+  if(ext==='pptx') return {text:await readPptx(file)};
+  return await readSheet(file);
+}
+async function handleFiles(files){
+  if(!files.length) return;
+  const list=$('#filelist');const sheetQs=[];const texts=[];
+  for(const f of files){
+    const ext=(f.name.split('.').pop()||'').toLowerCase();
+    const row=document.createElement('div');
+    if(!(DOC_EXT.includes(ext)||IMG_EXT.test(ext))||f.size>MAX_IMG){
+      row.innerHTML=f.size>MAX_IMG?`<div class="errbox"><div class="eh">ⓘ <b>${esc(f.name)}</b> 超過 50 MB</div></div>`
+        :`<div class="errbox"><div class="eh">ⓘ 不支援 <b>${esc(f.name)}</b> 格式</div>請以下列格式上傳你的檔案：<br><b>文件：</b>docx、pptx、xlsx、xls、csv、pdf、txt　<b>圖片：</b>jpeg、jpg、png、gif、webp${/^(doc|ppt)$/.test(ext)?'<br>舊版 .'+ext+' 請先另存為 .'+ext+'x':''}</div>`;
+      list.appendChild(row);continue;
+    }
+    row.className='fileitem';row.innerHTML=`<span>${esc(f.name)}</span><span class="st">準備中…</span>`;list.appendChild(row);
+    const st=row.querySelector('.st');const setSt=t=>{st.textContent=t};
+    try{
+      const before=poolSeq;
+      const r=await extractFile(f,setSt);
+      if(r.questions){sheetQs.push(...r.questions);st.textContent=`✓ 直接讀到 ${r.questions.length} 題`}
+      else{texts.push(r.text.trim());const imgs=poolSeq-before;st.textContent=`✓ 擷取 ${r.text.replace(/\s|⟦圖\d+⟧/g,'').length} 字`+(imgs?`、${imgs} 張圖`:'')}
+      st.classList.add('ok');
+    }catch(e){console.error(e);row.className='';row.innerHTML=`<div class="errbox"><div class="eh">ⓘ <b>${esc(f.name)}</b> 讀取失敗</div>${esc(e.message||'')}</div>`}
+  }
+  if(sheetQs.length) await applyParsed(sheetQs);
+  const t=texts.filter(Boolean);
+  if(t.length){
+    const p=$('#paste');let mode='add';
+    if(p.value.trim()) mode=await modal('貼上文字區已經有內容','「貼上文字」區原本已有文字或範本，新上傳檔案的內容要怎麼處理？',[{label:'接續在後面',value:'add'},{label:'覆蓋原本內容',value:'rep',primary:true}]);
+    p.value=(mode==='add'&&p.value.trim()?p.value.trim()+'\n\n':'')+t.join('\n\n');
+    setMode('paste');save();toast('文字已放到「貼上文字」區，確認後按「開始辨識題目」');
+  }
+}
+
+/* ================= 題型設定 ================= */
+const TYPES={
+  quiz:{label:'測驗',group:'測試知識',tag:''},
+  tf:{label:'是非題',group:'測試知識',tag:'是非題'},
+  typeans:{label:'簡答題',group:'測試知識',tag:'簡答題'},
+  slider:{label:'滑桿',group:'測試知識',tag:'滑桿題'},
+  pin:{label:'圖標答題',group:'測試知識',tag:'圖標答題'},
+  jumble:{label:'排列解謎',group:'測試知識',tag:'排列組合'},
+  poll:{label:'票選活動',group:'收集意見',tag:'票選',noPoints:true},
+  wordcloud:{label:'文字雲',group:'收集意見',tag:'文字雲',noPoints:true},
+  open:{label:'開放式問答',group:'收集意見',tag:'開放式問答',noPoints:true},
+  brainstorm:{label:'腦力激盪',group:'收集意見',tag:'腦力激盪',noPoints:true},
+  slide:{label:'投影片',group:'展示資訊',tag:'投影片',noPoints:true}
+};
+const TILE=['quiz','tf','poll'];
+const INFO={
+  wordcloud:'參與者可輸入並提交 20 個字元以內的簡短文字，回覆會顯示在大螢幕上。',
+  open:'參與者可自由輸入文字回覆（例如留言時間），回覆會顯示在大螢幕上。',
+  brainstorm:'參與者先提出想法，再一起投票選出最喜歡的。',
+  pin:'參與者需要在圖片上找出正確答案，並用圖標標記。'
+};
+const NOTE_PRESETS=[['暖身題','暖身題(不計分)'],['影片連結','影片連結：'],['答案解釋','答案解釋：']];
+const SLOT_LABEL={qimg:'題目圖',aimg:'解答圖',pin:'答案位置圖'};
+const slotLabel=s=>SLOT_LABEL[s]||`選項${+s.slice(1)+1}圖`;
+function getImg(q,s){return s[0]==='o'?(q.oimgs[+s.slice(1)]||null):s==='pin'?(q.pin&&q.pin.img):q[s]}
+function putImg(q,s,v){if(s[0]==='o'){const k=+s.slice(1);while(q.oimgs.length<=k)q.oimgs.push(null);q.oimgs[k]=v}else q[s]=v}
+function optCount(q){
+  if(q.type==='tf') return 2;
+  if(q.type==='typeans') return 4;
+  if(q.type==='jumble') return Math.min(4,Math.max(3,q.options.length));
+  return Math.min(6,Math.max(2,q.options.length));
+}
+const optFilled=(q,k)=>!!((q.options[k]||'').trim()||(TILE.includes(q.type)&&q.oimgs[k]));
+const colorIdx=(q,k)=>q.type==='tf'?[1,0][k]:k;
+function allImgs(q){
+  const out=[];
+  if(q.qimg) out.push(['qimg',q.qimg]);
+  if(q.type==='pin'&&q.pin&&q.pin.img) out.push(['pin',q.pin.img]);
+  if(q.aimg) out.push(['aimg',q.aimg]);
+  if(TILE.includes(q.type)) q.oimgs.forEach((im,k)=>{if(im&&k<optCount(q))out.push(['o'+k,im])});
+  return out;
+}
+function allImgsRaw(q){return [q.qimg,q.aimg,...q.oimgs,q.pin&&q.pin.img].filter(Boolean)}
+
+const isGif=im=>!!im&&(/\.gif$/i.test(im.name)||/gif/i.test(im.blob.type));
+function qNoLabel(i){
+  if(S.qNo==='none'||S.qs[i].type==='slide') return '';
+  let n=0;for(let j=0;j<=i;j++) if(S.qs[j].type!=='slide') n++;
+  return S.qNo==='q'?`Q${n}、`:`${n}、`;
+}
+const optPre=k=>S.optPrefix==='alpha'?`${'ABCDEF'[k]}. `:S.optPrefix==='num'?`${k+1}. `:'';
+const overBy=(s,lim)=>Math.max(0,(s||'').length-lim);
+/* ================= 題目資料 ================= */
+const MIN_TIME={typeans:20,jumble:20,pin:20,wordcloud:20,slider:10,open:30,brainstorm:30};
+const minTime=t=>MIN_TIME[t]||5;
+const clampTime=q=>{const m=minTime(q.type);if(q.time<m){q.time=TIMES.find(x=>x>=m);return true}return false};
+function applyTimeAll(t){let adj=0;S.qs.forEach(q=>{q.time=t;if(clampTime(q))adj++});return adj}
+function newQ(x={}){
+  const q={type:'quiz',text:'',options:['','','',''],answers:[],time:S.defTime,points:'standard',note:'',body:'',qimg:null,aimg:null,oimgs:[],slider:{min:'0',max:'50',ans:''},pin:null,...x};
+  q.id=x.id||uid();
+  if(!TIMES.includes(q.time)) q.time=S.defTime;
+  if(TYPES[q.type]) clampTime(q);
+  if(!TYPES[q.type]) q.type='quiz';
+  if(!Array.isArray(q.oimgs)) q.oimgs=[];
+  if(!q.slider) q.slider={min:'0',max:'50',ans:''};
+  while(q.options.length<4) q.options.push('');
+  delete q.multi;
+  return q;
+}
+function warmup(q){if(!q.note)q.note=WARMUP;q.points='none'}
+async function applyParsed(arr){
+  const qs=arr.map(x=>newQ(x));
+  let replaced=true;
+  if(S.qs.length&&S.qs.some(q=>q.text.trim()||q.options.some(Boolean))){
+    const v=await modal('已經有題目了',`目前已有 ${S.qs.length} 題，新辨識到 ${qs.length} 題。要怎麼處理？`,[{label:'取消',value:null},{label:'加在後面',value:'append'},{label:'全部取代',value:'replace',primary:true}]);
+    if(!v) return;
+    if(v==='replace'){revokeAll();S.qs=qs;S.cur=0}else{S.cur=S.qs.length;S.qs.push(...qs);replaced=false}
+  }else{revokeAll();S.qs=qs;S.cur=0}
+  if(replaced&&S.qs[0]&&!S.qs[0].note) warmup(S.qs[0]);
+  S.editing=true;render();save();
+  $('#editor').scrollIntoView({behavior:'smooth',block:'start'});
+  const noAns=S.qs.filter(q=>(q.type==='quiz'||q.type==='tf')&&!q.answers.length).length;
+  toast(`辨識完成：${qs.length} 題`+(noAns?`，其中 ${noAns} 題缺答案請補勾`:''),3500);
+}
+function revokeAll(){S.qs.forEach(q=>allImgsRaw(q).forEach(im=>URL.revokeObjectURL(im.url)))}
+function issuesOf(q){
+  const out=[];const n=optCount(q);const t=q.type;
+  if(!q.text.trim()) out.push('題目空白');
+  if(q.text.length>120) out.push(`題目 ${q.text.length} 字（上限 120）`);
+  if(TILE.includes(t)){
+    const filled=Array.from({length:n},(_,k)=>optFilled(q,k)).filter(Boolean).length;
+    if(filled<2) out.push('至少要 2 個選項');
+    q.options.slice(0,n).forEach((s,i)=>{if(s.length>75&&!q.oimgs[i])out.push(`選項 ${i+1} 超過 75 字`)});
+    if(t!=='poll'){
+      const a=q.answers.filter(x=>x<=n);
+      if(!a.length) out.push('尚未勾選正確答案');
+      a.forEach(x=>{if(!optFilled(q,x-1))out.push(`勾選的選項 ${x} 是空的`)});
+    }
+  }
+  if(t==='typeans'&&!q.options.slice(0,4).some(s=>s.trim())) out.push('請輸入至少 1 個答案');
+  if(t==='jumble'){const f=q.options.slice(0,n).filter(s=>s.trim()).length;if(f<3)out.push('排列解謎至少要 3 個答案')}
+  if(t==='slider'){
+    const {min,max,ans}=q.slider;const a=parseFloat(min),b=parseFloat(max),c=parseFloat(ans);
+    if(isNaN(a)||isNaN(b)||a>=b) out.push('請設定正確的數字區間（最小 < 最大）');
+    else if(isNaN(c)) out.push('請輸入滑桿的正確答案');
+    else if(c<a||c>b) out.push('答案不在數字區間內');
+  }
+  if(t==='pin'){if(!q.qimg)out.push('圖標答題需要上傳題目圖');else if(isGif(q.qimg))out.push('圖標答題不能使用 GIF，請換成 jpg / png');else if(!q.pin)out.push('請在圖片上標示正確位置')}
+  if(t==='jumble'||t==='typeans') q.options.slice(0,n).forEach((s,i)=>{if(s.length>75)out.push(`選項 ${i+1} 超過 75 字`)});
+  return out;
+}
+function composeNote(q){
+  const T=TYPES[q.type];const note=q.note.trim();const parts=[];
+  if(note) parts.push(note);
+  const add=s=>{if(!parts.some(p=>p.includes(s)))parts.push(s)};
+  if(!T.noPoints){
+    if(q.points==='double') add('分數加倍');
+    if(q.points==='none'&&!/不計分/.test(note)) add('不計分');
+  }
+  if(q.type==='quiz'&&q.answers.filter(a=>a<=optCount(q)).length>1) add('複選題');
+  if(q.qimg&&q.type!=='pin') add('附題目圖');
+  if(q.aimg) add('附解答圖');
+  if(q.type==='slide'&&q.body.trim()) parts.push('內文：'+q.body.trim().replace(/\s*\n\s*/g,' / '));
+  return (T.tag?`【${T.tag}】`:'')+parts.join('、');
+}
+
+/* ================= 畫面 ================= */
+function setMode(m){
+  document.querySelectorAll('.mode').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  $('#pUpload').hidden=m!=='upload';$('#pPaste').hidden=m!=='paste';
+  if(m==='edit'){
+    S.editing=true;
+    if(!S.qs.length){S.qs.push(newQ());warmup(S.qs[0]);S.cur=0;save()}
+    render();
+    setTimeout(()=>focusQuestion(),50);
+  }
+}
+let railRO=null;
+function syncRailH(){
+  const rail=$('#rail'),cv=document.querySelector('#stage .canvas');
+  if(!rail||!cv||matchMedia('(max-width:860px)').matches){rail&&rail.style.removeProperty('--railH');return}
+  const h=cv.getBoundingClientRect().bottom-rail.getBoundingClientRect().top;
+  if(h>200) rail.style.setProperty('--railH',Math.round(h)+'px');
+}
+function watchRail(){
+  const cv=document.querySelector('#stage .canvas');if(!cv||!window.ResizeObserver) return syncRailH();
+  if(railRO) railRO.disconnect();
+  railRO=new ResizeObserver(()=>syncRailH());railRO.observe(cv);syncRailH();
+}
+window.addEventListener('resize',()=>syncRailH());
+function setHdr(){const t=$('#top');if(t)document.documentElement.style.setProperty('--hdr',t.offsetHeight+'px')}
+window.addEventListener('resize',setHdr);
+function focusQuestion(){
+  const st=$('#stage');if(!st) return;
+  const wide=!matchMedia('(max-width:860px)').matches;
+  const target=st;
+  const y=target.getBoundingClientRect().top+scrollY-($('#top').offsetHeight+12);
+  window.scrollTo({top:y,behavior:'smooth'});
+  const ta=st.querySelector('textarea[data-f=text]');ta&&ta.focus({preventScroll:true});
+}
+function render(){
+  const show=S.qs.length>0||S.editing;
+  $('#editor').hidden=!show;document.body.classList.toggle('has-editor',show);
+  if(!show) return;
+  if(S.cur>=S.qs.length) S.cur=Math.max(0,S.qs.length-1);
+  renderRail();renderStage();renderStat();
+}
+function thumbHTML(q,i){
+  const bad=issuesOf(q).length>0;
+  let bars='';
+  if(TILE.includes(q.type)){const n=optCount(q);bars=Array.from({length:n},(_,k)=>`<i class="s${colorIdx(q,k)} ${q.answers.includes(k+1)?'c':''}"></i>`).join('')}
+  const thumbImg=q.type==='pin'&&q.pin?q.pin.img:q.qimg;
+  return `<div class="titem ${i===S.cur?'on':''}" data-i="${i}">
+    <div class="thumb" role="button" tabindex="0" aria-label="第 ${i+1} 題">
+      <span class="tn">${i+1}</span>${q.type!=='quiz'?`<span class="ttype">${TYPES[q.type].label}</span>`:''}${bad?'<span class="tdot" title="有欄位待確認"></span>':''}
+      <div class="tv">${thumbImg?`<img src="${thumbImg.url}" alt="">`:`<svg width="30" height="30"><use href="#i-img"/></svg>`}</div>
+      <div class="tt">${esc(q.text)||'<span style="color:#a59db8">（未輸入題目）</span>'}</div>
+      <div class="tbars">${bars}</div>
+    </div>
+    <div class="tbtns"><button type="button" data-tact="dup" data-i="${i}">⧉ 複製</button><button type="button" class="del" data-tact="del" data-i="${i}">🗑 刪除</button></div>
+  </div>`;
+}
+function renderRail(){
+  $('#thumbs').innerHTML=S.qs.map(thumbHTML).join('');
+  const on=document.querySelector('.titem.on');on&&on.scrollIntoView({block:'nearest',inline:'nearest'});
+}
+function refreshThumb(i){
+  const el=document.querySelector(`.titem[data-i="${i}"]`);if(!el) return;
+  const tmp=document.createElement('div');tmp.innerHTML=thumbHTML(S.qs[i],i);el.replaceWith(tmp.firstElementChild);
+}
+const FILE_ACCEPT='.jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp';
+const IMG_ICON='<svg width="22" height="22"><use href="#i-img"/></svg>';
+function slotHTML(q,slot,labelOverride){
+  const im=getImg(q,slot);const label=labelOverride||slotLabel(slot);const key=q.id+slot;
+  if(im) return `<div class="slot filled" data-slot="${slot}"><img src="${im.url}" alt="${label}"><span class="stag">${label}</span>
+    <div class="sact"><button data-act="pick" data-slot="${slot}" title="更換圖片" aria-label="更換">✎</button><button data-act="rmimg" data-slot="${slot}" title="移除圖片" aria-label="移除">✕</button></div>
+    <input type="file" hidden accept="${FILE_ACCEPT}" data-file="${slot}"></div>`;
+  return `<div class="slot ${loading.has(key)?'loading':''}" data-slot="${slot}" tabindex="0">
+    <div class="errwrap"></div>
+    <svg class="si" width="34" height="34"><use href="#i-img"/></svg>
+    <b>${label}</b>
+    <small>拖曳、點擊上傳或貼上（Ctrl+V）<br>jpeg、jpg、png、gif、webp · 50 MB 內</small>
+    <div class="sbtns"><button data-act="pick" data-slot="${slot}">上傳圖片</button>${canAiImage()&&slot!=='aimg'?`<button class="ai" data-act="aiimg" data-slot="${slot}">✨ AI 生成</button>`:''}</div>
+    <input type="file" hidden accept="${FILE_ACCEPT}" data-file="${slot}"></div>`;
+}
+function typeOptions(sel){
+  const groups={};Object.entries(TYPES).forEach(([k,t])=>(groups[t.group]=groups[t.group]||[]).push([k,t]));
+  return Object.entries(groups).map(([g,arr])=>`<optgroup label="${g}">${arr.map(([k,t])=>`<option value="${k}" ${k===sel?'selected':''}>${t.label}</option>`).join('')}</optgroup>`).join('');
+}
+const CHECK='<svg><use href="#i-check"/></svg>';
+function tilesHTML(q){
+  const n=optCount(q);const t=q.type;
+  const tiles=Array.from({length:n},(_,k)=>{
+    const ci=colorIdx(q,k);const im=q.oimgs[k];const filled=optFilled(q,k);const right=t!=='poll'&&q.answers.includes(k+1);
+    const ph=t==='tf'?(k?'否':'是'):`新增答案 ${k+1}${k>=2?'（選填）':''}`;
+    const ov=im?0:overBy(q.options[k],75);
+    const body=im?`<div class="optpic"><img src="${im.url}" alt="選項 ${k+1} 圖片"></div>`:`${S.optPrefix!=='none'?`<span class="opre">${optPre(k).trim()}</span>`:''}<input data-f="opt" data-k="${k}" value="${esc(q.options[k]||'')}" placeholder="${ph}">`;
+    const imgBtn=im?`<button class="oimgx" data-act="rmimg" data-slot="o${k}" title="移除圖片" aria-label="移除選項 ${k+1} 圖片">✕</button>`:`<button class="oimgbtn" data-act="pick" data-slot="o${k}" title="加入以圖片作答選項" aria-label="選項 ${k+1} 改用圖片">${IMG_ICON}</button>`;
+    const rm=(t!=='tf'&&n>2)?`<button class="rm" data-act="delopt" data-k="${k}" title="刪除此選項" aria-label="刪除選項">✕</button>`:'';
+    const chk=t!=='poll'?`<button class="chk ${right?'on':''}" data-act="ans" data-k="${k}" aria-label="把選項 ${k+1} 設為正確答案" title="勾選為正確答案（勾 2 個以上自動變複選題）">${CHECK}</button>`:'';
+    return `<div class="ans c${ci} ${filled?'filled':''} ${right?'right':''} ${im?'hasimg':''}" data-slot="o${k}" data-k="${k}"><span class="ocnt ${ov?'over':''}">${ov?'-'+ov:(q.options[k]||'').length+'/75'}</span><span class="shape s${ci}"><svg><use href="#sh${ci}"/></svg></span>${body}${imgBtn}${rm}${chk}<input type="file" hidden accept="${FILE_ACCEPT}" data-file="o${k}"></div>`;
+  }).join('');
+  const anyImg=q.oimgs.slice(0,n).some(Boolean);
+  return `<div class="answers">${tiles}</div>
+    ${anyImg?'<div class="optnote">選項只能圖片或文字擇一顯示，兩者都要顯示的話，請先把圖片壓上文字再上傳。</div>':''}
+    ${t!=='tf'&&n<6?'<button class="addmore" data-act="addopt">新增更多答案</button>':''}
+    ${t==='poll'?'<div class="typehint">票選沒有對錯，不用勾選答案</div>':''}`;
+}
+function typeansHTML(q){
+  const inp=k=>{const ov=overBy(q.options[k],75);return `<span class="tawrap"><span class="ocnt ${ov?'over':''}">${ov?'-'+ov:(q.options[k]||'').length+'/75'}</span><input data-f="opt" data-k="${k}" value="${esc(q.options[k]||'')}" placeholder="輸入答案"></span>`};
+  return `<div class="ta-main">${inp(0)}</div>
+    <div class="ta-sub-h">其他接受的答案</div>
+    <div class="ta-sub">${[1,2,3].map(inp).join('')}</div>
+    <div class="typehint">最多 4 個容錯答案，參與者輸入其中任一個都算答對</div>`;
+}
+function sliderPos(q){const a=parseFloat(q.slider.min),b=parseFloat(q.slider.max),c=parseFloat(q.slider.ans);if(isNaN(a)||isNaN(b)||isNaN(c)||a>=b)return null;return Math.max(0,Math.min(100,(c-a)/(b-a)*100))}
+function sliderHTML(q){
+  const p=sliderPos(q);
+  return `<div class="slider-box">
+      <label>最小<input data-f="smin" type="number" inputmode="decimal" value="${esc(q.slider.min)}"></label>
+      <div class="track" id="sTrack">${p===null?'':`<span class="ln" style="left:${p}%"></span><span class="mk" style="left:${p}%">答案 ${esc(q.slider.ans)}</span>`}</div>
+      <label>最大<input data-f="smax" type="number" inputmode="decimal" value="${esc(q.slider.max)}"></label>
+    </div>
+    <div class="slider-ans"><label>正確答案<input data-f="sans" type="number" inputmode="decimal" value="${esc(q.slider.ans)}" placeholder="例：25"></label></div>
+    <div class="typehint">參與者拖動滑桿選數字，越接近正確答案分數越高</div>`;
+}
+function jumbleHTML(q){
+  const n=optCount(q);
+  const items=Array.from({length:n},(_,k)=>`<div class="jitem" data-k="${k}"><span class="ocnt ${overBy(q.options[k],75)?'over':''}">${overBy(q.options[k],75)?'-'+overBy(q.options[k],75):(q.options[k]||'').length+'/75'}</span><span class="ordn">${k+1}</span><span class="shape s${k}"><svg><use href="#sh${k}"/></svg></span><input data-f="opt" data-k="${k}" value="${esc(q.options[k]||'')}" placeholder="新增答案 ${k+1}${k>=3?'（選填）':''}">${n>3?`<button class="rm" data-act="delopt" data-k="${k}" title="刪除此選項" aria-label="刪除選項">✕</button>`:''}<span class="grip" title="拖曳調整順序" aria-label="拖曳調整順序">≡</span></div>`).join('');
+  return `<div class="jlist" id="jlist">${items}</div>
+    ${n<4?'<button class="addmore" data-act="addopt">新增答案</button>':''}
+    <div class="typehint">請按照<b>正確順序</b>新增 3～4 個答案，可拖曳右側 ≡ 調整順序（排好的順序就是答案），遊戲中會自動隨機排列。</div>`;
+}
+function infoIll(t){
+  if(t==='pin') return `<svg viewBox="0 0 120 80" width="120"><circle cx="62" cy="40" r="22" fill="#dfe6f2"/><g><path d="M30 14c-5 0-9 4-9 9 0 7 9 15 9 15s9-8 9-15c0-5-4-9-9-9z" fill="#1368ce"/><circle cx="30" cy="23" r="3" fill="#fff"/></g><g><path d="M95 18c-5 0-9 4-9 9 0 7 9 15 9 15s9-8 9-15c0-5-4-9-9-9z" fill="#e21b3c"/><circle cx="95" cy="27" r="3" fill="#fff"/></g><g><path d="M55 26c-5 0-9 4-9 9 0 7 9 15 9 15s9-8 9-15c0-5-4-9-9-9z" fill="#66bf39"/><path d="m51 35 3 3 5-5" stroke="#fff" stroke-width="2" fill="none"/></g><g><path d="M72 32c-5 0-9 4-9 9 0 7 9 15 9 15s9-8 9-15c0-5-4-9-9-9z" fill="#66bf39"/><path d="m68 41 3 3 5-5" stroke="#fff" stroke-width="2" fill="none"/></g><g><path d="M38 50c-5 0-9 4-9 9 0 7 9 15 9 15s9-8 9-15c0-5-4-9-9-9z" fill="#26890c"/><circle cx="38" cy="59" r="3" fill="#fff"/></g></svg>`;
+  if(t==='wordcloud') return `<svg viewBox="0 0 120 80" width="120"><rect x="38" y="8" width="34" height="13" rx="2" fill="#26890c"/><rect x="76" y="12" width="30" height="11" rx="2" fill="#e21b3c"/><rect x="26" y="25" width="56" height="16" rx="2" fill="#1368ce"/><rect x="10" y="45" width="100" height="18" rx="2" fill="#d89e00"/><rect x="30" y="66" width="44" height="11" rx="2" fill="#e21b3c"/><rect x="78" y="66" width="26" height="9" rx="2" fill="#26890c"/></svg>`;
+  return `<svg viewBox="0 0 120 80" width="120"><rect x="14" y="10" width="70" height="26" rx="6" fill="#fff" stroke="#5a2b85" stroke-width="2"/><rect x="36" y="44" width="70" height="26" rx="6" fill="#5a2b85"/><rect x="22" y="19" width="44" height="4" rx="2" fill="#c9b8e2"/><rect x="44" y="53" width="44" height="4" rx="2" fill="#fff"/></svg>`;
+}
+function renderStage(){
+  const q=cur();const st=$('#stage');
+  if(!q){st.innerHTML='<div class="canvas" style="text-align:center;padding:40px">還沒有題目，按「＋ 加入題目」開始</div>';return}
+  const t=q.type,T=TYPES[t];
+  let body='';
+  if(TILE.includes(t)) body=tilesHTML(q);
+  else if(t==='typeans') body=typeansHTML(q);
+  else if(t==='slider') body=sliderHTML(q);
+  else if(t==='jumble') body=jumbleHTML(q);
+  else if(t==='pin') body=`<div class="pinbar">${q.qimg?`<button class="btn btn-purple" data-act="pinedit">⌖ ${q.pin?'修改':'標示'}正確位置</button>`:'請先上傳題目圖，再標示正確位置'}</div>
+      ${q.pin?`<div class="pinprev"><img src="${q.pin.img.url}" alt="答案位置圖"><span class="stag">答案位置圖</span></div>`:''}
+      <div class="infocard"><div class="ill">${infoIll('pin')}</div><p>${INFO.pin}</p></div>`;
+  else if(t==='slide') body=`<textarea class="body-ta" data-f="body" placeholder="投影片內文">${esc(q.body)}</textarea>`;
+  else body=`<div class="infocard"><div class="ill">${infoIll(t)}</div><p>${INFO[t]}</p></div>`;
+  st.innerHTML=`
+    <div class="canvas">
+      <div class="cv-top"><span class="qbadge">第 ${S.cur+1} 題／共 ${S.qs.length} 題</span><span class="cvr"><button type="button" class="setbtn" data-side="open">⚙ 題目設定</button><button type="button" class="timepill" id="pill" data-side="time" title="點擊修改答題秒數">⏱ ${timeLabel(q.time)}</button></span></div>
+      <div class="qbox ${qNoLabel(S.cur)?'haspre':''}">${qNoLabel(S.cur)?`<span class="qpre">${qNoLabel(S.cur).trim()}</span>`:''}<textarea data-f="text" rows="1" placeholder="${t==='slide'?'輸入投影片標題':'開始輸入你的題目'}">${esc(q.text)}</textarea><span class="cnt"></span></div>
+      <div class="qmedia">${slotHTML(q,'qimg',t==='pin'?'題目圖（必填）':'')}</div>
+      ${body}
+      <div class="noterow"><span class="lb">備註</span><input data-f="note" value="${esc(q.note)}" placeholder="答案解釋文字、影片連結、口頭說明等"><select data-act="preset"><option value="">＋常用</option>${NOTE_PRESETS.map(([l,v])=>`<option value="${v}">${l}</option>`).join('')}</select></div>
+      <div class="extra">
+        <button class="extra-t ${S.extraOpen?'on':''}" data-act="extra" aria-expanded="${S.extraOpen}">📎 上傳其他圖片${q.aimg?'<span class="badge">已上傳解答圖</span>':''}<span class="chev"></span></button>
+        ${S.extraOpen?`<div class="extra-body">${slotHTML(q,'aimg')}</div>`:''}
+      </div>
+      <div class="exnote" id="exnote"></div>
+      <div class="issues" id="issues"></div>
+    </div>
+    <div class="navbtns"><button class="btn btn-ghost" data-act="prev" ${S.cur?'':'disabled style="visibility:hidden"'}>‹ 上一題</button><button class="btn btn-ghost" data-act="next">${S.cur<S.qs.length-1?'下一題 ›':'＋ 下一題'}</button></div>`;
+  autosize(st.querySelector('textarea[data-f=text]'));
+  renderSide();
+  watchRail();
+  if(t==='jumble') makeSortable($('#jlist'),{itemSel:'.jitem',handleSel:'.grip',axis:()=>'y',onCommit:order=>{
+    const qq=cur();const n=optCount(qq);const opts=order.map(k=>qq.options[k]);qq.options=[...opts,...qq.options.slice(n)];changed(true);
+  }});
+  refreshMeta();
+}
+function autosize(ta){if(!ta)return;ta.style.height='auto';ta.style.height=ta.scrollHeight+'px'}
+function refreshMeta(){
+  const q=cur();if(!q) return;
+  const ex=$('#exnote');if(ex){const c=composeNote(q);ex.textContent=c?'匯出備註：'+c:''}
+  const is=$('#issues');if(is){const a=issuesOf(q);is.textContent=a.length?'⚠ '+a.join('、'):''}
+  const cnt=document.querySelector('.qbox .cnt');if(cnt){const ov=overBy(q.text,120);cnt.textContent=ov?`-${ov}`:q.text.length+'/120';cnt.classList.toggle('over',ov>0);cnt.title=ov?`超過 ${ov} 個字元`:''}
+  const pill=$('#pill');if(pill)pill.textContent='⏱ '+timeLabel(q.time);
+  const sv=$('#sideTimeVal');if(sv)sv.textContent=timeLabel(q.time);
+  if(q.type==='slider'){const tr=$('#sTrack');if(tr){const p=sliderPos(q);tr.innerHTML=p===null?'':`<span class="ln" style="left:${p}%"></span><span class="mk" style="left:${p}%">答案 ${esc(q.slider.ans)}</span>`}}
+}
+function renderStat(){
+  const bad=S.qs.filter(q=>issuesOf(q).length).length;
+  $('#stat').innerHTML=`共 ${S.qs.length} 題　`+(S.qs.length?(bad?`<span class="bad">⚠ ${bad} 題待確認</span>`:`<span class="good">✓ 全部 OK</span>`):'');
+  $('#dlZip').disabled=!(S.cover||S.bg||S.qs.some(q=>allImgs(q).length));
+}
+function changed(full){
+  if(full) renderStage(); else refreshMeta();
+  refreshThumb(S.cur);renderStat();save();
+}
+
+/* ================= 拖曳排序（含即時滑動動畫） ================= */
+function flip(els,mutate){
+  const before=new Map(els.map(el=>[el,el.getBoundingClientRect()]));
+  mutate();
+  els.forEach(el=>{el.style.transition='none';el.style.transform=''});
+  els.forEach(el=>{
+    const a=before.get(el),b=el.getBoundingClientRect();
+    const dx=a.left-b.left,dy=a.top-b.top;
+    if(!dx&&!dy) return;
+    el.style.transform=`translate(${dx}px,${dy}px)`;
+    void el.offsetWidth;
+    el.style.transition='transform .24s cubic-bezier(.2,.8,.2,1)';
+    el.style.transform='';
+  });
+}
+function makeSortable(box,{itemSel,handleSel,axis,longPress,ignore,onTap,onCommit,scroller}){
+  if(!box) return;
+  let d=null;
+  const items=()=>[...box.children].filter(x=>x.matches(itemSel));
+  box.addEventListener('pointerdown',e=>{
+    if(e.button>0) return;
+    if(ignore&&e.target.closest(ignore)) return;
+    const it=e.target.closest(itemSel);if(!it||it.parentElement!==box) return;
+    if(handleSel&&!e.target.closest(handleSel)) return;
+    const ax=axis(),y=ax==='y';const br=box.getBoundingClientRect();
+    const off0=y?it.offsetTop:it.offsetLeft;
+    d={it,id:e.pointerId,x:e.clientX,y:e.clientY,ax,active:false,touch:e.pointerType==='touch',timer:null,
+       grab:(y?e.clientY-br.top:e.clientX-br.left)-off0,orig:items().map(x=>x)};
+    if(handleSel){e.preventDefault();start()}
+    else if(d.touch&&longPress) d.timer=setTimeout(start,300);
+  });
+  function start(){
+    if(!d) return;d.active=true;d.it.classList.add('dragging');d.it.style.transition='none';d.it.style.position='relative';d.it.style.zIndex='5';
+    try{d.it.setPointerCapture(d.id)}catch(e){}
+    if(d.touch&&navigator.vibrate) try{navigator.vibrate(12)}catch(e){}
+  }
+  box.addEventListener('pointermove',e=>{
+    if(!d||e.pointerId!==d.id) return;
+    const dist=Math.hypot(e.clientX-d.x,e.clientY-d.y);
+    if(!d.active){
+      if(d.touch&&longPress){if(dist>8){clearTimeout(d.timer);d=null}return}
+      if(dist>5) start(); else return;
+    }
+    e.preventDefault();
+    const y=d.ax==='y';const br=box.getBoundingClientRect();
+    const p=(y?e.clientY-br.top:e.clientX-br.left)-d.grab; // 拖曳中項目的左上位置
+    const size=y?d.it.offsetHeight:d.it.offsetWidth;const center=p+size/2;
+    const all=items();const others=all.filter(x=>x!==d.it);
+    let before=null;
+    for(const o of others){const mid=y?o.offsetTop+o.offsetHeight/2:o.offsetLeft+o.offsetWidth/2;if(center<mid){before=o;break}}
+    const need=before?d.it.nextElementSibling!==before:all[all.length-1]!==d.it;
+    if(need) flip(others,()=>{before?box.insertBefore(d.it,before):box.appendChild(d.it)});
+    const nat=y?d.it.offsetTop:d.it.offsetLeft;
+    d.it.style.transform=y?`translateY(${p-nat}px) scale(1.03)`:`translateX(${p-nat}px) scale(1.03)`;
+    if(scroller){const sr=scroller.getBoundingClientRect();
+      if(y){if(e.clientY<sr.top+40)scroller.scrollTop-=10;else if(e.clientY>sr.bottom-40)scroller.scrollTop+=10}
+      else{if(e.clientX<sr.left+40)scroller.scrollLeft-=10;else if(e.clientX>sr.right-100)scroller.scrollLeft+=10}}
+  });
+  box.addEventListener('touchmove',e=>{if(d&&d.active)e.preventDefault()},{passive:false});
+  function end(e,cancel){
+    if(!d||(e&&e.pointerId!==d.id)) return;
+    clearTimeout(d.timer);const dd=d;d=null;
+    if(!dd.active){if(!cancel&&onTap)onTap(dd.it,e);return}
+    dd.it.style.transition='transform .2s cubic-bezier(.2,.8,.2,1)';dd.it.style.transform='';
+    setTimeout(()=>{
+      dd.it.classList.remove('dragging');dd.it.style.cssText='';
+      const order=items().map(x=>dd.orig.indexOf(x));
+      onCommit(order,dd.orig.indexOf(dd.it));
+    },200);
+  }
+  box.addEventListener('pointerup',e=>end(e,false));
+  box.addEventListener('pointercancel',e=>end(e,true));
+}
+
+/* ================= 圖片 ================= */
+function setImg(q,slot,file){
+  const err=imgError(file,q.type==='pin'&&slot==='qimg');
+  if(err){
+    if(q===cur()){
+      const w=document.querySelector(`.slot[data-slot="${slot}"] .errwrap`);
+      if(w) w.innerHTML=err;
+      else modal('無法上傳',err,[{label:'知道了',value:1,primary:true}]);
+    }
+    return false;
+  }
+  const old=getImg(q,slot);if(old) URL.revokeObjectURL(old.url);
+  putImg(q,slot,makeImg(file,file.name||`${slotLabel(slot)}.${(file.type.split('/')[1]||'png').replace('jpeg','jpg')}`));
+  if(slot==='qimg'&&q.pin){URL.revokeObjectURL(q.pin.img.url);q.pin=null;if(q.type==='pin')toast('題目圖已更換，請重新標示正確位置')}
+  if(q===cur()) changed(true); else save();
+  renderStat();
+  return true;
+}
+async function aiImage(slot){
+  const q=cur();const label=slotLabel(slot);
+  const html=`<p style="color:var(--muted);font-size:14px">描述想要的畫面（不要放真實人物的名字或長相）</p>
+    <textarea id="aiPrompt" rows="3">${esc(q.text?('為這題畫一張插圖：'+q.text):'')}</textarea>
+    <label style="display:block;margin-top:10px;font-size:14px;font-weight:700">風格<select id="aiStyle"><option>溫馨扁平插畫</option><option>可愛卡通</option><option>簡約圖示</option><option>水彩風</option></select></label>
+    <p style="color:var(--muted);font-size:13px;margin-top:8px">${IMAGE_API?'使用 GPT 圖片生成':'由 Claude 繪製插畫（扁平向量風，非照片）'}</p>`;
+  const v=await modal('✨ AI 生成'+label,html,[{label:'取消',value:false},{label:'開始生成',value:true,primary:true}]);
+  if(!v) return;
+  const prompt=$('#aiPrompt').value.trim(),style=$('#aiStyle').value;
+  if(!prompt){toast('請輸入畫面描述');return}
+  const key=q.id+slot;loading.add(key);renderStage();
+  try{
+    let blob;
+    if(IMAGE_API){
+      const r=await fetch(IMAGE_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:`${prompt}。風格：${style}。畫面中不要出現文字。`})});
+      if(!r.ok) throw new Error('圖片服務回應 '+r.status);
+      const j=await r.json();blob=b64ToBlob(j.b64||j.image||'','image/png');
+    }else{
+      const res=await aiSample(`請畫一張 SVG 插圖，用於 Kahoot 題目畫面。
+內容：${prompt}
+風格：${style}，色彩溫暖明亮，構圖簡潔，主體置中。
+要求：viewBox="0 0 1600 900"，寬高比 16:9；完整背景；不要任何文字；不要 script、foreignObject、外部圖片或外部字型；只輸出 SVG 原始碼。`,{modelTier:'default'});
+      blob=await svgToPng(res.text||'');
+    }
+    if(!blob||!blob.size) throw new Error('沒有產生圖片');
+    loading.delete(key);
+    setImg(q,slot,new File([blob],`AI_${label}.png`,{type:'image/png'}));
+    toast('圖片已生成');
+  }catch(e){console.error(e);loading.delete(key);if(q===cur())renderStage();toast(e&&e.code==='not_granted'?'未允許使用 AI':'生成失敗：'+(e.message||'請稍後再試'))}
+}
+async function svgToPng(raw){
+  const m=raw.match(/<svg[\s\S]*<\/svg>/i);if(!m) throw new Error('AI 沒有回傳圖片');
+  let svg=m[0].replace(/<script[\s\S]*?<\/script>/gi,'').replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi,'').replace(/\son\w+="[^"]*"/gi,'').replace(/(href)="(?!#)[^"]*"/gi,'');
+  if(!/xmlns=/.test(svg)) svg=svg.replace('<svg','<svg xmlns="http://www.w3.org/2000/svg"');
+  const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
+  try{
+    const img=new Image();img.src=url;await img.decode();
+    const cv=document.createElement('canvas');cv.width=1600;cv.height=900;
+    const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,1600,900);ctx.drawImage(img,0,0,1600,900);
+    return await new Promise(r=>cv.toBlob(r,'image/png'));
+  }finally{URL.revokeObjectURL(url)}
+}
+
+/* ================= 圖標答題：在圖片上標示正確區域 ================= */
+function shapePath(c,sh,w,h){
+  if(sh.t==='rect') c.rect(sh.x*w,sh.y*h,sh.w*w,sh.h*h);
+  else if(sh.t==='ellipse'){c.moveTo((sh.cx+sh.rx)*w,sh.cy*h);c.ellipse(sh.cx*w,sh.cy*h,sh.rx*w,sh.ry*h,0,0,Math.PI*2)}
+  else{sh.pts.forEach(([x,y],i)=>i?c.lineTo(x*w,y*h):c.moveTo(x*w,y*h));c.closePath()}
+}
+function paintPin(c,img,w,h,sh,lw){
+  c.clearRect(0,0,w,h);c.drawImage(img,0,0,w,h);
+  if(!sh) return;
+  c.save();c.beginPath();c.rect(0,0,w,h);shapePath(c,sh,w,h);c.fillStyle='rgba(20,10,30,.5)';c.fill('evenodd');
+  c.beginPath();shapePath(c,sh,w,h);c.lineJoin='round';c.lineWidth=lw*2.4;c.strokeStyle='#fff';c.stroke();c.lineWidth=lw;c.strokeStyle='#1f1a2c';c.stroke();c.restore();
+}
+function openPinEditor(q){
+  if(!q.qimg) return;
+  const ov=document.createElement('div');ov.className='pin-bg';
+  const ic={rect:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="1"/></svg>',
+    ellipse:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/></svg>',
+    free:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 8 9l2 9h4l2-9z"/><circle cx="12" cy="11" r="1.4"/><path d="M10 21h4"/></svg>',
+    clear:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m7 21-4-4L14 6l6 6-9 9z"/><path d="M7 21h13"/></svg>'};
+  ov.innerHTML=`<div class="pin-modal" role="dialog" aria-modal="true" aria-label="標示正確位置">
+    <div class="pin-head">新增正確標選區域</div>
+    <div class="pin-main">
+      <div class="pin-tools"><button data-tool="rect" class="on" title="長方形" aria-label="長方形">${ic.rect}</button><button data-tool="ellipse" title="橢圓" aria-label="橢圓">${ic.ellipse}</button><button data-tool="free" title="任意形狀" aria-label="任意形狀">${ic.free}</button><hr><button data-tool="clear" title="清除區域" aria-label="清除區域">${ic.clear}</button></div>
+      <div class="pin-stage"><canvas></canvas><p class="pin-tip">選擇形狀後，在圖片上拖曳畫出正確區域（重新畫會取代舊的）</p></div>
+    </div>
+    <div class="pin-foot"><button class="btn btn-ghost" data-pin="cancel">取消</button><button class="btn btn-purple" data-pin="save">儲存</button></div></div>`;
+  document.body.appendChild(ov);
+  const cv=ov.querySelector('canvas'),ctx=cv.getContext('2d');
+  let tool='rect',shape=q.pin?JSON.parse(JSON.stringify(q.pin.shape)):null,drawing=null,start=null,W=0,H=0;
+  const dpr=window.devicePixelRatio||1;
+  const img=new Image();img.src=q.qimg.url;
+  const close=()=>{ov.remove();document.removeEventListener('keydown',onKey)};
+  const onKey=e=>{if(e.key==='Escape')close()};document.addEventListener('keydown',onKey);
+  function layout(){
+    const st=ov.querySelector('.pin-stage');const maxW=Math.max(200,st.clientWidth-4),maxH=Math.max(200,Math.min(innerHeight*.58,560));
+    const s=Math.min(maxW/img.naturalWidth,maxH/img.naturalHeight);
+    W=Math.round(img.naturalWidth*s);H=Math.round(img.naturalHeight*s);
+    cv.style.width=W+'px';cv.style.height=H+'px';cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+  }
+  const draw=()=>{ctx.setTransform(dpr,0,0,dpr,0,0);paintPin(ctx,img,W,H,drawing||shape,3)};
+  img.decode().then(()=>{layout();draw()}).catch(()=>{toast('圖片載入失敗');close()});
+  const pt=e=>{const r=cv.getBoundingClientRect();return [Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))]};
+  cv.addEventListener('pointerdown',e=>{
+    e.preventDefault();cv.setPointerCapture(e.pointerId);start=pt(e);
+    drawing=tool==='free'?{t:'free',pts:[start]}:tool==='rect'?{t:'rect',x:start[0],y:start[1],w:0,h:0}:{t:'ellipse',cx:start[0],cy:start[1],rx:0,ry:0};
+    draw();
+  });
+  cv.addEventListener('pointermove',e=>{
+    if(!drawing) return;const [x,y]=pt(e);
+    if(drawing.t==='free'){const l=drawing.pts[drawing.pts.length-1];if(Math.hypot(x-l[0],y-l[1])>.004)drawing.pts.push([x,y])}
+    else if(drawing.t==='rect'){drawing.x=Math.min(x,start[0]);drawing.y=Math.min(y,start[1]);drawing.w=Math.abs(x-start[0]);drawing.h=Math.abs(y-start[1])}
+    else{drawing.cx=(x+start[0])/2;drawing.cy=(y+start[1])/2;drawing.rx=Math.abs(x-start[0])/2;drawing.ry=Math.abs(y-start[1])/2}
+    draw();
+  });
+  const finish=()=>{
+    if(!drawing) return;
+    const ok=drawing.t==='free'?drawing.pts.length>=4:drawing.t==='rect'?(drawing.w>.015&&drawing.h>.015):(drawing.rx>.008&&drawing.ry>.008);
+    if(ok) shape=drawing;drawing=null;draw();
+  };
+  cv.addEventListener('pointerup',finish);cv.addEventListener('pointercancel',finish);
+  ov.querySelector('.pin-tools').addEventListener('click',e=>{
+    const b=e.target.closest('[data-tool]');if(!b) return;
+    if(b.dataset.tool==='clear'){shape=null;draw();return}
+    tool=b.dataset.tool;ov.querySelectorAll('[data-tool]').forEach(x=>x.classList.toggle('on',x===b));
+  });
+  ov.querySelector('[data-pin=cancel]').onclick=close;
+  ov.addEventListener('click',e=>{if(e.target===ov)close()});
+  ov.querySelector('[data-pin=save]').onclick=async()=>{
+    if(!shape){toast('請先在圖片上畫出正確區域');return}
+    const s=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight));
+    const w=Math.round(img.naturalWidth*s),h=Math.round(img.naturalHeight*s);
+    const c2=document.createElement('canvas');c2.width=w;c2.height=h;
+    paintPin(c2.getContext('2d'),img,w,h,shape,Math.max(3,Math.round(w/260)));
+    const blob=await new Promise(r=>c2.toBlob(r,'image/png'));
+    if(q.pin) URL.revokeObjectURL(q.pin.img.url);
+    q.pin={shape,img:makeImg(blob,'答案位置圖.png')};
+    close();
+    if(q===cur()) changed(true); else save();
+    toast('已儲存答案位置圖');
+  };
+}
+
+/* ================= 瀏覽器自動儲存（IndexedDB，含圖片） ================= */
+const DBN='kahoot-q-editor',STORE='draft';
+function idb(){return new Promise((res,rej)=>{try{const r=indexedDB.open(DBN,1);r.onupgradeneeded=()=>r.result.createObjectStore(STORE);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}})}
+async function idbSet(v){const db=await idb();return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(v,'main');tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}
+async function idbGet(){const db=await idb();return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readonly');const r=tx.objectStore(STORE).get('main');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+let saveT;
+function save(){
+  clearTimeout(saveT);$('#saveChip').textContent='儲存中…';$('#saveChip').classList.remove('ok');
+  saveT=setTimeout(async()=>{
+    const strip=im=>im?{blob:im.blob,name:im.name}:null;
+    const data={v:6,setOpen:S.setOpen,gsOpen:S.gsOpen,cur:S.cur,qNo:S.qNo,cover:strip(S.cover),bg:S.bg?{kind:S.bg.kind,img:strip(S.bg.img)}:null,optPrefix:S.optPrefix,name:S.name,title:S.title,defTime:S.defTime,editing:S.editing,extraOpen:S.extraOpen,
+      qs:S.qs.map(q=>({...q,qimg:strip(q.qimg),aimg:strip(q.aimg),oimgs:q.oimgs.map(strip),pin:q.pin?{shape:q.pin.shape,img:strip(q.pin.img)}:null}))};
+    let ok=false;
+    try{await idbSet(data);ok=true}catch(e){
+      try{localStorage.setItem('kahootQEditor',JSON.stringify({...data,qs:data.qs.map(q=>({...q,qimg:null,aimg:null,oimgs:[],pin:null}))}));ok=true}catch(e2){}
+    }
+    const d=new Date();
+    $('#saveChip').textContent=ok?`✓ 已自動儲存在此瀏覽器 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`:'⚠ 此瀏覽器無法儲存草稿';
+    $('#saveChip').classList.toggle('ok',ok);
+  },500);
+}
+async function restore(){
+  let d=null;
+  try{d=await idbGet()}catch(e){}
+  if(!d){try{d=JSON.parse(localStorage.getItem('kahootQEditor')||'null')}catch(e){}}
+  if(!d) return false;
+  S.qNo=d.qNo||'none';S.setOpen=!!d.setOpen;S.gsOpen=!!d.gsOpen;S.cover=d.cover&&d.cover.blob?makeImg(d.cover.blob,d.cover.name):null;S.bg=d.bg&&d.bg.img&&d.bg.img.blob?{kind:d.bg.kind,img:makeImg(d.bg.img.blob,d.bg.img.name)}:null;S.optPrefix=d.optPrefix||'none';S.name=d.name||'';S.title=d.title||'';S.defTime=TIMES.includes(d.defTime)?d.defTime:20;S.editing=!!d.editing;S.extraOpen=!!d.extraOpen;
+  const mk=im=>im&&im.blob?makeImg(im.blob,im.name):null;
+  S.qs=(d.qs||[]).map(q=>{
+    const pin=q.pin&&q.pin.img&&q.pin.img.blob?{shape:q.pin.shape,img:mk(q.pin.img)}:null;
+    const n=newQ({...q,qimg:mk(q.qimg),aimg:mk(q.aimg||q.oimg),oimgs:(q.oimgs||[]).map(mk),pin});
+    delete n.oimg;return n;
+  });
+  S.cur=Math.min(d.cur||0,Math.max(0,S.qs.length-1));
+  return S.qs.length>0;
+}
+
+/* ================= 匯出 ================= */
+function rowOptions(q){
+  const t=q.type;const n=optCount(q);
+  const pre=(s,k)=>optPre(k)+s;
+  if(TILE.includes(t)) return Array.from({length:n},(_,k)=>{
+    if(q.oimgs[k]) return `圖片${k+1}`;
+    const s=(q.options[k]||'').trim();return s?pre(s,k):'';
+  });
+  if(t==='typeans') return q.options.slice(0,4).map(s=>s.trim()).filter(Boolean);
+  if(t==='jumble') return q.options.slice(0,n).map(s=>s.trim()).filter(Boolean).map(pre);
+  if(t==='slider') return [`${q.slider.min}~${q.slider.max}`,String(q.slider.ans)];
+  return ['1','2'];
+}
+function rowCorrect(q){
+  if(q.type==='quiz'||q.type==='tf'){const a=q.answers.filter(x=>x<=optCount(q));return a.length===1?a[0]:a.join(',')}
+  return 1;
+}
+function buildRows(){
+  const opts=S.qs.map(rowOptions);
+  let maxOpt=4;opts.forEach((o,i)=>{if(TILE.includes(S.qs[i].type)){let n=o.length;while(n>4&&!o[n-1])n--;maxOpt=Math.max(maxOpt,n)}});
+  const head=['No','Question',...Array.from({length:maxOpt},(_,i)=>'Answer '+(i+1)),'Time Limit','Correct Answer','備註'];
+  const rows=S.qs.map((q,i)=>{
+    const o=Array.from({length:maxOpt},(_,k)=>opts[i][k]||'');
+    return [i+1,qNoLabel(i)+q.text.trim(),...o,q.time,rowCorrect(q),composeNote(q)];
+  });
+  return {head,rows,maxOpt};
+}
+async function buildXlsx(){
+  await loadScript(LIB.xlsx);
+  const {head,rows,maxOpt}=buildRows();
+  const ws=XLSX.utils.aoa_to_sheet([head,...rows]);
+  ws['!cols']=[{wch:5},{wch:46},...Array(maxOpt).fill({wch:14}),{wch:10},{wch:14},{wch:26}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Kahoot');
+  return new Uint8Array(XLSX.write(wb,{type:'array',bookType:'xlsx'}));
+}
+function baseName(){
+  const d=new Date();const ds=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  const nm=(S.name||'').trim().replace(/[\\/:*?"<>|\s]+/g,'_');
+  return 'Kahoot_quiz_'+(nm?nm+'_':'')+ds;
+}
+async function saveFile(filename,data,mime){
+  const blob=data instanceof Blob?data:new Blob([data],{type:mime});
+  if(downloadsCap){
+    try{await downloadsCap.save({filename,data:blob});return}
+    catch(e){console.warn(e);if(/declin|cancel|denied|reject/i.test((e&&(e.code||e.message))||'')){toast('已取消下載');return}}
+  }
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+async function checkBefore(){
+  if(!S.qs.length){toast('還沒有題目');return false}
+  const bad=S.qs.map((q,i)=>({i,is:issuesOf(q)})).filter(x=>x.is.length);
+  if(!S.title.trim()) bad.unshift({i:-1,is:['還沒有填寫']});
+  if(!bad.length) return true;
+  const v=await modal('下載前請確認','以下項目還沒完成，Kahoot 可能會匯入失敗或缺資訊：<br><br>'+bad.slice(0,12).map(x=>x.i<0?`<b>遊戲標題</b>：還沒有填寫`:`<b>第 ${x.i+1} 題</b>：${esc(x.is.join('、'))}`).join('<br>')+(bad.length>12?`<br>…另有 ${bad.length-12} 項`:''),
+    [{label:'回去修改',value:false,primary:true},{label:'仍要下載',value:true}]);
+  if(!v){const f=bad[0];if(f.i<0){$('#gTitle').focus();$('#gTitle').scrollIntoView({behavior:'smooth',block:'center'})}else{S.cur=f.i;render();focusQuestion()}}
+  return v;
+}
+async function askName(){
+  const p=modal('請輸入你的 LINE 名稱',`<p style="color:var(--muted);font-size:14px">會用在檔名，方便我們對照，例如：Kahoot_quiz_小明_20261109.xlsx</p><input type="text" id="nameIn" maxlength="40" value="${esc(S.name)}" placeholder="你的 LINE 名稱">`,[{label:'取消',value:false},{label:'下載',value:true,primary:true}]);
+  setTimeout(()=>{const i=$('#nameIn');if(i){i.focus();i.select();i.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#mBtns .btn-purple').click()}}}},30);
+  if(!await p) return false;
+  S.name=($('#nameIn').value||'').trim();save();return true;
+}
+$('#dlExcel').onclick=async()=>{
+  if(!await checkBefore()) return;
+  if(!await askName()) return;
+  try{await saveFile(baseName()+'.xlsx',await buildXlsx(),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')}catch(e){console.error(e);toast('產生 Excel 失敗：'+e.message)}
+};
+$('#dlZip').onclick=async()=>{
+  if(!await checkBefore()) return;
+  if(!await askName()) return;
+  try{
+    await loadScript(LIB.jszip);
+    const zip=new JSZip();const base=baseName();zip.file(base+'.xlsx',await buildXlsx());
+    const lines=[`遊戲標題：${S.title.trim()||'（未填）'}`,`LINE 名稱：${S.name.trim()||'（未填）'}`,`背景：${S.bg?(S.bg.kind==='theme'?'公版截圖':'自訂圖片'):'未提供（由小幫手預設）'}`,''];
+    const extOf=im=>{let e=(im.name.split('.').pop()||'').toLowerCase();if(!IMG_EXT.test(e))e=(im.blob.type.split('/')[1]||'png').replace('jpeg','jpg');return e==='jpeg'?'jpg':e};
+    if(S.cover){zip.file(`圖片/封面.${extOf(S.cover)}`,S.cover.blob);lines.push(`封面.${extOf(S.cover)}　→　遊戲封面圖`)}
+    if(S.bg){zip.file(`圖片/背景.${extOf(S.bg.img)}`,S.bg.img.blob);lines.push(`背景.${extOf(S.bg.img)}　→　${S.bg.kind==='theme'?'公版背景截圖':'自訂背景圖'}`)}
+    S.qs.forEach((q,i)=>allImgs(q).forEach(([slot,im])=>{
+      const no=i+1;
+      const nm=slot==='qimg'?`${no}`:slot==='aimg'?`${no}解答`:slot==='pin'?`${no}答案位置`:`${no}-${+slot.slice(1)+1}`;
+      const fn=`${nm}.${extOf(im)}`;zip.file('圖片/'+fn,im.blob);
+      lines.push(`${fn}　→　第 ${no} 題${slot==='qimg'?'題目圖':slot==='aimg'?'解答圖':slot==='pin'?'答案位置圖':'選項 '+(+slot.slice(1)+1)+' 圖'}：${q.text.trim()}`);
+    }));
+    zip.file('圖片/圖片對照表.txt','﻿'+lines.join('\r\n'));
+    await saveFile(base+'.zip',await zip.generateAsync({type:'blob'}),'application/zip');
+  }catch(e){console.error(e);toast('產生 ZIP 失敗：'+e.message)}
+};
+
+/* ================= 事件 ================= */
+window.addEventListener('scroll',()=>{
+  $('#top').classList.toggle('scrolled',scrollY>8);
+  const ed=$('#editor');
+  $('#toTop').classList.toggle('show',!ed.hidden&&scrollY>ed.getBoundingClientRect().top+scrollY+240);
+},{passive:true});
+$('#toTop').onclick=()=>{const ed=$('#editor');window.scrollTo({top:ed.getBoundingClientRect().top+scrollY-76,behavior:'smooth'})};
+document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>{
+  const m=b.dataset.mode;
+  if(m!=='edit'&&b.classList.contains('on')){b.classList.remove('on');$('#pUpload').hidden=true;$('#pPaste').hidden=true;return}
+  setMode(m);
+  if(m==='paste') setTimeout(()=>$('#paste').focus(),30);
+});
+const drop=$('#drop'),fi=$('#fileInput');
+drop.onclick=()=>fi.click();
+drop.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fi.click()}};
+fi.onchange=()=>{handleFiles([...fi.files]);fi.value=''};
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',e=>handleFiles([...e.dataTransfer.files]));
+$('#clearPaste').onclick=()=>{$('#paste').value=''};
+$('#tplSel').onchange=async e=>{
+  const k=e.target.value;if(!k) return;
+  const p=$('#paste');
+  if(p.value.trim()){const v=await modal('載入範本','編輯區已經有文字，要取代還是加在後面？',[{label:'取消',value:null},{label:'加在後面',value:'add'},{label:'取代',value:'rep',primary:true}]);
+    if(!v){e.target.value='';return} p.value=v==='add'?p.value.trim()+'\n\n'+TEMPLATES[k]:TEMPLATES[k]}
+  else p.value=TEMPLATES[k];
+  e.target.value='';toast('已載入「'+({general:'通用版',wedding:'婚禮版',party:'尾牙春酒版'})[k]+'」範本，可直接修改後辨識');
+};
+$('#parseBtn').onclick=async()=>{
+  const text=$('#paste').value.trim();
+  if(!text){toast('請先上傳檔案、貼上題目文字或載入範本');return}
+  const btn=$('#parseBtn');btn.disabled=true;btn.textContent='⟳ 辨識中…';
+  try{
+    let qs=null;
+    if(aiSample){try{qs=await aiParse(text)}catch(e){console.warn(e);toast(e&&e.code==='not_granted'?'未允許 AI，改用規則辨識':'AI 辨識失敗，改用規則辨識')}}
+    if(!qs) qs=parseText(text).map(enrich);
+    if(!qs.length) toast('沒有辨識到題目，請確認每題前面有題號（例如 1、 2、）');
+    else await applyParsed(qs);
+  }finally{btn.disabled=false;btn.textContent='✦ 開始辨識題目'}
+};
+$('#addQ').onclick=()=>{
+  const first=!S.qs.length;S.qs.splice(S.cur+1,0,newQ());if(first)warmup(S.qs[0]);
+  S.cur=first?0:S.cur+1;S.editing=true;render();save();
+  setTimeout(focusQuestion,30);
+};
+$('#bulkTime').innerHTML=TIMES.map(x=>`<option value="${x}">${timeLabel(x)}</option>`).join('');
+$('#bulkTime').onchange=e=>{S.defTime=+e.target.value;save()};
+$('#applyTime').onclick=()=>{const t=+$('#bulkTime').value;S.defTime=t;const adj=applyTimeAll(t);render();save();toast(`全部題目已設為 ${timeLabel(t)}`+(adj?`（${adj} 題因題型最低秒數自動調高）`:''))};
+$('#qNo').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.qNo=b.dataset.v;syncSeg();render();save()};
+$('#gTitle').oninput=e=>{S.title=e.target.value;if(S.title.trim())$('#tgen').hidden=true;save()};
+$('#optPrefix').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.optPrefix=b.dataset.v;syncSeg();renderStage();save()};
+function syncSeg(){if(typeof syncGs==='function'&&$('#gsSum'))syncGs();document.querySelectorAll('#optPrefix button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.optPrefix));document.querySelectorAll('#qNo button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.qNo))}
+$('#clearAll').onclick=async()=>{
+  if(!S.qs.length) return;
+  if(await modal('清空全部題目？',`會刪除目前 ${S.qs.length} 題與圖片，此瀏覽器的草稿也會一起清掉，無法復原。`,[{label:'取消',value:false},{label:'清空',value:true,primary:true}])){revokeAll();S.qs=[];S.cur=0;S.editing=false;render();save()}
+};
+$('#copyLine').onclick=e=>{const b=e.currentTarget;copyText('@791kunoo').then(()=>{b.textContent='已複製 ✓';setTimeout(()=>b.textContent='複製',1500)})};
+const FB_URL='https://docs.google.com/forms/d/e/1FAIpQLSe8DgYAie8HViYgseAP_XsMHZ1oOv5uTvJi5FaDqrIeeH3DoQ/viewform?embedded=true';
+$('#fbOpen').onclick=()=>{const f=$('#fbFrame');if(!f.src)f.src=FB_URL;$('#fbbg').classList.add('show')};
+$('#fbClose').onclick=()=>$('#fbbg').classList.remove('show');
+$('#fbbg').onclick=e=>{if(e.target.id==='fbbg')$('#fbbg').classList.remove('show')};
+
+/* ---------- 題目設定（右側欄） ---------- */
+const TYPE_ICON={
+  quiz:'<rect x="3" y="3" width="7" height="7" rx="1.5" fill="#e21b3c"/><rect x="14" y="3" width="7" height="7" rx="1.5" fill="#1368ce"/><rect x="3" y="14" width="7" height="7" rx="1.5" fill="#d89e00"/><rect x="14" y="14" width="7" height="7" rx="1.5" fill="#26890c"/>',
+  tf:'<rect x="3" y="3" width="8" height="18" rx="2" fill="#1368ce"/><rect x="13" y="3" width="8" height="18" rx="2" fill="#e21b3c"/>',
+  typeans:'<rect x="3" y="5" width="18" height="14" rx="2" fill="#1368ce"/><path d="M8 9h8M12 9v7" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>',
+  slider:'<path d="M3 12h18" stroke="#5a2b85" stroke-width="2.5" stroke-linecap="round"/><circle cx="14" cy="12" r="4" fill="#d89e00" stroke="#fff" stroke-width="1.5"/>',
+  pin:'<path d="M12 2.5a6.5 6.5 0 0 0-6.5 6.5c0 4.8 6.5 12.5 6.5 12.5s6.5-7.7 6.5-12.5A6.5 6.5 0 0 0 12 2.5z" fill="#e21b3c"/><circle cx="12" cy="9" r="2.5" fill="#fff"/>',
+  jumble:'<rect x="3" y="3" width="18" height="5" rx="1.5" fill="#26890c"/><rect x="3" y="9.5" width="18" height="5" rx="1.5" fill="#e21b3c"/><rect x="3" y="16" width="18" height="5" rx="1.5" fill="#1368ce"/>',
+  poll:'<rect x="3" y="12" width="4" height="9" rx="1" fill="#e21b3c"/><rect x="10" y="6" width="4" height="15" rx="1" fill="#1368ce"/><rect x="17" y="9" width="4" height="12" rx="1" fill="#26890c"/>',
+  wordcloud:'<rect x="6" y="3" width="10" height="4" rx="1" fill="#26890c"/><rect x="2" y="9" width="20" height="6" rx="1" fill="#d89e00"/><rect x="5" y="17" width="9" height="4" rx="1" fill="#e21b3c"/><rect x="15" y="17" width="5" height="4" rx="1" fill="#1368ce"/>',
+  open:'<path d="M4 4h16v11H9l-5 4z" fill="#5a2b85"/><path d="M8 8.5h8M8 11.5h5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>',
+  brainstorm:'<path d="M12 2.5a6.5 6.5 0 0 0-3.8 11.8V17h7.6v-2.7A6.5 6.5 0 0 0 12 2.5z" fill="#d89e00"/><rect x="8.5" y="18.5" width="7" height="3" rx="1" fill="#6a6380"/>',
+  slide:'<rect x="2.5" y="4" width="19" height="14" rx="2" fill="#1368ce"/><path d="M6 9h12M6 12.5h8" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>'
+};
+const ticon=(k,s=22)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true">${TYPE_ICON[k]}</svg>`;
+const POINTS=[['standard','一般','用一般分數來獎勵正確答案。'],['double','分數加倍','最多給予正確答案兩倍分數。'],['none','不計分','減少答題時的得失心，不列入計分。']];
+const SLIDERS_IC='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 3v8M7 15v6M17 3v4M17 11v10"/><circle cx="7" cy="13" r="2.2"/><circle cx="17" cy="9" r="2.2"/></svg>';
+let openMenu=null;
+function setType(q,nt){
+  q.type=nt;
+  if(nt==='tf'){if(!q.options[0].trim()&&!q.options[1].trim()){q.options[0]='是';q.options[1]='否'}q.answers=q.answers.filter(a=>a<=2).slice(0,1)}
+  if(nt==='jumble'){if(q.options.length>4)q.options=q.options.slice(0,4);while(q.options.length<3)q.options.push('')}
+  if(TYPES[nt].noPoints&&q.points==='standard') q.points='none';
+  if(clampTime(q)) toast(`${TYPES[nt].label}最少 ${timeLabel(minTime(nt))}，已自動調整`);
+  changed(true);
+}
+function renderSide(){
+  const side=$('#side');if(!side) return;const q=cur();
+  $('.studio').classList.toggle('side-open',S.setOpen);
+  const tab=`<div class="sidetabs"><button type="button" class="sidetab ${S.setOpen?'on':''}" data-side="toggle" aria-expanded="${S.setOpen}">${SLIDERS_IC}<span>設定</span></button></div>`;
+  if(!S.setOpen||!q){side.innerHTML=tab;return}
+  const T=TYPES[q.type];
+  const groups={};Object.entries(TYPES).forEach(([k,t])=>(groups[t.group]=groups[t.group]||[]).push(k));
+  const typeMenu=openMenu==='type'?`<div class="smenu tmenu">${Object.entries(groups).map(([g,ks])=>`<div class="sm-g">${g}</div><div class="sm-grid">${ks.map(k=>`<button type="button" class="tcard ${k===q.type?'on':''}" data-pick-type="${k}">${ticon(k,30)}<span>${TYPES[k].label}</span></button>`).join('')}</div>`).join('')}</div>`:'';
+  const mt=minTime(q.type);
+  const timeMenu=openMenu==='time'?`<div class="smenu">${mt>5?`<div class="sm-g">${T.label}最少 ${timeLabel(mt)}</div>`:''}${TIMES.filter(x=>x>=mt).map(x=>`<button type="button" class="sm-item ${x===q.time?'on':''}" data-pick-time="${x}"><span>${timeLabel(x)}</span>${x===q.time?'<b>✓</b>':''}</button>`).join('')}</div>`:'';
+  const ptsMenu=openMenu==='points'?`<div class="smenu">${POINTS.map(([v,l,d])=>`<button type="button" class="sm-item two ${v===q.points?'on':''}" data-pick-points="${v}"><span><b>${l}</b><small>${d}</small></span>${v===q.points?'<b>✓</b>':''}</button>`).join('')}</div>`:'';
+  const ptsLabel=(POINTS.find(p=>p[0]===q.points)||POINTS[0])[1];
+  side.innerHTML=`<div class="sidepanel">
+      <div class="sp-head"><b>題目設定</b><button type="button" class="sp-x" data-side="toggle" aria-label="收起題目設定">✕</button></div>
+      <div class="sp-field"><div class="sp-lb">題型</div>
+        <button type="button" class="sp-sel ${openMenu==='type'?'open':''}" data-menu="type">${ticon(q.type)}<span>${T.label}</span><i class="dd"></i></button>${typeMenu}</div>
+      <div class="sp-field"><div class="sp-lb">⏱ 答題秒數</div>
+        <button type="button" class="sp-sel ${openMenu==='time'?'open':''}" data-menu="time"><span id="sideTimeVal">${timeLabel(q.time)}</span><i class="dd"></i></button>${timeMenu}
+        <button type="button" class="sp-link" data-side="applyall">套用到所有題目</button></div>
+      <div class="sp-field"><div class="sp-lb">🏅 分數</div>
+        ${T.noPoints?'<div class="sp-na">這個題型不計分</div>':`<button type="button" class="sp-sel ${openMenu==='points'?'open':''}" data-menu="points"><span>${ptsLabel}</span><i class="dd"></i></button>${ptsMenu}`}</div>
+    </div>${tab}`;
+}
+document.addEventListener('click',e=>{
+  const s=e.target.closest('[data-side],[data-menu],[data-pick-type],[data-pick-time],[data-pick-points]');
+  const q=cur();
+  if(!s){if(openMenu&&!e.target.closest('.smenu')){openMenu=null;renderSide()}return}
+  if(!q&&!s.dataset.side) return;
+  if(s.dataset.side){
+    const a=s.dataset.side;
+    if(a==='toggle'){S.setOpen=!S.setOpen;openMenu=null}
+    else if(a==='open'){S.setOpen=true;openMenu=null}
+    else if(a==='time'){S.setOpen=true;openMenu='time'}
+    else if(a==='applyall'&&q){const t=q.time;const adj=applyTimeAll(t);S.defTime=t;$('#bulkTime').value=String(t);renderRail();renderStat();refreshMeta();toast(`全部題目已設為 ${timeLabel(t)}`+(adj?`（${adj} 題因題型最低秒數自動調高）`:''))}
+    renderSide();save();
+    if(S.setOpen&&isRow()) document.body.classList.add('sheet');
+    if(!S.setOpen) document.body.classList.remove('sheet');
+    return;
+  }
+  if(s.dataset.menu){openMenu=openMenu===s.dataset.menu?null:s.dataset.menu;renderSide();return}
+  if(s.dataset.pickType){openMenu=null;if(s.dataset.pickType!==q.type)setType(q,s.dataset.pickType);else renderSide();return}
+  if(s.dataset.pickTime){openMenu=null;q.time=+s.dataset.pickTime;changed(false);renderSide();return}
+  if(s.dataset.pickPoints){openMenu=null;q.points=s.dataset.pickPoints;changed(false);renderSide();return}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&openMenu){openMenu=null;renderSide()}});
+/* ---------- 遊戲設定收合 ---------- */
+function gsSummary(){
+  const qn={none:'無',num:'1、2、3、',q:'Q1、Q2、Q3、'}[S.qNo],op={none:'無',alpha:'A. B. C. D.',num:'1. 2. 3. 4.'}[S.optPrefix];
+  return `封面：${S.cover?'已上傳':'未上傳'}｜背景：${S.bg?(S.bg.kind==='theme'?'公版':'自訂'):'未選擇'}｜題號：${qn}｜選項前綴：${op}`;
+}
+function syncGs(){
+  $('#gsBody').hidden=!S.gsOpen;$('#gsToggle').classList.toggle('on',S.gsOpen);$('#gsToggle').setAttribute('aria-expanded',S.gsOpen);
+  $('#gsToggle .gs-t').textContent=S.gsOpen?'收起設定':'更多設定';
+  $('#gsSum').textContent=S.gsOpen?'':gsSummary();
+}
+$('#gsToggle').onclick=()=>{S.gsOpen=!S.gsOpen;syncGs();save()};
+
+/* ---------- 封面圖、背景圖 ---------- */
+function renderGMedia(){
+  const card=(id,title,desc,im,extra)=>`<div class="gcardm ${im?'has':''}" data-g="${id}" role="button" tabindex="0">
+    <span class="gt">${im?`<img src="${im.url}" alt="">`:'<svg width="28" height="28"><use href="#i-img"/></svg>'}</span>
+    <span><b>${title}</b><small>${im?extra:desc}</small></span>
+    ${im?`<button class="gx" data-gx="${id}" title="移除" aria-label="移除${title}">✕</button>`:''}</div>`;
+  $('#gmedia').innerHTML=card('cover','上傳封面圖','選填｜圖片或 GIF（不能放影片）',S.cover,'已上傳，點擊可更換')+
+    card('bg','選擇背景圖','選填｜上傳自訂圖片或選用公版',S.bg&&S.bg.img,S.bg?(S.bg.kind==='theme'?'公版截圖，點擊可更換':'自訂圖片，點擊可更換'):'')+
+    '<input type="file" hidden id="coverFile" accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp"><div class="gerr" id="gErr" style="grid-column:1/-1"></div>';
+  $('#coverFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+    if(/^video\//.test(f.type)||/\.(mp4|mov|m4v|webm|avi)$/i.test(f.name)){$('#gErr').innerHTML=`<div class="errbox"><div class="eh">ⓘ 封面不能放影片：<b>${esc(f.name)}</b></div>請上傳圖片或 GIF（jpeg、jpg、png、gif、webp）</div>`;return}
+    const err=imgError(f);if(err){$('#gErr').innerHTML=err;return}
+    if(S.cover)URL.revokeObjectURL(S.cover.url);S.cover=makeImg(f,f.name);renderGMedia();renderStat();save();toast('已上傳封面圖')};
+  renderStat&&$('#stat')&&renderStat();
+  if($('#gsSum'))syncGs();
+}
+$('#gmedia').addEventListener('click',e=>{
+  const x=e.target.closest('[data-gx]');
+  if(x){e.stopPropagation();if(x.dataset.gx==='cover'){URL.revokeObjectURL(S.cover.url);S.cover=null}else{URL.revokeObjectURL(S.bg.img.url);S.bg=null}renderGMedia();save();return}
+  const c=e.target.closest('[data-g]');if(!c) return;
+  if(c.dataset.g==='cover') $('#coverFile').click(); else openBg();
+});
+$('#gmedia').addEventListener('keydown',e=>{const c=e.target.closest('[data-g]');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();c.click()}});
+let bgKind='custom';
+function openBg(){
+  $('#bgErr').innerHTML='';
+  $('#bgCur').innerHTML=S.bg?`<img src="${S.bg.img.url}" alt="目前背景"><div><b>目前背景</b><br><small style="color:var(--muted)">${S.bg.kind==='theme'?'公版截圖':'自訂圖片'}</small></div>`:'';
+  $('#bgbg').classList.add('show');
+}
+$('#bgClose').onclick=()=>$('#bgbg').classList.remove('show');
+$('#bgbg').onclick=e=>{if(e.target.id==='bgbg')$('#bgbg').classList.remove('show')};
+document.querySelectorAll('[data-bg]').forEach(b=>b.onclick=()=>{bgKind=b.dataset.bg;$('#bgFile').click()});
+$('#bgFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  const err=imgError(f);if(err){$('#bgErr').innerHTML=err;return}
+  if(S.bg)URL.revokeObjectURL(S.bg.img.url);S.bg={kind:bgKind,img:makeImg(f,f.name)};
+  $('#bgbg').classList.remove('show');renderGMedia();save();toast(bgKind==='theme'?'已上傳公版截圖':'已上傳自訂背景')};
+
+/* ---------- 參考標題拉把 ---------- */
+(function(){
+  const reel=$('#tgenReel'),lever=$('#tgenLever'),act=$('#tgenAct');let pick='',busy=false;
+  $('#tgenToggle').onclick=()=>{const g=$('#tgen');g.hidden=!g.hidden;if(!g.hidden&&!pick)spin()};
+  function spin(){
+    if(busy) return;busy=true;lever.classList.remove('pull');void lever.offsetWidth;lever.classList.add('pull');
+    let p;do{p=TITLES[Math.floor(Math.random()*TITLES.length)]}while(p===pick&&TITLES.length>1);pick=p;
+    const filler=Array.from({length:18},()=>TITLES[Math.floor(Math.random()*TITLES.length)]);
+    reel.style.transition='none';reel.style.transform='translateY(0)';
+    reel.innerHTML=[reel.lastElementChild?reel.lastElementChild.textContent:'',...filler,p].map(t=>`<div>${esc(t)}</div>`).join('');
+    const h=reel.firstElementChild.offsetHeight,n=reel.children.length-1;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{reel.style.transition=matchMedia('(prefers-reduced-motion: reduce)').matches?'none':'transform 1.6s cubic-bezier(.15,.75,.2,1)';reel.style.transform=`translateY(${-h*n}px)`}));
+    setTimeout(()=>{busy=false;act.hidden=false;reel.closest('.tgen-win').classList.add('done')},1650);
+  }
+  lever.onclick=spin;reel.closest('.tgen-win').onclick=spin;$('#tgenAgain').onclick=spin;
+  $('#tgenUse').onclick=()=>{if(!pick)return;S.title=pick;$('#gTitle').value=pick;$('#tgen').hidden=true;save();toast('已套用標題，可再自行修改')};
+})();
+
+/* ---------- 編輯畫布 ---------- */
+const stage=$('#stage');
+stage.addEventListener('input',e=>{
+  const q=cur();if(!q) return;const t=e.target;const f=t.dataset.f;
+  if((f==='text'||f==='body')&&/[\r\n]/.test(t.value)){const pos=t.selectionStart;t.value=t.value.replace(/\r?\n/g,' ');try{t.setSelectionRange(pos,pos)}catch(_){}}
+  if(f==='opt'){const box=t.closest('.ans,.jitem,.tawrap');const oc=box&&box.querySelector('.ocnt');if(oc){const ov=overBy(t.value,75);oc.classList.toggle('over',ov>0);oc.textContent=ov?'-'+ov:t.value.length+'/75'}}
+  if(f==='text'){q.text=t.value;autosize(t)}
+  else if(f==='opt'){const k=+t.dataset.k;q.options[k]=t.value;const tile=t.closest('.ans');if(tile){const fl=optFilled(q,k);tile.classList.toggle('filled',fl);if(!fl&&q.answers.includes(k+1)){q.answers=q.answers.filter(a=>a!==k+1);tile.classList.remove('right');const c=tile.querySelector('.chk');c&&c.classList.remove('on')}}}
+  else if(f==='note') q.note=t.value;
+  else if(f==='body') q.body=t.value;
+  else if(f==='smin') q.slider.min=t.value;
+  else if(f==='smax') q.slider.max=t.value;
+  else if(f==='sans') q.slider.ans=t.value;
+  else return;
+  changed(false);
+});
+stage.addEventListener('change',e=>{
+  const q=cur();if(!q) return;const t=e.target;const f=t.dataset.f;
+  if(f==='time'){q.time=+t.value;changed(false)}
+  else if(f==='points'){q.points=t.value;changed(false)}
+  else if(f==='type'){setType(q,t.value)}
+  else if(t.dataset.file){const file=t.files[0];if(file)setImg(q,t.dataset.file,file);t.value=''}
+  else if(t.dataset.act==='preset'&&t.value){
+    const v=t.value;
+    if(v===WARMUP){if(!q.note.includes('暖身題'))q.note=v+(q.note?'、'+q.note:'');q.points='none'}
+    else if(!q.note.includes(v.replace('：',''))) q.note=(q.note?q.note+'、':'')+v;
+    t.value='';changed(true);const inp=stage.querySelector('[data-f=note]');if(inp){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length)}
+  }
+});
+stage.addEventListener('click',async e=>{
+  const b=e.target.closest('[data-act]');
+  if(!b){const slot=e.target.closest('.slot:not(.filled)');if(slot&&!e.target.closest('input'))slot.querySelector('input[type=file]').click();return}
+  if(b.tagName==='SELECT') return;
+  const q=cur();if(!q) return;const k=+b.dataset.k;
+  switch(b.dataset.act){
+    case 'ans':{
+      const v=k+1;const added=!q.answers.includes(v);
+      if(!added) q.answers=q.answers.filter(a=>a!==v);
+      else q.answers=(q.type==='tf'?[v]:[...q.answers,v]).sort((a,b)=>a-b);
+      stage.querySelectorAll('.chk[data-act=ans]').forEach((c,i)=>{c.classList.toggle('on',q.answers.includes(i+1));c.closest('.ans').classList.toggle('right',q.answers.includes(i+1))});
+      if(q.type==='quiz'&&added&&q.answers.length===2) toast('已勾選 2 個答案，自動設為複選題');
+      changed(false);break;
+    }
+    case 'addopt':{const n=optCount(q),max=q.type==='jumble'?4:6;if(n<max){q.options=q.options.slice(0,n);q.options.push('');changed(true);const ins=stage.querySelectorAll('[data-f=opt]');ins.length&&ins[ins.length-1].focus()}break}
+    case 'delopt':{const min=q.type==='jumble'?3:2;if(optCount(q)>min){q.options.splice(k,1);const r=q.oimgs.splice(k,1)[0];r&&URL.revokeObjectURL(r.url);q.answers=q.answers.filter(a=>a!==k+1).map(a=>a>k+1?a-1:a);
+      if(q.type!=='jumble'&&q.options.length<2)q.options.push('');changed(true)}break}
+    case 'pick':e.stopPropagation();b.closest('.slot,.ans').querySelector('input[type=file]').click();break;
+    case 'rmimg':{e.stopPropagation();const s=b.dataset.slot;const im=getImg(q,s);im&&URL.revokeObjectURL(im.url);putImg(q,s,null);
+      if(s==='qimg'&&q.pin){URL.revokeObjectURL(q.pin.img.url);q.pin=null}changed(true);break}
+    case 'aiimg':e.stopPropagation();aiImage(b.dataset.slot);break;
+    case 'pinedit':openPinEditor(q);break;
+    case 'extra':S.extraOpen=!S.extraOpen;renderStage();save();break;
+    case 'prev':if(S.cur>0){S.cur--;render();save();focusQuestion()}break;
+    case 'next':if(S.cur<S.qs.length-1)S.cur++;else{S.qs.push(newQ());S.cur=S.qs.length-1}render();save();focusQuestion();break;
+  }
+});
+stage.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing&&e.target.matches('textarea')){e.preventDefault();return}
+  const s=e.target.closest('.slot:not(.filled)');if(s&&e.target===s&&(e.key==='Enter'||e.key===' ')){e.preventDefault();s.querySelector('input[type=file]').click()}});
+const dropTarget=e=>e.target.closest('.slot,.ans[data-slot]');
+['dragenter','dragover'].forEach(ev=>stage.addEventListener(ev,e=>{const s=dropTarget(e);if(s&&e.dataTransfer&&[...e.dataTransfer.types].includes('Files')){e.preventDefault();s.classList.add('over')}}));
+stage.addEventListener('dragleave',e=>{const s=dropTarget(e);s&&s.classList.remove('over')});
+stage.addEventListener('drop',e=>{const s=dropTarget(e);if(!s)return;e.preventDefault();s.classList.remove('over');const f=e.dataTransfer.files[0];if(f)setImg(cur(),s.dataset.slot,f)});
+document.addEventListener('paste',e=>{
+  if($('#editor').hidden) return;
+  const files=[...(e.clipboardData&&e.clipboardData.files||[])];if(!files.length) return;
+  const q=cur();if(!q) return;
+  const focused=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.slot,.ans[data-slot]');
+  const slot=focused?focused.dataset.slot:(!q.qimg?'qimg':(S.extraOpen&&!q.aimg)?'aimg':null);
+  if(!slot){toast('請先點選要放圖片的位置再貼上');return}
+  e.preventDefault();setImg(q,slot,files[0]);
+});
+
+/* ---------- 縮圖列：點選、複製／刪除、拖曳排序 ---------- */
+const rail=$('#rail'),thumbs=$('#thumbs');
+const isRow=()=>matchMedia('(max-width:860px)').matches;
+rail.addEventListener('click',async e=>{
+  const b=e.target.closest('[data-tact]');if(!b) return;
+  const i=+b.dataset.i;const q=S.qs[i];if(!q) return;
+  if(b.dataset.tact==='dup'){
+    const cp=im=>im?makeImg(im.blob,im.name):null;
+    const c=newQ({...q,id:uid(),options:[...q.options],answers:[...q.answers],slider:{...q.slider},note:q.note===WARMUP?'':q.note,points:q.note===WARMUP?'standard':q.points,
+      qimg:cp(q.qimg),aimg:cp(q.aimg),oimgs:q.oimgs.map(cp),pin:q.pin?{shape:JSON.parse(JSON.stringify(q.pin.shape)),img:cp(q.pin.img)}:null});
+    S.qs.splice(i+1,0,c);S.cur=i+1;render();save();toast('已複製為第 '+(i+2)+' 題');
+  }else{
+    if((q.text.trim()||q.options.some(s=>s.trim())||allImgsRaw(q).length)&&!await modal(`刪除第 ${i+1} 題？`,esc(q.text||'（未輸入題目）'),[{label:'取消',value:false},{label:'刪除',value:true,primary:true}])) return;
+    allImgsRaw(q).forEach(im=>URL.revokeObjectURL(im.url));
+    S.qs.splice(i,1);if(S.cur>i||S.cur>=S.qs.length)S.cur=Math.max(0,S.cur-1);render();save();
+  }
+});
+makeSortable(thumbs,{itemSel:'.titem',axis:()=>isRow()?'x':'y',longPress:true,ignore:'button',scroller:rail,
+  onTap:it=>{S.cur=+it.dataset.i;render();save();if(isRow())focusQuestion()},
+  onCommit:(order,from)=>{
+    const movedId=S.qs[from].id;S.qs=order.map(i=>S.qs[i]);S.cur=S.qs.findIndex(q=>q.id===movedId);
+    render();save();if(order.some((v,i)=>v!==i))toast(`已移到第 ${S.cur+1} 題`);
+  }});
+rail.addEventListener('contextmenu',e=>{if(e.target.closest('.thumb'))e.preventDefault()});
+rail.addEventListener('keydown',e=>{const th=e.target.closest('.thumb');if(th&&(e.key==='Enter'||e.key===' ')){e.preventDefault();S.cur=+th.closest('.titem').dataset.i;render();save()}});
+
+/* ================= 啟動 ================= */
+(async()=>{
+  setHdr();
+  updateModeText();
+  const had=await restore();
+  $('#gTitle').value=S.title;renderGMedia();syncGs();$('#bulkTime').value=String(S.defTime);syncSeg();
+  render();
+  if(had){toast(`已載入上次的編輯進度（${S.qs.length} 題）`,3200);$('#saveChip').textContent='✓ 已載入此瀏覽器的草稿';$('#saveChip').classList.add('ok')}
+})();
+
+</script>
+</body>
+</html>
