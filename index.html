@@ -2670,9 +2670,9 @@ function bankToQ(r){
   let options=[...opts],answers=ans.map(i=>i+1),slider;
   if(/滑桿/.test(ty)){type='slider';const rg=opts.join(' ').match(/(\d+)\s*[-~～]\s*(\d+)/);const a=opts.find(o=>/^\d+(\.\d+)?$/.test(o.trim()));slider={min:rg?rg[1]:'0',max:rg?rg[2]:'100',ans:a||''};options=['','','',''];answers=[]}
   else if(/排列|排序/.test(ty)){type='jumble';options=opts.slice(0,4);answers=[]}
-  else if(/文字雲/.test(ty)){type='wordcloud';options=['','','',''];answers=[]}
+  else if(/文字雲|留言/.test(ty)){type='wordcloud';const t=opts.join(' ').match(/(\d+)\s*秒/);if(t)time=+t[1];options=['','','',''];answers=[]}
   else if(/圖標/.test(ty)){type='pin';options=['','','',''];answers=[]}
-  else if(/留言|開放/.test(ty)){type='open';const t=opts.join(' ').match(/(\d+)\s*秒/);if(t)time=+t[1];options=['','','',''];answers=[];if(!note)note=ty}
+  else if(/開放/.test(ty)){type='open';const t=opts.join(' ').match(/(\d+)\s*秒/);if(t)time=+t[1];options=['','','',''];answers=[];if(!note)note=ty}
   else if(/語音/.test(q)&&!note) note='語音題';
   while(options.length<(type==='jumble'?3:4)) options.push('');
   const x={text,options,answers,type,note,points:'standard'};if(slider)x.slider=slider;if(time&&TIMES.includes(time))x.time=time;
