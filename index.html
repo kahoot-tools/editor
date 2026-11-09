@@ -836,6 +836,12 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 .finish-btn{font-size:17px;padding:14px 30px;border-radius:14px}
 .finish-note p{margin:0 0 8px}.finish-na{color:var(--muted);font-size:13.5px}
 .modal.finishm{max-width:560px}
+.finish-name{display:flex;align-items:center;gap:10px;margin-top:6px;font-size:14px;padding:3px}
+.finish-name span{white-space:nowrap;color:var(--ink)}
+.finish-name input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-size:15px}
+.modal.finishm .mbtns{flex-wrap:nowrap}
+.modal.finishm .mbtns .btn{white-space:nowrap}
+@media (max-width:560px){.modal.finishm{padding:18px 14px}.modal.finishm .mbtns{gap:6px}.modal.finishm .mbtns .btn{padding:9px 10px;font-size:13px}}
 .mbtns .btn:disabled{opacity:.45;cursor:not-allowed}
 /* 玩家手機 */
 .pv-phone{position:relative;aspect-ratio:10/16;width:calc(var(--H)*.625);container-type:inline-size;overflow:hidden;border-radius:18px;border:7px solid #1b1919;background:#ece4da center/cover no-repeat;display:flex;flex-direction:column;color:#333;font-family:"Montserrat","Noto Sans TC",sans-serif}
@@ -2433,6 +2439,7 @@ async function checkBefore(){
   return v;
 }
 async function askName(){
+  if(skipName){skipName=false;return true}
   const p=modal('請輸入你的 LINE 名稱',`<p style="color:var(--muted);font-size:14px">會用在檔名，方便我們對照，例如：Kahoot_quiz_小明_20261109.xlsx</p><input type="text" id="nameIn" maxlength="40" value="${esc(S.name)}" placeholder="你的 LINE 名稱">`,[{label:'取消',value:false},{label:'下載',value:true,primary:true}]);
   setTimeout(()=>{const i=$('#nameIn');if(i){i.focus();i.select();i.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#mBtns .btn-purple').click()}}}},30);
   if(!await p) return false;
@@ -3109,11 +3116,15 @@ rail.addEventListener('contextmenu',e=>{if(e.target.closest('.thumb'))e.preventD
 rail.addEventListener('keydown',e=>{const th=e.target.closest('.thumb');if(th&&(e.key==='Enter'||e.key===' ')){e.preventDefault();S.cur=+th.closest('.titem').dataset.i;render();save()}});
 
 $('#backInput').onclick=backToInput;
+let skipName=false;
 $('#finishBtn').onclick=async()=>{
   const hasImg=!$('#dlZip').disabled;
-  const v=await modal('編輯完成，去導出',`<div class="finish-note"><p>📦 若題目與圖片已製作完成，可直接<b>下載壓縮檔</b>提供給小幫手。</p><p>📝 若有圖片或其他素材尚未上傳，可先<b>下載題目 Excel</b> 安排製作，待圖片完善後再補傳完整檔。</p>${hasImg?'':'<p class="finish-na">目前沒有上傳任何圖片，只需要下載 Excel。</p>'}</div>`,
-    [{label:'取消',value:null},{label:'⬇ 下載Excel',value:'x',cls:'btn-green'},{label:'⬇ Excel+圖片(ZIP)',value:'z',primary:true,disabled:hasImg?'':'有上傳圖片時才需要'}],'finishm');
-  if(v==='x')$('#dlExcel').click();else if(v==='z')$('#dlZip').click();
+  const v=await modal('編輯完成，去導出',`<div class="finish-note"><p>📦 若題目與圖片已製作完成，可直接<b>下載壓縮檔</b>提供給小幫手。</p><p>📝 若有圖片或其他素材尚未上傳，可先<b>下載題目 Excel</b> 安排製作，待圖片完善後再補傳完整檔。</p>${hasImg?'':'<p class="finish-na">目前沒有上傳任何圖片，只需要下載 Excel。</p>'}</div><label class="finish-name"><span>LINE 名稱</span><input type="text" id="finName" maxlength="40" value="${esc(S.name)}" placeholder="會用在檔名，例如：小明"></label>`,
+    [{label:'⬇ 下載Excel',value:'x',cls:'btn-green'},{label:'⬇ Excel+圖片(ZIP)',value:'z',primary:true,disabled:hasImg?'':'有上傳圖片時才需要'},{label:'取消',value:null}],'finishm');
+  if(!v) return;
+  S.name=($('#finName').value||'').trim();save();skipName=true;
+  if(v==='x')$('#dlExcel').click();else $('#dlZip').click();
+  setTimeout(()=>{skipName=false},3000);
 };
 $('#resumeBtn').onclick=()=>setView('edit');
 $('#navMenu').onclick=e=>{e.stopPropagation();const t=$('#top');const o=!t.classList.contains('navopen');t.classList.toggle('navopen',o);$('#navMenu').setAttribute('aria-expanded',o)};
