@@ -851,6 +851,11 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 .fw-act{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
 .fw-act span{flex:1;font-size:12.5px;color:#a8642a}
 .finish-warn+.finish{margin-top:14px}
+.bq{position:relative}
+.bq.hasimg{padding-right:96px}
+.bthumb{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:76px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.bthumb img{width:76px;height:50px;object-fit:cover;border-radius:6px;background:#eee}
+.bthumb i{font-style:normal;font-size:11px;color:var(--accent)}
 /* 玩家手機 */
 .pv-phone{position:relative;aspect-ratio:10/16;width:calc(var(--H)*.625);container-type:inline-size;overflow:hidden;border-radius:18px;border:7px solid #1b1919;background:#ece4da center/cover no-repeat;display:flex;flex-direction:column;color:#333;font-family:"Montserrat","Noto Sans TC",sans-serif}
 .pv-phone>*{position:relative;z-index:1}
@@ -2689,6 +2694,12 @@ const BANKS={"婚禮":[{"cat":"基礎題","rows":[[1,"請問今天是農曆幾�
 /* ---------- 參考題庫匯入 ---------- */
 let bankKey=Object.keys(BANKS)[0],bankCat='全部';const bankSel=new Set();
 function bankRows(){const cats=BANKS[bankKey];return (bankCat==='全部'?cats:cats.filter(c=>c.cat===bankCat)).flatMap(c=>c.rows.map(r=>({r,cat:c.cat})))}
+const BANK_IMG={"婚禮": {"10": "w10.webp", "11": "w11.webp", "12": "w12.webp", "13": "w13.png", "17": "w17.jpg", "18": "w18.gif", "19": "w19.jpeg", "20": "w20.jpg", "26": "w26.png", "44": "w44.webp", "45": "w45.webp", "46": "w46.png", "47": "w47.png", "48": "w48.jpg", "50": "w50.jpg", "51": "w51.jpg", "8": "w8.png"}, "尾牙": {"103": "p103.jpg", "33": "p33.webp"}};
+const bankImgOf=(bk,no)=>{const f=BANK_IMG[bk]&&BANK_IMG[bk][no];return f?'bank-img/'+f:null};
+async function loadBankImg(bk,no){
+  const u=bankImgOf(bk,no);if(!u) return null;
+  try{const r=await fetch(u);if(!r.ok) throw 0;const b=await r.blob();if(!b.size) throw 0;return makeImg(b,`${bk}${no}.${u.split('.').pop()}`)}catch(e){return undefined}
+}
 const rowKey=r=>bankKey+'|'+r[0];
 function bankType(t){const m=t.match(/^【([^】]+)】/);return m?m[1]:''}
 function renderBank(){
@@ -2696,9 +2707,9 @@ function renderBank(){
   const cats=['全部',...BANKS[bankKey].map(c=>c.cat)];
   $('#bankCats').innerHTML=cats.map(c=>`<button type="button" data-bc="${c}" class="${c===bankCat?'on':''}">${c}</button>`).join('');
   $('#bankList').innerHTML=bankRows().map(({r})=>{
-    const [no,q,opts,ans]=r;const k=rowKey(r);const ty=bankType(q);
-    return `<label class="bq"><input type="checkbox" data-bkey="${esc(k)}" ${bankSel.has(k)?'checked':''}><div><div class="bt">${ty?`<span class="btype">${esc(ty)}</span>`:''}${esc(q.replace(/^【[^】]+】/,''))}</div>
-      <div class="bo">${opts.map((o,i)=>`<span class="${ans.includes(i)?'ok':''}">${ans.includes(i)?'✓ ':''}${esc(o)}</span>`).join('')}</div></div></label>`;
+    const [no,q,opts,ans]=r;const k=rowKey(r);const ty=bankType(q);const bi=bankImgOf(bankKey,no);
+    return `<label class="bq ${bi?'hasimg':''}"><input type="checkbox" data-bkey="${esc(k)}" ${bankSel.has(k)?'checked':''}><div><div class="bt">${ty?`<span class="btype">${esc(ty)}</span>`:''}${esc(q.replace(/^【[^】]+】/,''))}</div>
+      <div class="bo">${opts.map((o,i)=>`<span class="${ans.includes(i)?'ok':''}">${ans.includes(i)?'✓ ':''}${esc(o)}</span>`).join('')}</div></div>${bi?`<span class="bthumb" title="匯入時會自動附上這張圖"><img src="${bi}" alt="" loading="lazy"><i>🖼 附圖</i></span>`:''}</label>`;
   }).join('');
   $('#bankCount').textContent=`已選 ${bankSel.size} 題`;$('#bankImport').disabled=!bankSel.size;
 }
@@ -2724,17 +2735,24 @@ $('#bankTabs').onclick=e=>{const b=e.target.closest('[data-bk]');if(!b)return;ba
 $('#bankCats').onclick=e=>{const b=e.target.closest('[data-bc]');if(!b)return;bankCat=b.dataset.bc;renderBank()};
 $('#bankList').onchange=e=>{const c=e.target.closest('[data-bkey]');if(!c)return;c.checked?bankSel.add(c.dataset.bkey):bankSel.delete(c.dataset.bkey);$('#bankCount').textContent=`已選 ${bankSel.size} 題`;$('#bankImport').disabled=!bankSel.size};
 $('#bankAll').onclick=()=>{const rows=bankRows();const all=rows.every(({r})=>bankSel.has(rowKey(r)));rows.forEach(({r})=>all?bankSel.delete(rowKey(r)):bankSel.add(rowKey(r)));renderBank()};
-$('#bankImport').onclick=()=>{
-  const picked=[];Object.entries(BANKS).forEach(([bk,cats])=>cats.forEach(c=>c.rows.forEach(r=>{if(bankSel.has(bk+'|'+r[0]))picked.push(r)})));
+$('#bankImport').onclick=async()=>{
+  const picked=[];Object.entries(BANKS).forEach(([bk,cats])=>cats.forEach(c=>c.rows.forEach(r=>{if(bankSel.has(bk+'|'+r[0]))picked.push([bk,r])})));
   if(!picked.length) return;
   const empty=S.qs.length===1&&!S.qs[0].text.trim()&&!S.qs[0].options.some(Boolean);
-  const qs=picked.map(bankToQ);
+  const btn=$('#bankImport');const withImg=picked.filter(([bk,r])=>bankImgOf(bk,r[0])).length;
+  if(withImg){btn.disabled=true;btn.textContent='載入圖片中…'}
+  let failed=0;
+  const qs=await Promise.all(picked.map(async([bk,r])=>{const q=bankToQ(r);
+    if(bankImgOf(bk,r[0])){const im=await loadBankImg(bk,r[0]);
+      if(im){q.qimg=im;q.text=q.text.replace(/\s*[\(（]附[^\)）]{0,6}[\)）].*$/,'').trim()}else failed++}
+    return q}));
+  btn.textContent='匯入';
   if(empty) S.qs=[];
   const first=!S.qs.length;const startIdx=S.qs.length;
   S.qs.push(...qs);if(first&&!S.qs[0].note) warmup(S.qs[0]);
   S.cur=startIdx;S.editing=true;bankSel.clear();
   save();setView('edit');
-  toast(`已從題庫匯入 ${qs.length} 題`);
+  toast(`已從題庫匯入 ${qs.length} 題`+(withImg-failed>0?`，其中 ${withImg-failed} 題已自動附圖`:'')+(failed?`（${failed} 張圖載入失敗，請自行上傳）`:''),3500);
 };
 
 /* ---------- 公版主題：貼上名稱自動找圖 ---------- */
