@@ -680,6 +680,15 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 :is(#dlExcel,#dlZip,#dlExcel *,#dlZip *){font-weight:700!important}
 .qbox textarea{font-size:23px}
 @media (max-width:560px){.qbox textarea{font-size:19px}}
+/* 長文字：選項自動換行、字體隨字數縮小 */
+.ans textarea,.jitem textarea{flex:1;min-width:0;border:0;outline:none;resize:none;background:transparent;font:inherit;font-size:16px;line-height:1.35;padding:4px;overflow:hidden;align-self:center;color:inherit;font-weight:500!important;word-break:break-word}
+.ans textarea::placeholder,.jitem textarea::placeholder{color:#9a91ab}
+.ans.filled textarea{color:#fff}
+.ans.filled textarea::placeholder{color:rgba(255,255,255,.7)}
+.ans{align-items:center}
+.ans .shape,.jitem .shape{align-self:stretch}
+.qbox textarea{word-break:break-word}
+.canvas{overflow:clip}
 </style>
 </head>
 <body>
@@ -1659,7 +1668,7 @@ function tilesHTML(q){
     const ci=colorIdx(q,k);const im=q.oimgs[k];const filled=optFilled(q,k);const right=t!=='poll'&&q.answers.includes(k+1);
     const ph=t==='tf'?(k?'否':'是'):`新增答案 ${k+1}${k>=2?'（選填）':''}`;
     const ov=im?0:overBy(q.options[k],75);
-    const body=im?`<div class="optpic"><img src="${im.url}" alt="選項 ${k+1} 圖片"></div>`:`${S.optPrefix!=='none'?`<span class="opre">${optPre(k).trim()}</span>`:''}<input data-f="opt" data-k="${k}" value="${esc(q.options[k]||'')}" placeholder="${ph}">`;
+    const body=im?`<div class="optpic"><img src="${im.url}" alt="選項 ${k+1} 圖片"></div>`:`${S.optPrefix!=='none'?`<span class="opre">${optPre(k).trim()}</span>`:''}<textarea data-f="opt" data-k="${k}" rows="1" placeholder="${ph}">${esc(q.options[k]||'')}</textarea>`;
     const imgBtn=im?`<button class="oimgx" data-act="rmimg" data-slot="o${k}" title="移除圖片" aria-label="移除選項 ${k+1} 圖片">✕</button>`:`<button class="oimgbtn" data-act="pick" data-slot="o${k}" title="加入以圖片作答選項" aria-label="選項 ${k+1} 改用圖片">${IMG_ICON}</button>`;
     const rm=(t!=='tf'&&n>2)?`<button class="rm" data-act="delopt" data-k="${k}" title="刪除此選項" aria-label="刪除選項">✕</button>`:'';
     const chk=t!=='poll'?`<button class="chk ${right?'on':''}" data-act="ans" data-k="${k}" aria-label="把選項 ${k+1} 設為正確答案" title="勾選為正確答案（勾 2 個以上自動變複選題）">${CHECK}</button>`:'';
@@ -1691,7 +1700,7 @@ function sliderHTML(q){
 }
 function jumbleHTML(q){
   const n=optCount(q);
-  const items=Array.from({length:n},(_,k)=>`<div class="jitem" data-k="${k}"><span class="ocnt ${overBy(q.options[k],75)?'over':''}">${overBy(q.options[k],75)?'-'+overBy(q.options[k],75):(q.options[k]||'').length+'/75'}</span><span class="ordn">${k+1}</span><span class="shape s${k}"><svg><use href="#sh${k}"/></svg></span><input data-f="opt" data-k="${k}" value="${esc(q.options[k]||'')}" placeholder="新增答案 ${k+1}${k>=3?'（選填）':''}">${n>3?`<button class="rm" data-act="delopt" data-k="${k}" title="刪除此選項" aria-label="刪除選項">✕</button>`:''}<span class="grip" title="拖曳調整順序" aria-label="拖曳調整順序">≡</span></div>`).join('');
+  const items=Array.from({length:n},(_,k)=>`<div class="jitem" data-k="${k}"><span class="ocnt ${overBy(q.options[k],75)?'over':''}">${overBy(q.options[k],75)?'-'+overBy(q.options[k],75):(q.options[k]||'').length+'/75'}</span><span class="ordn">${k+1}</span><span class="shape s${k}"><svg><use href="#sh${k}"/></svg></span><textarea data-f="opt" data-k="${k}" rows="1" placeholder="新增答案 ${k+1}${k>=3?'（選填）':''}">${esc(q.options[k]||'')}</textarea>${n>3?`<button class="rm" data-act="delopt" data-k="${k}" title="刪除此選項" aria-label="刪除選項">✕</button>`:''}<span class="grip" title="拖曳調整順序" aria-label="拖曳調整順序">≡</span></div>`).join('');
   return `<div class="jlist" id="jlist">${items}</div>
     ${n<4?'<button class="addmore" data-act="addopt">新增答案</button>':''}
     <div class="typehint">請按照<b>正確順序</b>新增 3～4 個答案，可拖曳右側 ≡ 調整順序（排好的順序就是答案），遊戲中會自動隨機排列。</div>`;
@@ -1730,7 +1739,7 @@ function renderStage(){
       <div class="issues" id="issues"></div>
     </div>
     <div class="navbtns"><button class="btn btn-ghost" data-act="prev" ${S.cur?'':'disabled style="visibility:hidden"'}>‹ 上一題</button><button class="btn btn-ghost" data-act="next">${S.cur<S.qs.length-1?'下一題 ›':'＋ 下一題'}</button></div>`;
-  autosize(st.querySelector('textarea[data-f=text]'));
+  autosizeAll();
   renderSide();
   watchRail();
   if(t==='jumble') makeSortable($('#jlist'),{itemSel:'.jitem',handleSel:'.grip',axis:()=>'y',onCommit:order=>{
@@ -1738,9 +1747,17 @@ function renderStage(){
   }});
   refreshMeta();
 }
-function autosize(ta){if(!ta)return;ta.style.height='auto';ta.style.height=ta.scrollHeight+'px'}
+function fitSize(ta){
+  const n=(ta.value||'').length;
+  if(ta.dataset.f==='text'){const big=matchMedia('(max-width:560px)').matches?19:23;ta.style.fontSize=(n<=40?big:n<=80?big-3:big-5)+'px'}
+  else if(ta.dataset.f==='opt'){ta.style.fontSize=(n<=24?16:n<=45?15:n<=60?14:13)+'px'}
+}
+function autosize(ta){if(!ta)return;fitSize(ta);ta.style.height='auto';ta.style.height=ta.scrollHeight+'px'}
+function autosizeAll(){document.querySelectorAll('#stage textarea[data-f=text],#stage textarea[data-f=opt]').forEach(autosize)}
+window.addEventListener('resize',()=>autosizeAll());
 function refreshMeta(){
   const q=cur();if(!q) return;
+  autosizeAll();
   const ex=$('#exnote');if(ex){const c=composeNote(q);ex.textContent=c?'匯出備註：'+c:''}
   const is=$('#issues');if(is){const a=issuesOf(q);is.textContent=a.length?'⚠ '+a.join('、'):''}
   const cnt=document.querySelector('.qbox .cnt');if(cnt){const ov=overBy(q.text,120);cnt.textContent=ov?`-${ov}`:q.text.length+'/120';cnt.classList.toggle('over',ov>0);cnt.title=ov?`超過 ${ov} 個字元`:''}
@@ -1982,9 +1999,10 @@ function idb(){return new Promise((res,rej)=>{try{const r=indexedDB.open(DBN,1);
 async function idbSet(v){const db=await idb();return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(v,'main');tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}
 async function idbGet(){const db=await idb();return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readonly');const r=tx.objectStore(STORE).get('main');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
 let saveT;
-function save(){
-  clearTimeout(saveT);$('#saveChip').textContent='儲存中…';$('#saveChip').classList.remove('ok');
-  saveT=setTimeout(async()=>{
+let savePending=false;
+function save(now){
+  clearTimeout(saveT);savePending=true;$('#saveChip').textContent='儲存中…';$('#saveChip').classList.remove('ok');
+  saveT=setTimeout(async()=>{savePending=false;
     const strip=im=>im?{blob:im.blob,name:im.name}:null;
     const data={v:6,setOpen:S.setOpen,gsOpen:S.gsOpen,cur:S.cur,qNo:S.qNo,cover:strip(S.cover),bg:S.bg?{kind:S.bg.kind,name:S.bg.name||'',img:strip(S.bg.img)}:null,optPrefix:S.optPrefix,name:S.name,title:S.title,defTime:S.defTime,editing:S.editing,extraOpen:S.extraOpen,
       qs:S.qs.map(q=>({...q,qimg:strip(q.qimg),aimg:strip(q.aimg),oimgs:q.oimgs.map(strip),pin:q.pin?{shape:q.pin.shape,img:strip(q.pin.img)}:null}))};
@@ -1995,7 +2013,7 @@ function save(){
     const d=new Date();
     $('#saveChip').textContent=ok?`✓ 已自動儲存在此瀏覽器 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`:'⚠ 此瀏覽器無法儲存草稿';
     $('#saveChip').classList.toggle('ok',ok);
-  },500);
+  },now?0:500);
 }
 async function restore(){
   let d=null;
@@ -2013,6 +2031,8 @@ async function restore(){
   return S.qs.length>0;
 }
 
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&savePending)save(true)});
+window.addEventListener('pagehide',()=>{if(savePending)save(true)});
 /* ================= 匯出 ================= */
 function rowOptions(q){
   const t=q.type;const n=optCount(q);
@@ -2399,8 +2419,9 @@ async function pickTheme(t){
 const stage=$('#stage');
 stage.addEventListener('input',e=>{
   const q=cur();if(!q) return;const t=e.target;const f=t.dataset.f;
-  if((f==='text'||f==='body')&&/[\r\n]/.test(t.value)){const pos=t.selectionStart;t.value=t.value.replace(/\r?\n/g,' ');try{t.setSelectionRange(pos,pos)}catch(_){}}
+  if((f==='text'||f==='body'||f==='opt')&&/[\r\n]/.test(t.value)){const pos=t.selectionStart;t.value=t.value.replace(/\r?\n/g,' ');try{t.setSelectionRange(pos,pos)}catch(_){}}
   if(f==='opt'){const box=t.closest('.ans,.jitem,.tawrap');const oc=box&&box.querySelector('.ocnt');if(oc){const ov=overBy(t.value,75);oc.classList.toggle('over',ov>0);oc.textContent=ov?'-'+ov:t.value.length+'/75'}}
+  if(f==='opt'&&t.tagName==='TEXTAREA') autosize(t);
   if(f==='text'){q.text=t.value;autosize(t)}
   else if(f==='opt'){const k=+t.dataset.k;q.options[k]=t.value;const tile=t.closest('.ans');if(tile){const fl=optFilled(q,k);tile.classList.toggle('filled',fl);if(!fl&&q.answers.includes(k+1)){q.answers=q.answers.filter(a=>a!==k+1);tile.classList.remove('right');const c=tile.querySelector('.chk');c&&c.classList.remove('on')}}}
   else if(f==='note') q.note=t.value;
