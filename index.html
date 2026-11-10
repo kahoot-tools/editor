@@ -1374,7 +1374,7 @@ function updateModeText(){
 function normalize(s){return s.replace(/[\uFF01-\uFF5E]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).replace(/\u3000/g,' ')}
 function blankRange(str,s,e){return str.slice(0,s)+' '.repeat(e-s)+str.slice(e)}
 function cleanPart(s){
-  return s.replace(/([^\x00-\x7F])[ \t]*\n[ \t]*(?=[^\x00-\x7F])/g,'$1').replace(/\s*\n\s*/g,' ').replace(/[ \t]+/g,' ').trim()
+  return s.replace(/([^\x00-\x7F])[ \t]*\n[ \t]*/g,'$1').replace(/[ \t]*\n[ \t]*(?=[^\x00-\x7F])/g,'').replace(/\s*\n\s*/g,' ').replace(/[ \t]+/g,' ').trim()
     .replace(/^[\/\s:：.、)）]+/,'').replace(/[\/\s;；,，、。(（]+$/,'').trim();
 }
 const CIRCLED='①②③④⑤⑥';
@@ -1392,8 +1392,8 @@ function pickSeq(ms){
 }
 function findLabels(n,loose){
   const ms=[];let m;
-  const re=loose?/(?<![A-Za-z])([A-F])(?![a-z])/g:/\(\s*([A-Fa-f])\s*\)|(?<![A-Za-z])([A-F])\s*[.、:)](?!\d)/g;
-  while((m=re.exec(n))) ms.push({idx:(m[1]||m[2]).toUpperCase().charCodeAt(0)-65,start:m.index,end:m.index+m[0].length});
+  const re=loose?/(?<![A-Za-z])([A-F])(?![a-z])/g:/\(\s*([A-Fa-f])\s*\)|(?<![A-Za-z])([A-F])\s*(?:[、:)]|\.(?!\d))|(?<=^|[\s(（])([A-F])\s*\.(?=\d)/gm;
+  while((m=re.exec(n))) ms.push({idx:(m[1]||m[2]||m[3]).toUpperCase().charCodeAt(0)-65,start:m.index,end:m.index+m[0].length});
   if(!loose){const rc=/[①②③④⑤⑥]/g;while((m=rc.exec(n))) ms.push({idx:CIRCLED.indexOf(m[0]),start:m.index,end:m.index+1});ms.sort((a,b)=>a.start-b.start)}
   return ms;
 }
@@ -1406,6 +1406,13 @@ function lineSplit(o,n){
   const splitLine=r=>{const parts=[];const re=/[^、\/|]+/g;let m;const t=txt(r);while((m=re.exec(t))){if(m[0].trim())parts.push({s:r.s+m.index,e:r.s+m.index+m[0].length})}return parts};
   let qEnd=-1;
   for(let k=0;k<lines.length-1;k++){if(/[?？:：]\s*$/.test(txt(lines[k]))){qEnd=k;break}}
+  // 題目以？結束，後面接著用頓號分隔的選項（選項可能跨行、斷字）
+  {const qm=n.search(/[?？]/);
+    if(qm>=0){const rest=n.slice(qm+1);const rs=qm+1;
+      if(/[、\/|]/.test(rest)&&rest.replace(/[、\/|\s]/g,'')){
+        const parts=[];const re=/[^、\/|]+/g;let m;while((m=re.exec(rest))){if(m[0].trim())parts.push({s:rs+m.index,e:rs+m.index+m[0].length})}
+        if(parts.length>=2&&parts.length<=6&&parts.every(r=>n.slice(r.s,r.e).replace(/\s/g,'').length<=60)){
+          const q0=lines[0].s;return {qs:q0,qe:qm+1,ranges:parts}}}}}
   const build=(qLines,optLines)=>{
     if(!optLines.length) return null;
     if(optLines.length===1){const parts=splitLine(optLines[0]);if(parts.length>=2&&parts.length<=6)return {qs:qLines[0].s,qe:qLines[qLines.length-1].e,ranges:parts}}
@@ -1458,6 +1465,11 @@ function parseBlock(o,n){
   let text='',ranges=[],labelStarts=[],labeled=false,optStart=Infinity;
   let seq=pickSeq(findLabels(n,false));
   if(seq.length<2){
+    const lseq=pickSeq(findLabels(n,true));const qm=n.search(/[?？]/);
+    const okLoose=lseq.length>=3&&((qm>=0&&lseq[0].start>qm)||/(^|\n)\s*$/.test(n.slice(0,lseq[0].start)))&&lseq.every((x,i)=>n.slice(x.end,i+1<lseq.length?lseq[i+1].start:n.length).trim());
+    if(okLoose) seq=lseq;
+  }
+  if(seq.length<2){
     const ls=lineSplit(o,n);
     if(ls){text=cleanPart(o.slice(ls.qs,ls.qe));ranges=ls.ranges;labelStarts=ranges.map(r=>r.s)}
     else seq=pickSeq(findLabels(n,true));
@@ -1480,7 +1492,7 @@ function parseBlock(o,n){
     if(i<0){const gap=n.slice(t.pos+t.len,labelStarts[0]);if(t.pos<labelStarts[0]&&!gap.trim()&&!gap.includes('\n'))i=0;else continue}
     if(labeled&&i+1<ranges.length){
       const before=n[t.pos-1]||' ',after=n.slice(t.pos+t.len,labelStarts[i+1]);
-      if(/\s/.test(before)&&!after.trim()) i=i+1;
+      if(/\s/.test(before)&&!after.trim()&&!after.includes('\n')) i=i+1;
     }
     tickAns.push(i+1);
   }
