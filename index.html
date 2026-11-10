@@ -2571,7 +2571,12 @@ $('#optPrefix').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.op
 function syncSeg(){if(typeof syncGs==='function'&&$('#gsSum'))syncGs();document.querySelectorAll('#optPrefix button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.optPrefix));document.querySelectorAll('#qNo button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.qNo))}
 $('#clearAll').onclick=async()=>{
   if(!S.qs.length) return;
-  if(await modal('清空全部題目？',`會刪除目前 ${S.qs.length} 題與圖片，此瀏覽器的草稿也會一起清掉，無法復原。`,[{label:'取消',value:false},{label:'清空',value:true,primary:true}])){revokeAll();S.qs=[];S.cur=0;S.editing=false;save();setView('input')}
+  if(await modal('清空全部？',`會刪除目前 ${S.qs.length} 題與所有圖片，並清除遊戲標題、封面圖、背景圖和更多設定（題號、選項前綴、答題秒數），此瀏覽器的草稿也會一起清掉，無法復原。`,[{label:'取消',value:false},{label:'清空',value:true,primary:true}])){
+    revokeAll();S.qs=[];S.cur=0;S.editing=false;
+    if(S.cover)URL.revokeObjectURL(S.cover.url);if(S.bg)URL.revokeObjectURL(S.bg.img.url);
+    Object.assign(S,{title:'',cover:null,bg:null,qNo:'none',optPrefix:'none',defTime:20,gsOpen:false,setOpen:false,extraOpen:false});
+    $('#gTitle').value='';$('#tgen').hidden=true;$('#bulkTime').value='20';renderGMedia();syncSeg();syncGs();
+    save();setView('input')}
 };
 $('#copyLine').onclick=e=>{const b=e.currentTarget;copyText('@791kunoo').then(()=>{b.textContent='已複製 ✓';setTimeout(()=>b.textContent='複製',1500)})};
 const FB_URL='https://docs.google.com/forms/d/e/1FAIpQLSe8DgYAie8HViYgseAP_XsMHZ1oOv5uTvJi5FaDqrIeeH3DoQ/viewform?embedded=true';
