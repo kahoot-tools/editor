@@ -1135,7 +1135,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.10f</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.10g</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1666,9 +1666,12 @@ async function readSheet(file){
   // 一律讀「畫面上看到的文字」，日期不要變成 46045 這種序號
   for(const k of Object.keys(sh)){if(k[0]==='!')continue;const c=sh[k];
     if(c.t==='n'&&c.z&&XLSX.SSF.is_date(c.z)){
-      const d=XLSX.SSF.parse_date_code(c.v);
-      if(d&&!/[年月日]/.test(c.w||'')){const hasY=/y/i.test(String(c.z).replace(/"[^"]*"/g,''));const hasT=/h|s/i.test(String(c.z).replace(/"[^"]*"/g,''))&&!/[dy]/i.test(String(c.z).replace(/"[^"]*"/g,''));
-        c.w=hasT?`${d.H}:${String(d.M).padStart(2,'0')}`:(hasY?`${d.y}年`:'')+`${d.m}月${d.d}日`}}}
+      const d=XLSX.SSF.parse_date_code(c.v);if(!d) continue;const z=String(c.z);
+      // Excel 內建的「系統日期」格式在台灣顯示為 2026/1/25，照這個樣子顯示；其他格式照原本畫面上的文字
+      if(z==='m/d/yy'||z==='m/d/yyyy'||z==='mm/dd/yy') c.w=`${d.y}/${d.m}/${d.d}`;
+      else if(z==='m/d/yy h:mm') c.w=`${d.y}/${d.m}/${d.d} ${d.H}:${String(d.M).padStart(2,'0')}`;
+      else if(!c.w) c.w=`${d.y}/${d.m}/${d.d}`;
+    }}
   const rows=XLSX.utils.sheet_to_json(sh,{header:1,defval:'',raw:false});
   for(let r=0;r<Math.min(rows.length,15);r++){
     const h=rows[r].map(c=>String(c).trim().toLowerCase());
