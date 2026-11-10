@@ -1135,7 +1135,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.10d</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.10e</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1863,7 +1863,6 @@ async function applyParsed(arr){
     if(!v) return;
     if(v==='replace'){revokeAll();S.qs=qs;S.cur=0}else{S.cur=S.qs.length;S.qs.push(...qs);replaced=false}
   }else{revokeAll();S.qs=qs;S.cur=0}
-  if(replaced&&S.qs[0]&&!S.qs[0].note) warmup(S.qs[0]);
   S.editing=true;const start=S.qs.length-qs.length;S.cur=start;save();
   renderDone(start,qs.length);setView('done');
 }
@@ -1914,7 +1913,7 @@ function setMode(m){
   if(m==='bank') renderBank();
   if(m==='edit'){
     S.editing=true;
-    if(!S.qs.length){S.qs.push(newQ());warmup(S.qs[0]);S.cur=0;save()}
+    if(!S.qs.length){S.qs.push(newQ());S.cur=0;save()}
     setView('edit');
     setTimeout(()=>focusQuestion(),50);
   }
@@ -2591,7 +2590,7 @@ $('#parseBtn').onclick=async()=>{
   }finally{btn.disabled=false;btn.textContent='✦ 開始辨識題目'}
 };
 $('#addQ').onclick=()=>{
-  const first=!S.qs.length;S.qs.splice(S.cur+1,0,newQ());if(first)warmup(S.qs[0]);
+  const first=!S.qs.length;S.qs.splice(S.cur+1,0,newQ());
   S.cur=first?0:S.cur+1;S.editing=true;render();save();
   setTimeout(focusQuestion,30);
 };
@@ -2802,7 +2801,7 @@ $('#bankImport').onclick=async()=>{
   btn.textContent='匯入';
   if(empty) S.qs=[];
   const first=!S.qs.length;const startIdx=S.qs.length;
-  S.qs.push(...qs);if(first&&!S.qs[0].note) warmup(S.qs[0]);
+  S.qs.push(...qs);
   S.cur=startIdx;S.editing=true;bankSel.clear();
   save();setView('edit');
   toast(`已從題庫匯入 ${qs.length} 題`+(withImg-failed>0?`，其中 ${withImg-failed} 題已自動附圖`:'')+(failed?`（${failed} 張圖載入失敗，請自行上傳）`:''),3500);
