@@ -1134,7 +1134,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.10b</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.10c</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1374,7 +1374,8 @@ function updateModeText(){
 function normalize(s){return s.replace(/[\uFF01-\uFF5E]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).replace(/\u3000/g,' ')}
 function blankRange(str,s,e){return str.slice(0,s)+' '.repeat(e-s)+str.slice(e)}
 function cleanPart(s){
-  return s.replace(/([^\x00-\x7F])[ \t]*\n[ \t]*/g,'$1').replace(/[ \t]*\n[ \t]*(?=[^\x00-\x7F])/g,'').replace(/\s*\n\s*/g,' ').replace(/[ \t]+/g,' ').trim()
+  s=s.replace(/\r\n?|[\u2028\u2029\v\f]/g,'\n');
+  return s.replace(/([^\x00-\x7F\s\u3000\u00a0])[^\S\n]*\n[^\S\n]*/g,'$1').replace(/[^\S\n]*\n[^\S\n]*(?=[^\x00-\x7F\s\u3000\u00a0])/g,'').replace(/\s*\n\s*/g,' ').replace(/[^\S\n]+/g,' ').trim()
     .replace(/^[\/\s:：.、)）]+/,'').replace(/[\/\s;；,，、。(（]+$/,'').trim();
 }
 const CIRCLED='①②③④⑤⑥';
@@ -1508,7 +1509,7 @@ function parseBlock(o,n){
   return {text,options,answers,qimgNum,oimgNum};
 }
 function parseText(raw){
-  const o=raw.replace(/\r\n?/g,'\n');const n=normalize(o);
+  const o=raw.replace(/\r\n?|[\u2028\u2029\v\f]/g,'\n').replace(/[\u00a0\u3000\t ]+$/gm,'');const n=normalize(o);
   const starts=[];let lastNum=null,p=0;
   for(const L of n.split('\n')){
     const s=p;p+=L.length+1;let m;
