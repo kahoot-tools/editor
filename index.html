@@ -856,6 +856,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 .bthumb{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:76px;display:flex;flex-direction:column;align-items:center;gap:2px}
 .bthumb img{width:76px;height:50px;object-fit:cover;border-radius:6px;background:#eee}
 .bthumb i{font-style:normal;font-size:11px;color:var(--accent)}
+#rail,#thumbs,.titem{overflow-anchor:none}
 /* 玩家手機 */
 .pv-phone{position:relative;aspect-ratio:10/16;width:calc(var(--H)*.625);container-type:inline-size;overflow:hidden;border-radius:18px;border:7px solid #1b1919;background:#ece4da center/cover no-repeat;display:flex;flex-direction:column;color:#333;font-family:"Montserrat","Noto Sans TC",sans-serif}
 .pv-phone>*{position:relative;z-index:1}
@@ -1134,7 +1135,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.10c</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.10d</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -2189,8 +2190,14 @@ function makeSortable(box,{itemSel,handleSel,axis,longPress,ignore,onTap,onCommi
       if(dist>5) start(); else return;
     }
     e.preventDefault();
+    last={x:e.clientX,y:e.clientY};if(Math.abs(d.ax==='y'?e.clientY-d.y:e.clientX-d.x)>30)d.far=true;update(e.clientX,e.clientY);
+    if(!raf) raf=requestAnimationFrame(autoScroll);
+  });
+  let last=null,raf=0;
+  function update(cx,cy){
+    if(!d||!d.active) return;
     const y=d.ax==='y';const br=box.getBoundingClientRect();
-    const p=(y?e.clientY-br.top:e.clientX-br.left)-d.grab; // 拖曳中項目的左上位置
+    const p=(y?cy-br.top:cx-br.left)-d.grab; // 拖曳中項目的左上位置
     const size=y?d.it.offsetHeight:d.it.offsetWidth;const center=p+size/2;
     const all=items();const others=all.filter(x=>x!==d.it);
     let before=null;
@@ -2199,14 +2206,31 @@ function makeSortable(box,{itemSel,handleSel,axis,longPress,ignore,onTap,onCommi
     if(need) flip(others,()=>{before?box.insertBefore(d.it,before):box.appendChild(d.it)});
     const nat=y?d.it.offsetTop:d.it.offsetLeft;
     d.it.style.transform=y?`translateY(${p-nat}px) scale(1.03)`:`translateX(${p-nat}px) scale(1.03)`;
-    if(scroller){const sr=scroller.getBoundingClientRect();
-      if(y){if(e.clientY<sr.top+40)scroller.scrollTop-=10;else if(e.clientY>sr.bottom-40)scroller.scrollTop+=10}
-      else{if(e.clientX<sr.left+40)scroller.scrollLeft-=10;else if(e.clientX>sr.right-100)scroller.scrollLeft+=10}}
-  });
+  }
+  // 靠近邊緣時連續平滑捲動：先捲縮圖列，捲到底再帶動整個網頁
+  function autoScroll(){
+    raf=0;if(!d||!d.active||!last) return;
+    const y=d.ax==='y';const pos=y?last.y:last.x;
+    const sr=scroller?scroller.getBoundingClientRect():{top:0,left:0,bottom:innerHeight,right:innerWidth};
+    const hdr=(document.getElementById('top')||{offsetHeight:0}).offsetHeight;
+    const lo=y?Math.max(sr.top,hdr):Math.max(sr.left,0),hi=y?Math.min(sr.bottom,innerHeight):Math.min(sr.right,innerWidth);
+    const Z=y?80:90;let v=0;
+    if(pos<lo+Z) v=-((lo+Z-pos)/Z);else if(pos>hi-Z) v=(pos-(hi-Z))/Z;
+    if(!d.far) v=0;
+    if(!v) return;
+    v=Math.sign(v)*Math.min(26,Math.max(2,Math.abs(v)*Math.abs(v)*26));
+    let moved=false;
+    const win=()=>{if(!y) return false;const b=scrollY;window.scrollBy(0,v);return scrollY!==b};
+    const own=()=>{if(!scroller) return false;const b=y?scroller.scrollTop:scroller.scrollLeft;if(y)scroller.scrollTop+=v;else scroller.scrollLeft+=v;return (y?scroller.scrollTop:scroller.scrollLeft)!==b};
+    // 縮圖列超出畫面時先捲網頁，讓縮圖列露出來；縮圖列在畫面內時捲縮圖列，捲到底再捲網頁
+    const pageFirst=y&&scroller&&((v>0&&sr.bottom>innerHeight+1)||(v<0&&sr.top<hdr-1));
+    moved=pageFirst?(win()||own()):(own()||win());
+    if(moved){update(last.x,last.y);raf=requestAnimationFrame(autoScroll)}
+  }
   box.addEventListener('touchmove',e=>{if(d&&d.active)e.preventDefault()},{passive:false});
   function end(e,cancel){
     if(!d||(e&&e.pointerId!==d.id)) return;
-    clearTimeout(d.timer);const dd=d;d=null;
+    clearTimeout(d.timer);const dd=d;d=null;if(raf){cancelAnimationFrame(raf);raf=0}last=null;
     if(!dd.active){if(!cancel&&onTap)onTap(dd.it,e);return}
     dd.it.style.transition='transform .2s cubic-bezier(.2,.8,.2,1)';dd.it.style.transform='';
     setTimeout(()=>{
