@@ -2281,6 +2281,15 @@ function paintPin(c,img,w,h,sh,lw){
   c.save();c.beginPath();c.rect(0,0,w,h);shapePath(c,sh,w,h);c.fillStyle='rgba(20,10,30,.5)';c.fill('evenodd');
   c.beginPath();shapePath(c,sh,w,h);c.lineJoin='round';c.lineWidth=lw*2.4;c.strokeStyle='#fff';c.stroke();c.lineWidth=lw;c.strokeStyle='#1f1a2c';c.stroke();c.restore();
 }
+async function makePinImg(qimg,shape){
+  const img=new Image();img.src=qimg.url;await img.decode();
+  const s=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight));
+  const w=Math.round(img.naturalWidth*s),h=Math.round(img.naturalHeight*s);
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  paintPin(c.getContext('2d'),img,w,h,shape,Math.max(3,Math.round(w/260)));
+  const blob=await new Promise(r=>c.toBlob(r,'image/png'));
+  return {shape:JSON.parse(JSON.stringify(shape)),img:makeImg(blob,'答案位置圖.png')};
+}
 function openPinEditor(q){
   if(!q.qimg) return;
   const ov=document.createElement('div');ov.className='pin-bg';
@@ -2694,7 +2703,8 @@ const BANKS={"婚禮":[{"cat":"基礎題","rows":[[1,"請問今天是農曆幾�
 /* ---------- 參考題庫匯入 ---------- */
 let bankKey=Object.keys(BANKS)[0],bankCat='全部';const bankSel=new Set();
 function bankRows(){const cats=BANKS[bankKey];return (bankCat==='全部'?cats:cats.filter(c=>c.cat===bankCat)).flatMap(c=>c.rows.map(r=>({r,cat:c.cat})))}
-const BANK_IMG={"婚禮": {"10": "w10.webp", "11": "w11.webp", "12": "w12.webp", "13": "w13.png", "17": "w17.jpg", "18": "w18.gif", "19": "w19.jpeg", "20": "w20.jpg", "26": "w26.png", "44": "w44.webp", "45": "w45.webp", "46": "w46.png", "47": "w47.png", "48": "w48.jpg", "50": "w50.jpg", "51": "w51.jpg", "8": "w8.png"}, "尾牙": {"103": "p103.jpg", "33": "p33.webp"}};
+const BANK_IMG={"婚禮": {"10": "w10.webp", "11": "w11.webp", "12": "w12.webp", "13": "w13.png", "17": "w17.jpg", "18": "w18.gif", "19": "w19.jpeg", "20": "w20.jpg", "26": "w26.png", "44": "w44.webp", "45": "w45.webp", "46": "w46.png", "47": "w47.png", "48": "w48.jpg", "50": "w50.jpg", "51": "w51.jpg", "8": "w8.png", "15": "p33.webp"}, "尾牙": {"103": "p103.jpg", "33": "p33.webp", "11": "w8.png", "23": "w10.webp", "28": "w11.webp", "30": "w12.webp", "31": "w13.png", "13": "w17.jpg", "14": "w18.gif", "15": "w19.jpeg", "16": "w20.jpg", "35": "w44.webp", "43": "w47.png", "44": "w48.jpg", "47": "w50.jpg"}};
+const BANK_PIN={"尾牙":{"103":{"t":"ellipse","cx":0.193,"cy":0.712,"rx":0.078,"ry":0.074}}};
 const bankImgOf=(bk,no)=>{const f=BANK_IMG[bk]&&BANK_IMG[bk][no];return f?'bank-img/'+f:null};
 async function loadBankImg(bk,no){
   const u=bankImgOf(bk,no);if(!u) return null;
@@ -2744,7 +2754,8 @@ $('#bankImport').onclick=async()=>{
   let failed=0;
   const qs=await Promise.all(picked.map(async([bk,r])=>{const q=bankToQ(r);
     if(bankImgOf(bk,r[0])){const im=await loadBankImg(bk,r[0]);
-      if(im){q.qimg=im;q.text=q.text.replace(/\s*[\(（]附[^\)）]{0,6}[\)）].*$/,'').trim()}else failed++}
+      if(im){q.qimg=im;q.text=q.text.replace(/\s*[\(（]附[^\)）]{0,6}[\)）].*$/,'').replace(/([？?])\s*[一二三四五六七八九東南西北中發白]{8,}$/,'$1').trim();
+        const ps=BANK_PIN[bk]&&BANK_PIN[bk][r[0]];if(ps&&q.type==='pin'){try{q.pin=await makePinImg(im,ps)}catch(e){}}}else failed++}
     return q}));
   btn.textContent='匯入';
   if(empty) S.qs=[];
