@@ -981,7 +981,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
   <div class="wrap row">
     <a class="brand" href="#" aria-label="回到頂端"><span class="mini" aria-hidden="true"><i style="background:#E21B3C"></i><i style="background:#1368CE"></i><i style="background:#D89E00"></i><i style="background:#26890C"></i></span><span class="kmini">Kahoot</span>題目製作編輯器</a>
     <button type="button" class="navmenu" id="navMenu" aria-label="參考連結選單" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-    <nav class="topnav" aria-label="參考連結"><a href="https://kahoot-tools.github.io/info/#bank" id="bankOpen">📚 參考題庫</a>
+    <nav class="topnav" aria-label="參考連結"><a href="https://kahoot-tools.github.io/info/#bank" id="bankOpen" target="_blank" rel="noopener">📚 參考題庫</a>
     <a href="https://kahoot-tools.github.io/info/#make-notes" target="_blank" rel="noopener">📋 題目設定注意事項</a></nav>
     <div class="grow"></div>
     <span class="savechip" id="saveChip"></span>
@@ -2740,7 +2740,7 @@ function bankToQ(r){
 }
 function openBank(e){if(e)e.preventDefault();$('#top').classList.remove('navopen');if(S.view!=='input')setView('input',true);setMode('bank');
   const y=$('#pBank').getBoundingClientRect().top+scrollY-($('#top').offsetHeight+10);window.scrollTo({top:Math.max(0,y),behavior:'smooth'})}
-$('#bankOpen').onclick=openBank;
+$('#bankOpen').addEventListener('click',()=>$('#top').classList.remove('navopen'));
 $('#bankTabs').onclick=e=>{const b=e.target.closest('[data-bk]');if(!b)return;bankKey=b.dataset.bk;bankCat='全部';renderBank()};
 $('#bankCats').onclick=e=>{const b=e.target.closest('[data-bc]');if(!b)return;bankCat=b.dataset.bc;renderBank()};
 $('#bankList').onchange=e=>{const c=e.target.closest('[data-bkey]');if(!c)return;c.checked?bankSel.add(c.dataset.bkey):bankSel.delete(c.dataset.bkey);$('#bankCount').textContent=`已選 ${bankSel.size} 題`;$('#bankImport').disabled=!bankSel.size};
