@@ -1135,7 +1135,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.10e</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.10f</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1661,8 +1661,15 @@ async function readPptx(file){
 }
 async function readSheet(file){
   await loadScript(LIB.xlsx);
-  const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});
-  const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});
+  const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellNF:true});
+  const sh=wb.Sheets[wb.SheetNames[0]];
+  // 一律讀「畫面上看到的文字」，日期不要變成 46045 這種序號
+  for(const k of Object.keys(sh)){if(k[0]==='!')continue;const c=sh[k];
+    if(c.t==='n'&&c.z&&XLSX.SSF.is_date(c.z)){
+      const d=XLSX.SSF.parse_date_code(c.v);
+      if(d&&!/[年月日]/.test(c.w||'')){const hasY=/y/i.test(String(c.z).replace(/"[^"]*"/g,''));const hasT=/h|s/i.test(String(c.z).replace(/"[^"]*"/g,''))&&!/[dy]/i.test(String(c.z).replace(/"[^"]*"/g,''));
+        c.w=hasT?`${d.H}:${String(d.M).padStart(2,'0')}`:(hasY?`${d.y}年`:'')+`${d.m}月${d.d}日`}}}
+  const rows=XLSX.utils.sheet_to_json(sh,{header:1,defval:'',raw:false});
   for(let r=0;r<Math.min(rows.length,15);r++){
     const h=rows[r].map(c=>String(c).trim().toLowerCase());
     const qi=h.findIndex(c=>/^question|題目/.test(c));const a1=h.findIndex(c=>/answer\s*1|選項\s*1/.test(c));
@@ -2471,6 +2478,10 @@ async function buildXlsx(){
   const aoa=[head,...rows];
   if(S.title.trim()) aoa.push([],['遊戲標題：'+S.title.trim()]);
   const ws=XLSX.utils.aoa_to_sheet(aoa);
+  // 題目、選項、備註一律存成「文字」格式，避免 Excel 自動轉成日期或數字
+  const rg=XLSX.utils.decode_range(ws['!ref']);const textCols=new Set([1,...Array.from({length:maxOpt},(_,i)=>2+i),2+maxOpt+2]);
+  for(let R=0;R<=rg.e.r;R++)for(let C=0;C<=rg.e.c;C++){const a=XLSX.utils.encode_cell({r:R,c:C});const c=ws[a];if(!c)continue;
+    if(R===0||textCols.has(C)||R>rows.length){c.t='s';c.v=String(c.v);c.z='@';delete c.w}}
   ws['!cols']=[{wch:5},{wch:46},...Array(maxOpt).fill({wch:14}),{wch:10},{wch:14},{wch:26}];
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Kahoot');
   return new Uint8Array(XLSX.write(wb,{type:'array',bookType:'xlsx'}));
