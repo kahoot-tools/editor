@@ -1135,7 +1135,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.10g</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.12a</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1447,7 +1447,31 @@ function resolveAnswers(raw,options){
   if(!res.length){const hit=on.map((o,i)=>o&&(o.includes(nk(raw))||nk(raw).includes(o))?i+1:0).filter(Boolean);if(hit.length===1)res=hit}
   return [...new Set(res)].filter(a=>a>=1&&a<=6).sort((a,b)=>a-b);
 }
-const MARK_RE=/✅|☑️|☑|✔️|✔|✓|√|(?<![^\s、,，(（])\*|\*(?![^\s、,，)）])/g;
+const MARK_RE=/✅|☑️|☑|✔️|✔|✓|√|ˇ|※|\(\s*答案\s*\)|(?<=^[ \t]*)答案(?=[ \t]+\S)|(?<=[\s)\]】」』》〉])答案(?=[ \t]*$)|(?<![^\s、,，(（])\*|\*(?![^\s、,，)）])/gm;
+const WRAP_PAIRS={'【':'】','「':'」','『':'』','《':'》','〈':'〉'};
+// 選項被【】「」『』《》〈〉整個包住 → 視為答案（全部選項都包住時視為原本就有的括號，例如書名）
+function wrapAnswers(text,options){
+  const hits=[];const opts=options.slice();let qt=text;
+  const prevOf=k=>k===0?qt:opts[k-1];
+  const setPrev=(k,v)=>{if(k===0)qt=v;else opts[k-1]=v};
+  const found=[];
+  opts.forEach((t,k)=>{
+    if(!t) return;
+    const a=t[0],z=t[t.length-1];
+    if(WRAP_PAIRS[a]&&WRAP_PAIRS[a]===z&&t.length>2&&!t.slice(1,-1).includes(z)) found.push({k,kind:'in'});
+    else{const op=Object.keys(WRAP_PAIRS).find(x=>WRAP_PAIRS[x]===z);const pv=prevOf(k)||'';
+      if(op&&!t.includes(op)&&pv.trimEnd().endsWith(op)) found.push({k,kind:'lbl',op});}
+  });
+  const filled=opts.filter(Boolean).length;
+  if(!found.length||(found.length===filled&&filled>=2)) return {text,options,hits};
+  for(const f of found){
+    const t=opts[f.k];
+    if(f.kind==='in') opts[f.k]=t.slice(1,-1).trim();
+    else{opts[f.k]=t.slice(0,-1).trim();const pv=prevOf(f.k).trimEnd();setPrev(f.k,pv.slice(0,-1).trim())}
+    hits.push(f.k+1);
+  }
+  return {text:qt,options:opts,hits};
+}
 function parseBlock(o,n){
   const marks=[];let m;const mre=/⟦圖(\d+)⟧/g;
   while((m=mre.exec(n))) marks.push({num:+m[1],pos:m.index,len:m[0].length});
@@ -1498,6 +1522,7 @@ function parseBlock(o,n){
     }
     tickAns.push(i+1);
   }
+  if(ranges.length){const w=wrapAnswers(text,options);text=w.text;options=w.options;tickAns.push(...w.hits)}
   const answers=[...new Set([...resolveAnswers(rawAns,options),...tickAns])].sort((a,b)=>a-b);
   let qimgNum=null,oimgNum=null;
   for(const k of marks){
@@ -1512,9 +1537,12 @@ function parseBlock(o,n){
 function parseText(raw){
   const o=raw.replace(/\r\n?|[\u2028\u2029\v\f]/g,'\n').replace(/[\u00a0\u3000\t ]+$/gm,'');const n=normalize(o);
   const starts=[];let lastNum=null,p=0;
-  for(const L of n.split('\n')){
+  const LS=n.split('\n');let prevBlank=true;
+  const nextIsQ=i=>{for(let j=i+1;j<LS.length;j++){if(LS[j].trim())return /^[ \t]*(?:\(\d{1,3}\)|(?:Q|第)?[ \t]*\d{1,3}[ \t]*題?[ \t]*(?:\.(?!\d)|[、:)\]])|暖身題|【)/i.test(LS[j])}return true};
+  for(let li=0;li<LS.length;li++){
+    const L=LS[li];const wasBlank=prevBlank;prevBlank=!L.trim();
     const s=p;p+=L.length+1;let m;
-    if(/^\s*【[^】]*】\s*$/.test(L)){starts.push({s,e:s+L.length,header:true});lastNum=0;continue}
+    if(/^\s*【[^】]*】\s*$/.test(L)&&(wasBlank||!starts.length||(nextIsQ(li)&&!/^\s*【\s*(?:[A-F]\s*[.、:)]|[①②③④⑤⑥])/.test(L)))){starts.push({s,e:s+L.length,header:true});lastNum=0;continue}
     if((m=L.match(/^\s*暖身題\s*[:.、]?\s*/))){starts.push({s,e:s+m[0].length,warm:true});lastNum=0;continue}
     if((m=L.match(/^\s*【([^】]+)】\s*(?=\S)/))){starts.push({s,e:s+m[0].length,open:m[1].trim()});continue}
     if((m=L.match(/^[ \t]*(?:\((\d{1,3})\)|(?:Q|第)?[ \t]*(\d{1,3})[ \t]*題?[ \t]*(?:\.(?!\d)|[、:)\]]))/i))){
@@ -1846,8 +1874,10 @@ function newQ(x={}){
   delete q.multi;
   return q;
 }
+// 這些題型的題目通常是指示句，不自動補問號
+const NO_QMARK=['slide','wordcloud','jumble','slider','pin','poll','open'];
 function fixQMarks(qs){
-  const list=qs.filter(q=>q.type!=='slide'&&q.text.trim());
+  const list=qs.filter(q=>!NO_QMARK.includes(q.type)&&q.text.trim());
   let full=0,half=0;list.forEach(q=>{const t=q.text.trim();if(/？$/.test(t))full++;else if(/\?$/.test(t))half++});
   const mk=half>full?'?':'？';
   list.forEach(q=>{const t=q.text.trim();
