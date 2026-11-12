@@ -1135,7 +1135,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.12a</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.12b</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1405,7 +1405,10 @@ function lineSplit(o,n){
   for(const L of n.split('\n')){if(L.trim())lines.push({s:p,e:p+L.length});p+=L.length+1}
   if(lines.length<2) return null;
   const txt=r=>n.slice(r.s,r.e);
-  const splitLine=r=>{const parts=[];const re=/[^、\/|]+/g;let m;const t=txt(r);while((m=re.exec(t))){if(m[0].trim())parts.push({s:r.s+m.index,e:r.s+m.index+m[0].length})}return parts};
+  const splitLine=r=>{const parts=[];const re=/[^、\/|]+/g;let m;const t=txt(r);while((m=re.exec(t))){if(m[0].trim())parts.push({s:r.s+m.index,e:r.s+m.index+m[0].length})}
+    // 沒有頓號時改用空白分隔（中文選項：萊特薇庭 幸福莊園 唯愛庭園）
+    if(parts.length<2&&/[\u3400-\u9fff]/.test(t)){const sp=[];const rs=/\S+/g;while((m=rs.exec(t)))sp.push({s:r.s+m.index,e:r.s+m.index+m[0].length});if(sp.length>=2&&sp.length<=6)return sp}
+    return parts};
   let qEnd=-1;
   for(let k=0;k<lines.length-1;k++){if(/[?？:：]\s*$/.test(txt(lines[k]))){qEnd=k;break}}
   // 題目以？結束，後面接著用頓號分隔的選項（選項可能跨行、斷字）
