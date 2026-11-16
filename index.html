@@ -1135,7 +1135,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.17a</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.17b</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1543,7 +1543,7 @@ function parseBlock(o,n){
   if(!options.length) options=['','','',''];
   return {text,options,answers,qimgNum,oimgNum};
 }
-function parseText(raw){
+function parseTextCore(raw){
   const o=raw.replace(/\r\n?|[\u2028\u2029\v\f]/g,'\n').replace(/[\u00a0\u3000\t ]+$/gm,'');const n=normalize(o);
   const starts=[];let lastNum=null,p=0;
   const LS=n.split('\n');let prevBlank=true;
@@ -1581,6 +1581,60 @@ function parseText(raw){
     rs.forEach(([a,b])=>out.push(parseBlock(o.slice(a,b),n.slice(a,b))));
   }
   return out.filter(q=>q.text||q.options.some(Boolean));
+}
+// ---- 考卷格式前處理：書後解答、題號前的作答框 ( B )1.、多題擠在同一行 ----
+const LET2I=c=>normalize(c).toUpperCase().charCodeAt(0)-64;
+function keyItems(str){
+  // 回傳 {map:{題號:[答案]}, seq:[[答案]...]}；無法完整解析回傳 null
+  const n=normalize(str).replace(/[①②③④⑤⑥]/g,c=>'ABCDEF'['①②③④⑤⑥'.indexOf(c)]);
+  const map={};let cnt=0;let rest=n;
+  rest=rest.replace(/(\d{1,3})\s*[-~～]\s*(\d{1,3})\s*[:.、)]?\s*([A-F](?:\s?[A-F])*)/gi,(m,a,b,l)=>{const ls=l.replace(/\s/g,'').toUpperCase();a=+a;b=+b;if(b-a+1!==ls.length)return m;for(let i=0;i<ls.length;i++)map[a+i]=[LET2I(ls[i])];cnt+=ls.length;return ' '});
+  rest=rest.replace(/(\d{1,3})\s*[.、:)\-]?\s*\(?\s*([A-F](?:\s*[,、&]?\s*[A-F])*)\s*\)?(?![A-Za-z])/gi,(m,a,l)=>{map[+a]=[...new Set(l.replace(/[^A-Fa-f]/g,'').toUpperCase().split('').map(LET2I))].sort();cnt++;return ' '});
+  if(cnt>=2&&!rest.replace(/[\s,，;；.。、]/g,'')) return {map,seq:null};
+  const lets=n.replace(/[\s,，;；.、]/g,'');
+  if(!cnt&&/^[A-F]{3,}$/i.test(lets)) return {map:null,seq:lets.toUpperCase().split('').map(c=>[LET2I(c)])};
+  return null;
+}
+function prepExam(raw){
+  let t=raw.replace(/\r\n?|[\u2028\u2029\v\f]/g,'\n');
+  let key=null;
+  // 1. 書後解答（標題行「答案／解答…」之後全部是答案，或結尾連續幾行都是 1.A 2.C）
+  const lines=t.split('\n');
+  for(let i=lines.length-1;i>=0;i--){
+    const m=normalize(lines[i]).match(/^\s*[【\[]?\s*(?:參考答案|正確答案|標準答案|答案|解答|詳解|answers?|ans)\s*[】\]]?\s*[:：]?\s*(.*)$/i);
+    if(!m) continue;
+    const region=[m[1],...lines.slice(i+1)].join('\n');
+    if(!region.trim()) break;
+    const k=keyItems(region);
+    if(k&&(k.map||(k.seq&&(i===0||!lines[i-1].trim()||!m[1].trim())))){key=k;lines.length=i;}
+    break;
+  }
+  if(!key){let j=lines.length;while(j>0&&!lines[j-1].trim())j--;let i=j;
+    while(i>0&&lines[i-1].trim()&&keyItems(lines[i-1])&&keyItems(lines[i-1]).map&&!/[?？]/.test(lines[i-1]))i--;
+    if(i<j){const k=keyItems(lines.slice(i,j).join('\n'));if(k&&k.map&&Object.keys(k.map).length>=2){key=k;lines.length=i}}}
+  t=lines.join('\n');
+  // 2. 多題擠在同一行：題號照順序出現在行中間就斷行
+  {const re=/(?:[(（][ \t　]*[A-FＡ-Ｆa-f]?[ \t　]*[)）][ \t]*)?(?<![\d.])(\d{1,3}|[０-９]{1,3})[ \t]*[.、．](?![\d０-９])/g;let m,exp=null,out='',last=0;
+    while((m=re.exec(t))){const num=+normalize(m[1]);const bol=/(^|\n)[ \t　]*$/.test(t.slice(Math.max(0,m.index-40),m.index));
+      if(bol){exp=num+1;continue}
+      if(exp!==null&&num===exp&&/[\s)）。？?!！]$/.test(t.slice(0,m.index))){out+=t.slice(last,m.index).replace(/[ \t　]+$/,'')+'\n';last=m.index;exp=num+1}}
+    t=out+t.slice(last);}
+  // 3. 題號前的作答框：( B )1.  (  )2.  （Ａ）3.
+  const box={};
+  t=t.replace(/^([ \t　]*)[(（][ \t　]*([A-FＡ-Ｆa-f]{0,4})[ \t　]*[)）][ \t　]*(?=((?:Q|第)?[ \t]*(?:\d{1,3}|[０-９]{1,3}))[ \t]*題?[ \t]*(?:[.．](?![\d０-９])|[、:：)）]))/gim,(m,sp,l,num)=>{const k=+normalize(num).replace(/\D/g,'');if(l)box[k]=[...new Set(l.split('').map(LET2I))].sort();return sp});
+  return {text:t,key,box};
+}
+function parseText(raw){
+  const pre=prepExam(raw);
+  const out=parseTextCore(pre.text);
+  out.forEach((q,i)=>{
+    if(q.answers.length) return;
+    const num=q.srcNo?+normalize(q.srcNo).replace(/\D/g,''):i+1;
+    let a=pre.box[num];
+    if(!a&&pre.key){a=pre.key.map?pre.key.map[num]:(pre.key.seq[i]||null)}
+    if(a) q.answers=a.filter(x=>x>=1&&x<=6&&(q.options[x-1]||q.type!=='quiz'));
+  });
+  return out;
 }
 /* ======== PARSER-END ======== */
 
