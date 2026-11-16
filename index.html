@@ -1135,7 +1135,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.12b</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.17a</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1399,28 +1399,34 @@ function findLabels(n,loose){
   if(!loose){const rc=/[①②③④⑤⑥]/g;while((m=rc.exec(n))) ms.push({idx:CIRCLED.indexOf(m[0]),start:m.index,end:m.index+1});ms.sort((a,b)=>a.start-b.start)}
   return ms;
 }
+const OPT_SEP=/、|\||(?<!\d)\/|\/(?!\d)/;
+function sepParts(t,base){const parts=[];const re=/(?:[^、|\/]|(?<=\d)\/(?=\d))+/g;let m;while((m=re.exec(t))){if(m[0].trim())parts.push({s:base+m.index,e:base+m.index+m[0].length})}return parts}
 function lineSplit(o,n){
   // 沒有 A/B/C/D 代號：題目可能跨行（以？結尾判斷），選項為頓號分隔的一行或一行一個
   const lines=[];let p=0;
   for(const L of n.split('\n')){if(L.trim())lines.push({s:p,e:p+L.length});p+=L.length+1}
   if(lines.length<2) return null;
   const txt=r=>n.slice(r.s,r.e);
-  const splitLine=r=>{const parts=[];const re=/[^、\/|]+/g;let m;const t=txt(r);while((m=re.exec(t))){if(m[0].trim())parts.push({s:r.s+m.index,e:r.s+m.index+m[0].length})}
+  const spaceSplit=r=>{const t=txt(r);if(!/[\u3400-\u9fff]/.test(t)&&/[A-Za-z]/.test(t))return [];const sp=[];let m;const rs=/\([^()\n]*\)|[^\s(]+(?:\([^()\n]*\)[^\s(]*)*/g;while((m=rs.exec(t)))sp.push({s:r.s+m.index,e:r.s+m.index+m[0].length});return sp};
+  const splitLine=r=>{let m;const t=txt(r);const parts=sepParts(t,r.s);
     // 沒有頓號時改用空白分隔（中文選項：萊特薇庭 幸福莊園 唯愛庭園）
-    if(parts.length<2&&/[\u3400-\u9fff]/.test(t)){const sp=[];const rs=/\S+/g;while((m=rs.exec(t)))sp.push({s:r.s+m.index,e:r.s+m.index+m[0].length});if(sp.length>=2&&sp.length<=6)return sp}
+    if(parts.length<2){const sp=spaceSplit(r);if(sp.length>=2&&sp.length<=6)return sp}
     return parts};
   let qEnd=-1;
   for(let k=0;k<lines.length-1;k++){if(/[?？:：]\s*$/.test(txt(lines[k]))){qEnd=k;break}}
   // 題目以？結束，後面接著用頓號分隔的選項（選項可能跨行、斷字）
   {const qm=n.search(/[?？]/);
     if(qm>=0){const rest=n.slice(qm+1);const rs=qm+1;
-      if(/[、\/|]/.test(rest)&&rest.replace(/[、\/|\s]/g,'')){
-        const parts=[];const re=/[^、\/|]+/g;let m;while((m=re.exec(rest))){if(m[0].trim())parts.push({s:rs+m.index,e:rs+m.index+m[0].length})}
+      if(OPT_SEP.test(rest)&&rest.replace(/[、\/|\s]/g,'')){
+        const parts=sepParts(rest,rs);
         if(parts.length>=2&&parts.length<=6&&parts.every(r=>n.slice(r.s,r.e).replace(/\s/g,'').length<=60)){
           const q0=lines[0].s;return {qs:q0,qe:qm+1,ranges:parts}}}}}
   const build=(qLines,optLines)=>{
     if(!optLines.length) return null;
     if(optLines.length===1){const parts=splitLine(optLines[0]);if(parts.length>=2&&parts.length<=6)return {qs:qLines[0].s,qe:qLines[qLines.length-1].e,ranges:parts}}
+    // 選項用空白分隔且分成好幾行（東京鐵塔 東京迪士尼 / （巴黎鐵塔）巴黎迪士尼）
+    if(optLines.length>=2){const per=optLines.map(r=>sepParts(txt(r),r.s).length>=2?sepParts(txt(r),r.s):spaceSplit(r));const all=per.flat();
+      if(per.every(x=>x.length>=2)&&all.length<=6) return {qs:qLines[0].s,qe:qLines[qLines.length-1].e,ranges:all}}
     if(optLines.length>=2&&optLines.length<=6&&optLines.every(r=>txt(r).trim().length<=60)) return {qs:qLines[0].s,qe:qLines[qLines.length-1].e,ranges:optLines.map(r=>({s:r.s,e:r.e}))};
     return null;
   };
@@ -1451,7 +1457,7 @@ function resolveAnswers(raw,options){
   return [...new Set(res)].filter(a=>a>=1&&a<=6).sort((a,b)=>a-b);
 }
 const MARK_RE=/✅|☑️|☑|✔️|✔|✓|√|ˇ|※|\(\s*答案\s*\)|(?<=^[ \t]*)答案(?=[ \t]+\S)|(?<=[\s)\]】」』》〉])答案(?=[ \t]*$)|(?<![^\s、,，(（])\*|\*(?![^\s、,，)）])/gm;
-const WRAP_PAIRS={'【':'】','「':'」','『':'』','《':'》','〈':'〉'};
+const WRAP_PAIRS={'【':'】','「':'」','『':'』','《':'》','〈':'〉','(':')','（':'）'};
 // 選項被【】「」『』《》〈〉整個包住 → 視為答案（全部選項都包住時視為原本就有的括號，例如書名）
 function wrapAnswers(text,options){
   const hits=[];const opts=options.slice();let qt=text;
@@ -1461,7 +1467,7 @@ function wrapAnswers(text,options){
   opts.forEach((t,k)=>{
     if(!t) return;
     const a=t[0],z=t[t.length-1];
-    if(WRAP_PAIRS[a]&&WRAP_PAIRS[a]===z&&t.length>2&&!t.slice(1,-1).includes(z)) found.push({k,kind:'in'});
+    if(WRAP_PAIRS[a]&&WRAP_PAIRS[a]===z&&t.slice(1,-1).trim()&&!t.slice(1,-1).includes(z)) found.push({k,kind:'in'});
     else{const op=Object.keys(WRAP_PAIRS).find(x=>WRAP_PAIRS[x]===z);const pv=prevOf(k)||'';
       if(op&&!t.includes(op)&&pv.trimEnd().endsWith(op)) found.push({k,kind:'lbl',op});}
   });
