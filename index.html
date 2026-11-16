@@ -1135,7 +1135,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.17c</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.17d</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1401,6 +1401,9 @@ function findLabels(n,loose){
 }
 const OPT_SEP=/、|\||(?<!\d)\/|\/(?!\d)/;
 function sepParts(t,base){const parts=[];const re=/(?:[^、|\/]|(?<=\d)\/(?=\d))+/g;let m;while((m=re.exec(t))){if(m[0].trim())parts.push({s:base+m.index,e:base+m.index+m[0].length})}return parts}
+// 選項用數字當代號，而且在行首：1・實習醫師鬥格 / 2．好運來
+function findNumLabels(n){const ms=[];const re=/(^|\n)([ \t]*)([1-6])[ \t]*[・‧·•.、:)][ \t]*(?=\S)/g;let m;
+  while((m=re.exec(n))){const st=m.index+m[1].length+m[2].length;ms.push({idx:+m[3]-1,start:st,end:m.index+m[0].length})}return ms}
 function lineSplit(o,n){
   // 沒有 A/B/C/D 代號：題目可能跨行（以？結尾判斷），選項為頓號分隔的一行或一行一個
   const lines=[];let p=0;
@@ -1543,6 +1546,9 @@ function parseBlock(o,n){
   const ansRe=/(?<![^\s(、,])\(?\s*(?:正確答案|參考答案|標準答案|正確選項|答案|解答|正解|答(?=\s*[:=])|ans(?:wer)?)\s*(?:[:=]\s*|(?:是|為)\s*(?=\S)|(?=\(?[A-F1-6①②③④⑤⑥©]\)?(?:\s*[),、&\/及和與]|\s*$)))((?:\([A-Fa-f]\)|[^\n)])*)\)?/gim;
   let last=null;while((m=ansRe.exec(n))) last=m;
   let rawAns='';
+  // 「A：3」當答案（A = Answer），只在沒有 B 選項時
+  if(!last){const aq=/(^|\n)[ \t]*(?:A|Q?A|ans?)[ \t]*[:=][ \t]*((?:[1-6①②③④⑤⑥]|\(?[A-Fa-f]\)?)(?:[ \t]*[,、&\/][ \t]*(?:[1-6]|[A-Fa-f]))*)[ \t]*(?=\n|$)/i.exec(n);
+    if(aq&&!/(^|\n)\s*\(?B\s*[:.、)]/.test(n)){const st=aq.index+aq[1].length;const g=n.indexOf(aq[2],st);rawAns=o.slice(g,g+aq[2].length);o=blankRange(o,st,aq.index+aq[0].length);n=blankRange(n,st,aq.index+aq[0].length)}}
   if(last){
     if(last[1]){const g=last.index+last[0].lastIndexOf(last[1]);rawAns=o.slice(g,g+last[1].length).replace(MARK_RE,'')}
     o=blankRange(o,last.index,last.index+last[0].length);n=blankRange(n,last.index,last.index+last[0].length);
@@ -1553,6 +1559,7 @@ function parseBlock(o,n){
   for(const k of ticks){o=blankRange(o,k.pos,k.pos+k.len);n=blankRange(n,k.pos,k.pos+k.len)}
   let text='',ranges=[],labelStarts=[],labeled=false,optStart=Infinity;
   let seq=pickSeq(findLabels(n,false));
+  if(seq.length<2){const ns=pickSeq(findNumLabels(n));if(ns.length>=2)seq=ns}
   if(seq.length<2){
     const lseq=pickSeq(findLabels(n,true));const qm=n.search(/[?？]/);
     const okLoose=lseq.length>=3&&((qm>=0&&lseq[0].start>qm)||/(^|\n)\s*$/.test(n.slice(0,lseq[0].start)))&&lseq.every((x,i)=>n.slice(x.end,i+1<lseq.length?lseq[i+1].start:n.length).trim());
@@ -1603,13 +1610,20 @@ function parseTextCore(raw){
   const starts=[];let lastNum=null,p=0;
   const LS=n.split('\n');let prevBlank=true;
   const nextIsQ=i=>{for(let j=i+1;j<LS.length;j++){if(LS[j].trim())return /^[ \t]*(?:\(\d{1,3}\)|(?:Q|第)?[ \t]*\d{1,3}[ \t]*題?[ \t]*(?:\.(?!\d)|[、:)\]])|暖身題|【)/i.test(LS[j])}return true};
+  let optExp=0,prevQ=false;
   for(let li=0;li<LS.length;li++){
     const L=LS[li];const wasBlank=prevBlank;prevBlank=!L.trim();
     const s=p;p+=L.length+1;let m;
+    // 題目下面用 1・2・3・ 當選項代號：不要當成新題號
+    {const om=L.match(/^[ \t]*([1-6])[ \t]*[・‧·•.、:)][ \t]*(\S.*)$/);const wasQ=prevQ;
+      prevQ=L.trim()?/[?？]\s*$/.test(L):prevQ;
+      if(!L.trim()){optExp=0}
+      else if(om&&!/[?？]\s*$/.test(om[2])&&((+om[1]===1&&wasQ)||(optExp&&+om[1]===optExp))){optExp=+om[1]+1;prevQ=false;continue}
+      else if(!om) optExp=0;}
     if(/^\s*【[^】]*】\s*$/.test(L)&&(wasBlank||!starts.length||(nextIsQ(li)&&!/^\s*【\s*(?:[A-F]\s*[.、:)]|[①②③④⑤⑥])/.test(L)))){starts.push({s,e:s+L.length,header:true});lastNum=0;continue}
     if((m=L.match(/^\s*(?:\d{1,3}\s*[.、]?\s*)?[(（【]?\s*暖身題\s*[)）】]?\s*[:：.、]?\s*/))){starts.push({s,e:s+m[0].length,warm:true});lastNum=0;continue}
     if((m=L.match(/^\s*【([^】]+)】\s*(?=\S)/))){starts.push({s,e:s+m[0].length,open:m[1].trim()});continue}
-    if((m=L.match(/^[ \t]*(?:\((\d{1,3})\)|(?:Q|第)?[ \t]*(\d{1,3})[ \t]*題?[ \t]*(?:\.(?!\d)|[、:)\]]))/i))){
+    if((m=L.match(/^[ \t]*(?:\((\d{1,3})\s*\.?\s*\)|(?:Q|第)?[ \t]*(\d{1,3})[ \t]*題?[ \t]*(?:\.(?!\d)|[、:)\]]))/i))){
       const num=+(m[1]||m[2]);
       const rest=L.slice(m[0].length);
       const optLike=!/[?？:：]/.test(rest)&&rest.split(/[、\/]/).length>=3&&rest.split(/[、\/]/).every(x=>x.trim().length<=12);
