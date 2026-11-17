@@ -1150,7 +1150,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.17g</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.17h</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1863,29 +1863,40 @@ async function readSheet(file){
     const h=rows[r].map(c=>String(c).trim().toLowerCase());
     const qi=h.findIndex(c=>/^question|題目|問題|題幹/.test(c));
     // 選項欄：Answer 1、選項1、選項A、選項一、Option 1、A、(A)
-    const optCol=k=>h.findIndex(c=>new RegExp('^(?:answer|option|選項|選擇|答案)\\s*(?:'+k+'(?!\\d)|'+'ABCDEF'[k-1].toLowerCase()+'(?![a-z])|'+'一二三四五六'[k-1]+')|^[(（]?'+'abcdef'[k-1]+'[)）]?$').test(c));
+    const optCol=k=>h.findIndex(c=>new RegExp('^(?:answer|option|選項|選擇|答案)\\s*(?:'+k+'(?!\\d)|'+'ABCDEF'[k-1].toLowerCase()+'(?![a-z])|'+'一二三四五六'[k-1]+')|^[(（]?(?:'+'abcdef'[k-1]+'|'+k+'(?:\\.0+)?|'+'一二三四五六'[k-1]+')[)）]?$').test(c));
     const ai=[1,2,3,4,5,6].map(optCol);
     if(qi>=0&&ai[0]>=0&&ai[1]>=0){
       const ti=h.findIndex(c=>/time|秒|時間/.test(c));
       const ci=h.findIndex((c,x)=>/correct|答案|正解|解答|^ans/.test(c)&&!ai.includes(x));
       const ni=h.findIndex(c=>/備註|note|remark/.test(c));
+      // 標題列上方的「標題：xxx」「秒數：20秒」
+      let title='',gTime=NaN;
+      for(const pr of rows.slice(0,r)){const cs=pr.map(c=>String(c).trim());
+        cs.forEach((c,x)=>{const nx=cs.slice(x+1).find(Boolean)||'';
+          if(/^(?:遊戲)?(?:標題|名稱|title)\s*[:：]?$/i.test(c)&&nx) title=nx;
+          else if(/^(?:遊戲)?(?:標題|title)\s*[:：]\s*(.+)$/i.test(c)) title=c.replace(/^[^:：]+[:：]\s*/,'');
+          if(/^(?:秒數|時間|time(?:\s*limit)?)\s*[:：]?$/i.test(c)&&nx) gTime=parseInt(normalize(nx))});}
       const qs=[];
       for(const row of rows.slice(r+1)){
-        const text=String(row[qi]??'').trim().replace(/^\d{1,3}\s*[.、]\s*/,'');if(!text) continue;
+        let text=String(row[qi]??'').trim().replace(/^\d{1,3}\s*[.、]\s*/,'');if(!text) continue;
         let options=ai.filter(i=>i>=0).map(i=>String(row[i]??'').trim());
+        // 只有文字、沒有選項的列（例如「IG 追蹤：＠xxx」）→ 併到上一題的備註
+        if(!options.some(Boolean)&&qs.length&&!(ci>=0&&String(row[ci]??'').trim())){const pq=qs[qs.length-1];pq.note=(pq.note?pq.note+'；':'')+text;continue}
+        let warm=false;text=text.replace(/^暖身題\s*[:：.、]?\s*/,()=>{warm=true;return ''});
         while(options.length>4&&!options[options.length-1]) options.pop();
         while(options.length<4) options.push('');
         const cv=String(row[ci]??'').trim();
         // Kahoot 範本的 Correct Answer 是選項編號（1~6）；其他答案欄可能寫代號或選項文字
         const answers=ci<0?[]:(/correct/.test(h[ci])&&/^[1-6](?:\.0+)?(?:\s*[,、，\/]\s*[1-6])*$/.test(normalize(cv)))?[...new Set(normalize(cv).replace(/\.0+/g,'').match(/[1-6]/g).map(Number))].sort():resolveAnswers(cv,options);
-        const t=ti>=0?parseInt(row[ti]):NaN;
+        const t=ti>=0?parseInt(normalize(String(row[ti]??''))):NaN;
         const q=enrich({text,options,answers,note:ni>=0?String(row[ni]??'').trim():''});
-        if(TIMES.includes(t)) q.time=t;
+        if(TIMES.includes(t)) q.time=t;else if(TIMES.includes(gTime)) q.time=gTime;
+        if(warm){q.points='none';if(!q.note)q.note=WARMUP}
         if(/分數加倍/.test(q.note)) q.points='double';
         if(/不計分/.test(q.note)) q.points='none';
         qs.push(q);
       }
-      if(qs.length) return {questions:qs};
+      if(qs.length) return {questions:qs,title};
     }
   }
   // 沒有標題列：每一列當一題，題號、題目、選項、答案各在一格
@@ -1968,7 +1979,8 @@ async function handleFiles(files){
     try{
       const before=poolSeq;
       const r=await extractFile(f,setSt);
-      if(r.questions){sheetQs.push(...r.questions);st.textContent=`✓ 直接讀到 ${r.questions.length} 題`}
+      if(r.questions){sheetQs.push(...r.questions);st.textContent=`✓ 直接讀到 ${r.questions.length} 題`;
+        if(r.title&&!S.title.trim()){S.title=r.title.slice(0,95);const gt=$('#gTitle');if(gt)gt.value=S.title}}
       else{texts.push(r.text.trim());const imgs=poolSeq-before;st.textContent=`✓ 擷取 ${r.text.replace(/\s|⟦圖\d+⟧/g,'').length} 字`+(imgs?`、${imgs} 張圖`:'')}
       st.classList.add('ok');
     }catch(e){console.error(e);row.className='';row.innerHTML=`<div class="errbox"><div class="eh">ⓘ <b>${esc(f.name)}</b> 讀取失敗</div>${esc(e.message||'')}</div>`}
