@@ -1150,7 +1150,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.17h</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.17i</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1664,7 +1664,8 @@ function parseTextCore(raw){
       const end=i+1<starts.length?starts[i+1].s:n.length;
       const px=st===real[0]?pre:'';
       const q=parseBlock(px+o.slice(st.e,end),px+n.slice(st.e,end));
-      if(st.warm){q.note=WARMUP;q.points='none'}
+      // 暖身題：題目保留「暖身題：」字樣（0(暖身題)、這種寫法統一成「暖身題：」），分數設不計分
+      if(st.warm){if(!/^暖身題/.test(q.text))q.text='暖身題：'+q.text;q.note=WARMUP;q.points='none'}
       if(st.srcNo) q.srcNo=st.srcNo;
       if(st.open){q.type='open';q.note=st.open;q.options=['','','',''];q.answers=[]}
       out.push(q);
@@ -1882,7 +1883,7 @@ async function readSheet(file){
         let options=ai.filter(i=>i>=0).map(i=>String(row[i]??'').trim());
         // 只有文字、沒有選項的列（例如「IG 追蹤：＠xxx」）→ 併到上一題的備註
         if(!options.some(Boolean)&&qs.length&&!(ci>=0&&String(row[ci]??'').trim())){const pq=qs[qs.length-1];pq.note=(pq.note?pq.note+'；':'')+text;continue}
-        let warm=false;text=text.replace(/^暖身題\s*[:：.、]?\s*/,()=>{warm=true;return ''});
+        const warm=/^暖身題/.test(text);
         while(options.length>4&&!options[options.length-1]) options.pop();
         while(options.length<4) options.push('');
         const cv=String(row[ci]??'').trim();
