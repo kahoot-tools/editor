@@ -1150,7 +1150,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.17e</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.17f</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1564,6 +1564,9 @@ function parseBlock(o,n){
   // 題目問號後面直接寫答案：「請問今天的主角是誰？A」
   if(!last){const qa=/[?？][ \t]*\(?\s*([A-Fa-f](?:\s*[,、&]\s*[A-Fa-f])*|[1-6①②③④⑤⑥])\s*\)?[ \t]*(?=\n)/.exec(n);
     if(qa&&!/^[ \t]*\(?\s*[A-Fa-f]\s*[).、:]/.test(n.slice(qa.index+1))){const st=qa.index+1;const g=n.indexOf(qa[1],st);rawAns=o.slice(g,g+qa[1].length);o=blankRange(o,st,qa.index+qa[0].length);n=blankRange(n,st,qa.index+qa[0].length)}}
+  // 題目那一行最後用括號寫答案：「我們在一起多久 (C)」，下一行開始才是 A. B. C. 選項
+  if(!last&&!rawAns){const qb=/^([^\n]*?\S)[ \t]*\(\s*([A-Fa-f](?:\s*[,、&]\s*[A-Fa-f])*|[1-6])\s*\)[ \t]*(?=\n)/.exec(n.replace(/^\s+/,m=>' '.repeat(m.length)));
+    if(qb&&/(^|\n)[ \t]*\(?\s*A\s*[.、:)]/.test(n.slice(qb.index+qb[0].length))){const st=qb.index+qb[1].length;const g=n.indexOf(qb[2],st);rawAns=o.slice(g,g+qb[2].length);o=blankRange(o,st,qb.index+qb[0].length);n=blankRange(n,st,qb.index+qb[0].length)}}
   // 「A：3」當答案（A = Answer），只在沒有 B 選項時
   if(!last&&!rawAns){const aq=/(^|\n)[ \t]*(?:A|Q?A|ans?)[ \t]*[:=][ \t]*((?:[1-6①②③④⑤⑥]|\(?[A-Fa-f]\)?)(?:[ \t]*[,、&\/][ \t]*(?:[1-6]|[A-Fa-f]))*)[ \t]*(?=\n|$)/i.exec(n);
     if(aq&&!/(^|\n)\s*\(?B\s*[:.、)]/.test(n)){const st=aq.index+aq[1].length;const g=n.indexOf(aq[2],st);rawAns=o.slice(g,g+aq[2].length);o=blankRange(o,st,aq.index+aq[0].length);n=blankRange(n,st,aq.index+aq[0].length)}}
