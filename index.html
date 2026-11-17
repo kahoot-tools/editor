@@ -756,6 +756,21 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 .done-sum .w b{color:#c2410c}
 .done-list{list-style:none;margin:14px 0 0;padding:8px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;color:#9a3412;font-size:14px;line-height:1.8}
 .done-ok{color:var(--good);margin:12px 0 0;font-size:14px}
+.qfix{margin-top:16px;text-align:left;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#faf8fd}
+.qfix h3{font-size:15px;margin:0 0 2px;color:var(--accent)}
+.qfix .qf-tip{font-size:13px;color:var(--muted);margin:0 0 10px}
+.qf-bulk{display:flex;gap:8px;margin-bottom:10px}
+.qf-bulk input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:10px;padding:7px 10px;font:inherit;font-size:14px;background:#fff}
+.qf-list{max-height:420px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.qf-row{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.qf-row.ok{border-color:#b7e1a1}
+.qf-q{font-size:14px;margin-bottom:6px;display:flex;gap:6px;align-items:baseline}
+.qf-q b{color:var(--accent);flex:none}
+.qf-q .st{margin-left:auto;font-size:12px;flex:none;color:#c2410c}.qf-row.ok .st{color:var(--good)}
+.qf-opts{display:flex;flex-wrap:wrap;gap:6px}
+.qf-opt{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:4px 12px;font:inherit;font-size:13.5px;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.qf-opt i{font-style:normal;font-family:Montserrat,sans-serif;color:var(--muted);margin-right:5px}
+.qf-opt.on{background:#66bf39;border-color:#66bf39;color:#fff}.qf-opt.on i{color:#fff}
 .done-btns{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
 .backbtn{white-space:nowrap;margin-right:4px}
 .resume{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#efe7f8;border:1.5px solid #d9c9ec;border-radius:14px;padding:10px 14px;margin:12px 0;font-size:14px;color:var(--accent)}
@@ -1135,7 +1150,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.17d</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.17e</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1546,8 +1561,11 @@ function parseBlock(o,n){
   const ansRe=/(?<![^\s(、,])\(?\s*(?:正確答案|參考答案|標準答案|正確選項|答案|解答|正解|答(?=\s*[:=])|ans(?:wer)?)\s*(?:[:=]\s*|(?:是|為)\s*(?=\S)|(?=\(?[A-F1-6①②③④⑤⑥©]\)?(?:\s*[),、&\/及和與]|\s*$)))((?:\([A-Fa-f]\)|[^\n)])*)\)?/gim;
   let last=null;while((m=ansRe.exec(n))) last=m;
   let rawAns='';
+  // 題目問號後面直接寫答案：「請問今天的主角是誰？A」
+  if(!last){const qa=/[?？][ \t]*\(?\s*([A-Fa-f](?:\s*[,、&]\s*[A-Fa-f])*|[1-6①②③④⑤⑥])\s*\)?[ \t]*(?=\n)/.exec(n);
+    if(qa&&!/^[ \t]*\(?\s*[A-Fa-f]\s*[).、:]/.test(n.slice(qa.index+1))){const st=qa.index+1;const g=n.indexOf(qa[1],st);rawAns=o.slice(g,g+qa[1].length);o=blankRange(o,st,qa.index+qa[0].length);n=blankRange(n,st,qa.index+qa[0].length)}}
   // 「A：3」當答案（A = Answer），只在沒有 B 選項時
-  if(!last){const aq=/(^|\n)[ \t]*(?:A|Q?A|ans?)[ \t]*[:=][ \t]*((?:[1-6①②③④⑤⑥]|\(?[A-Fa-f]\)?)(?:[ \t]*[,、&\/][ \t]*(?:[1-6]|[A-Fa-f]))*)[ \t]*(?=\n|$)/i.exec(n);
+  if(!last&&!rawAns){const aq=/(^|\n)[ \t]*(?:A|Q?A|ans?)[ \t]*[:=][ \t]*((?:[1-6①②③④⑤⑥]|\(?[A-Fa-f]\)?)(?:[ \t]*[,、&\/][ \t]*(?:[1-6]|[A-Fa-f]))*)[ \t]*(?=\n|$)/i.exec(n);
     if(aq&&!/(^|\n)\s*\(?B\s*[:.、)]/.test(n)){const st=aq.index+aq[1].length;const g=n.indexOf(aq[2],st);rawAns=o.slice(g,g+aq[2].length);o=blankRange(o,st,aq.index+aq[0].length);n=blankRange(n,st,aq.index+aq[0].length)}}
   if(last){
     if(last[1]){const g=last.index+last[0].lastIndexOf(last[1]);rawAns=o.slice(g,g+last[1].length).replace(MARK_RE,'')}
@@ -1565,7 +1583,11 @@ function parseBlock(o,n){
     const okLoose=lseq.length>=3&&((qm>=0&&lseq[0].start>qm)||/(^|\n)\s*$/.test(n.slice(0,lseq[0].start)))&&lseq.every((x,i)=>n.slice(x.end,i+1<lseq.length?lseq[i+1].start:n.length).trim());
     if(okLoose) seq=lseq;
   }
-  if(seq.length<2){
+  // 選項放在題目後面的括號裡，用頓號分隔
+  if(seq.length<2){const pm=/[(]([^()\n]*[、,，\/|][^()\n]*)[)][ \t]*$/.exec(n.replace(/\s+$/,''));
+    if(pm&&n.slice(0,pm.index).trim()){const parts=sepParts(pm[1],pm.index+1);
+      if(parts.length>=2&&parts.length<=6&&parts.every(r=>n.slice(r.s,r.e).trim().length<=40)){text=cleanPart(o.slice(0,pm.index));ranges=parts;labelStarts=parts.map(r=>r.s)}}}
+  if(seq.length<2&&!ranges.length){
     const ls=lineSplit(o,n);
     if(ls){text=cleanPart(o.slice(ls.qs,ls.qe));ranges=ls.ranges;labelStarts=ranges.map(r=>r.s)}
     else seq=pickSeq(findLabels(n,true));
@@ -1626,7 +1648,7 @@ function parseTextCore(raw){
     if((m=L.match(/^[ \t]*(?:\((\d{1,3})\s*\.?\s*\)|(?:Q|第)?[ \t]*(\d{1,3})[ \t]*題?[ \t]*(?:\.(?!\d)|[、:)\]]))/i))){
       const num=+(m[1]||m[2]);
       const rest=L.slice(m[0].length);
-      const optLike=!/[?？:：]/.test(rest)&&rest.split(/[、\/]/).length>=3&&rest.split(/[、\/]/).every(x=>x.trim().length<=12);
+      const optLike=!/[?？:：]/.test(rest)&&!/^[^(（、\/]+[(（][^)）]*[、\/][^)）]*[)）]\s*$/.test(rest)&&rest.split(/[、\/]/).length>=3&&rest.split(/[、\/]/).every(x=>x.trim().length<=12);
       if((lastNum===null||(num>lastNum&&num<=lastNum+3))&&!(optLike&&lastNum!==null)){starts.push({s,e:s+m[0].length,srcNo:m[0].trim()});lastNum=num}
     }
   }
@@ -1661,6 +1683,7 @@ function keyItems(str){
   rest=rest.replace(/(\d{1,3})\s*[.、:)\-]?\s*\(?\s*([A-F](?:\s*[,、&]?\s*[A-F])*)\s*\)?(?![A-Za-z])/gi,(m,a,l)=>{map[+a]=[...new Set(l.replace(/[^A-Fa-f]/g,'').toUpperCase().split('').map(LET2I))].sort();cnt++;return ' '});
   if(cnt>=2&&!rest.replace(/[\s,，;；.。、]/g,'')) return {map,seq:null};
   const lets=n.replace(/[\s,，;；.、]/g,'');
+  if(!cnt&&/^[1-6]{2,}$/.test(lets)&&/^[\s1-6]+$/.test(n)) return {map:null,seq:lets.split('').map(c=>[+c])};
   if(!cnt&&/^[A-F]{3,}$/i.test(lets)) return {map:null,seq:lets.toUpperCase().split('').map(c=>[LET2I(c)])};
   return null;
 }
@@ -2148,17 +2171,37 @@ function setView(v,noScroll){
   render();
   if(!noScroll) window.scrollTo({top:0,behavior:'auto'});
 }
-function renderDone(start,n){
+let doneFix=null;
+function renderDone(start,n,keep){
   const qs=S.qs.slice(start,start+n);
+  // 待補答案的題目（測驗／是非題，選項至少 2 個，但沒勾答案）；第一次進來時記下，勾完也繼續顯示方便修改
+  if(!keep) doneFix=qs.filter(q=>TILE.includes(q.type)&&q.type!=='poll'&&Array.from({length:optCount(q)},(_,k)=>optFilled(q,k)).filter(Boolean).length>=2&&!q.answers.filter(x=>x<=optCount(q)).length).map(q=>q.id);
+  const fixQs=doneFix.map(id=>S.qs.find(q=>q.id===id)).filter(Boolean);
+  const LET='ABCDEF';
+  const fixHtml=fixQs.length?`<div class="qfix"><h3>快速設定答案</h3><p class="qf-tip">點選項就能勾選正確答案（可複選）。也可以在下方一次輸入，例如「ACBD」「1.A 2.C」或「3212」</p>
+    <div class="qf-bulk"><input type="text" id="qfBulk" placeholder="依序輸入答案，例如 ACBD"><button type="button" class="btn btn-ghost" id="qfApply">套用</button></div>
+    <div class="qf-list">${fixQs.map(q=>{const no=S.qs.indexOf(q)+1;const nOpt=optCount(q);const ok=q.answers.length>0;
+      return `<div class="qf-row${ok?' ok':''}"><div class="qf-q"><b>第 ${no} 題</b><span>${esc(q.text.trim()||'（題目空白）')}</span><span class="st">${ok?'✓ 已設定':'未設定'}</span></div><div class="qf-opts">${Array.from({length:nOpt},(_,k)=>optFilled(q,k)?`<button type="button" class="qf-opt${q.answers.includes(k+1)?' on':''}" data-qid="${q.id}" data-k="${k+1}"><i>${LET[k]}</i>${esc((q.options[k]||'').trim()||'（圖片）')}</button>`:'').join('')}</div></div>`}).join('')}</div></div>`:'';
   const imgs=qs.reduce((a,q)=>a+allImgsRaw(q).length,0);
   const bad=qs.map((q,k)=>[start+k+1,issuesOf(q)]).filter(x=>x[1].length);
   $('#doneCard').innerHTML=`<div class="done-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div>
    <div class="done-main"><h2>識別完成</h2><p>共辨識出 ${n} 題${S.qs.length>n?`（加上原本的，目前共 ${S.qs.length} 題）`:''}，接下來可以逐題編輯</p>
    <div class="done-sum"><div><b>${n}</b>題目</div><div><b>${imgs}</b>張圖片</div><div class="${bad.length?'w':''}"><b>${bad.length}</b>待確認</div></div>
    ${bad.length?`<ul class="done-list">${bad.slice(0,6).map(([no,is])=>`<li>⚠ 第 ${no} 題：${esc(is.join('、'))}</li>`).join('')}${bad.length>6?`<li>…還有 ${bad.length-6} 題，進入編輯後可在左側看到紅點</li>`:''}</ul>`:'<p class="done-ok">✓ 每一題都有題目、選項與答案</p>'}
+   ${fixHtml}
    <div class="done-btns"><button type="button" class="btn btn-ghost" id="goBack">← 返回繼續識別</button><button type="button" class="btn btn-purple" id="goEdit">進入題目編輯 →</button></div></div>`;
   $('#goEdit').onclick=()=>{setView('edit');setTimeout(()=>focusQuestion(),50)};
   $('#goBack').onclick=backToInput;
+  const card=$('#doneCard');const keepScroll=()=>{const l=card.querySelector('.qf-list');return l?l.scrollTop:0};
+  const rerender=()=>{const st=keepScroll();renderDone(start,n,true);const l=card.querySelector('.qf-list');if(l)l.scrollTop=st;save()};
+  card.querySelectorAll('.qf-opt').forEach(b=>b.onclick=()=>{const q=S.qs.find(x=>x.id===b.dataset.qid);if(!q)return;const k=+b.dataset.k;
+    q.answers=q.answers.includes(k)?q.answers.filter(x=>x!==k):[...q.answers,k].sort((a,c)=>a-c);rerender()});
+  const ap=$('#qfApply');
+  if(ap){const doApply=()=>{const v=$('#qfBulk').value.trim();if(!v)return;const nv=normalize(v);const k=keyItems(v)||(/^[A-Fa-f1-6\s,、]+$/.test(nv)?{map:null,seq:nv.replace(/[\s,、]/g,'').split('').map(c=>[/\d/.test(c)?+c:c.toUpperCase().charCodeAt(0)-64])}:null);
+      if(!k){toast('看不懂這組答案，請輸入像「ACBD」「1.A 2.C」或「3212」');return}
+      let cnt=0;fixQs.forEach((q,i)=>{const a=k.map?k.map[S.qs.indexOf(q)+1]:k.seq[i];if(a&&a.length){q.answers=a.filter(x=>x>=1&&x<=optCount(q)&&optFilled(q,x-1));if(q.answers.length)cnt++}});
+      rerender();toast(cnt?`已設定 ${cnt} 題的答案`:'沒有對應到任何題目，請確認題號或數量');};
+    ap.onclick=doApply;$('#qfBulk').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();doApply()}}}
 }
 function backToInput(){
   setView('input');
