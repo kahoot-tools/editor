@@ -1150,7 +1150,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.17f</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.17g</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1329,7 +1329,7 @@ party:`暖身題：請問各位今天是來參加？
 答案：黑色`
 };
 
-const S={qs:[],cur:0,qNo:'none',optPrefix:'none',name:'',title:'',defTime:20,editing:false,extraOpen:false,cover:null,bg:null,setOpen:false,gsOpen:false};
+const S={qs:[],cur:0,qNo:'none',optPrefix:'none',name:'',title:'',defTime:10,editing:false,extraOpen:false,cover:null,bg:null,setOpen:false,gsOpen:false};
 const POOL=new Map(); let poolSeq=0;
 const loading=new Set();
 let aiSample=null, aiImages=false, downloadsCap=null;
@@ -2664,7 +2664,7 @@ async function restore(){
   try{d=await idbGet()}catch(e){}
   if(!d){try{d=JSON.parse(localStorage.getItem('kahootQEditor')||'null')}catch(e){}}
   if(!d) return false;
-  S.qNo=d.qNo||'none';S.setOpen=!!d.setOpen;S.gsOpen=!!d.gsOpen;S.cover=d.cover&&d.cover.blob?makeImg(d.cover.blob,d.cover.name):null;S.bg=d.bg&&d.bg.img&&d.bg.img.blob?{kind:d.bg.kind,name:d.bg.name||'',img:makeImg(d.bg.img.blob,d.bg.img.name)}:null;S.optPrefix=d.optPrefix||'none';S.name=d.name||'';S.title=d.title||'';S.defTime=TIMES.includes(d.defTime)?d.defTime:20;S.editing=!!d.editing;S.extraOpen=!!d.extraOpen;
+  S.qNo=d.qNo||'none';S.setOpen=!!d.setOpen;S.gsOpen=!!d.gsOpen;S.cover=d.cover&&d.cover.blob?makeImg(d.cover.blob,d.cover.name):null;S.bg=d.bg&&d.bg.img&&d.bg.img.blob?{kind:d.bg.kind,name:d.bg.name||'',img:makeImg(d.bg.img.blob,d.bg.img.name)}:null;S.optPrefix=d.optPrefix||'none';S.name=d.name||'';S.title=d.title||'';S.defTime=TIMES.includes(d.defTime)?d.defTime:10;S.editing=!!d.editing;S.extraOpen=!!d.extraOpen;
   S.noBgTip=!!d.noBgTip;
   const mk=im=>{if(!im||!im.blob)return null;const o=makeImg(im.blob,im.name);if(im.cut&&im.cut.blob)o.cut={...makeImg(im.cut.blob,im.cut.name),st:im.cut.st};return o};
   S.qs=(d.qs||[]).map(q=>{
@@ -2854,7 +2854,7 @@ $('#clearAll').onclick=async()=>{
   if(await modal('清空全部？',`會刪除目前 ${S.qs.length} 題與所有圖片，並清除遊戲標題、封面圖、背景圖和更多設定（題號、選項前綴、答題秒數），此瀏覽器的草稿也會一起清掉，無法復原。`,[{label:'取消',value:false},{label:'清空',value:true,primary:true}])){
     revokeAll();S.qs=[];S.cur=0;S.editing=false;
     if(S.cover)URL.revokeObjectURL(S.cover.url);if(S.bg)URL.revokeObjectURL(S.bg.img.url);
-    Object.assign(S,{title:'',cover:null,bg:null,qNo:'none',optPrefix:'none',defTime:20,gsOpen:false,setOpen:false,extraOpen:false});
+    Object.assign(S,{title:'',cover:null,bg:null,qNo:'none',optPrefix:'none',defTime:10,gsOpen:false,setOpen:false,extraOpen:false});
     $('#gTitle').value='';$('#tgen').hidden=true;$('#bulkTime').value='20';renderGMedia();syncSeg();syncGs();
     save();setView('input')}
 };
