@@ -1150,7 +1150,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.17i</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.18a</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1667,7 +1667,7 @@ function parseTextCore(raw){
       // 暖身題：題目保留「暖身題：」字樣（0(暖身題)、這種寫法統一成「暖身題：」），分數設不計分
       if(st.warm){if(!/^暖身題/.test(q.text))q.text='暖身題：'+q.text;q.note=WARMUP;q.points='none'}
       if(st.srcNo) q.srcNo=st.srcNo;
-      if(st.open){q.type='open';q.note=st.open;q.options=['','','',''];q.answers=[]}
+      if(st.open){const tt=tagType(st.open);q.type=['wordcloud','brainstorm','slide'].includes(tt)?tt:'open';q.note=st.open;q.options=['','','',''];q.answers=[]}
       out.push(q);
     });
   }else{
@@ -1677,6 +1677,9 @@ function parseTextCore(raw){
   }
   return out.filter(q=>q.text||q.options.some(Boolean));
 }
+// 【文字雲】這類標記 → 題型（沒認得的維持 null）
+function tagType(tag){tag=String(tag||'');
+  return /文字雲/.test(tag)?'wordcloud':/開放/.test(tag)?'open':/腦力激盪/.test(tag)?'brainstorm':/投影片/.test(tag)?'slide':/票選|投票/.test(tag)?'poll':/排列|排序/.test(tag)?'jumble':/滑桿/.test(tag)?'slider':/圖標/.test(tag)?'pin':/是非/.test(tag)?'tf':/簡答/.test(tag)?'typeans':null}
 // ---- 考卷格式前處理：書後解答、題號前的作答框 ( B )1.、多題擠在同一行 ----
 const LET2I=c=>normalize(c).toUpperCase().charCodeAt(0)-64;
 function keyItems(str){
@@ -1876,13 +1879,17 @@ async function readSheet(file){
         cs.forEach((c,x)=>{const nx=cs.slice(x+1).find(Boolean)||'';
           if(/^(?:遊戲)?(?:標題|名稱|title)\s*[:：]?$/i.test(c)&&nx) title=nx;
           else if(/^(?:遊戲)?(?:標題|title)\s*[:：]\s*(.+)$/i.test(c)) title=c.replace(/^[^:：]+[:：]\s*/,'');
-          if(/^(?:秒數|時間|time(?:\s*limit)?)\s*[:：]?$/i.test(c)&&nx) gTime=parseInt(normalize(nx))});}
+          if(/^(?:秒數|時間|time(?:\s*limit)?)\s*[:：]?$/i.test(c)&&/^\s*\d{1,3}\s*(?:秒|s|sec)?\s*$/i.test(normalize(nx))) gTime=parseInt(normalize(nx))});}
       const qs=[];
       for(const row of rows.slice(r+1)){
         let text=String(row[qi]??'').trim().replace(/^\d{1,3}\s*[.、]\s*/,'');if(!text) continue;
         let options=ai.filter(i=>i>=0).map(i=>String(row[i]??'').trim());
         // 只有文字、沒有選項的列（例如「IG 追蹤：＠xxx」）→ 併到上一題的備註
-        if(!options.some(Boolean)&&qs.length&&!(ci>=0&&String(row[ci]??'').trim())){const pq=qs[qs.length-1];pq.note=(pq.note?pq.note+'；':'')+text;continue}
+        const noteTxt=ni>=0?String(row[ni]??'').trim():'';
+        const tagM=text.match(/^【([^】]+)】\s*/);const sType=tagType(tagM?tagM[1]:'')||tagType(noteTxt.length<=10?noteTxt:'');
+        const hasNo=String(row[0]??'').trim()&&/^\d{1,3}(?:\.0+)?$/.test(normalize(String(row[0]).trim()))&&qi!==0;
+        if(!options.some(Boolean)&&qs.length&&!sType&&!hasNo&&!noteTxt&&!(ci>=0&&String(row[ci]??'').trim())){const pq=qs[qs.length-1];pq.note=(pq.note?pq.note+'；':'')+text;continue}
+        if(tagM&&tagType(tagM[1])) text=text.slice(tagM[0].length).trim();
         const warm=/^暖身題/.test(text);
         while(options.length>4&&!options[options.length-1]) options.pop();
         while(options.length<4) options.push('');
@@ -1893,6 +1900,9 @@ async function readSheet(file){
         const q=enrich({text,options,answers,note:ni>=0?String(row[ni]??'').trim():''});
         if(TIMES.includes(t)) q.time=t;else if(TIMES.includes(gTime)) q.time=gTime;
         if(warm){q.points='none';if(!q.note)q.note=WARMUP}
+        if(sType){q.type=sType;if(!q.note)q.note=TYPES[sType].label;
+          if(['wordcloud','open','brainstorm','slide','pin','slider'].includes(sType)){q.options=['','','',''];q.answers=[]}
+          if(sType==='poll'||sType==='jumble'||sType==='typeans') q.answers=[];}
         if(/分數加倍/.test(q.note)) q.points='double';
         if(/不計分/.test(q.note)) q.points='none';
         qs.push(q);
