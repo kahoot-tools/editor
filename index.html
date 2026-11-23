@@ -748,8 +748,8 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 #guideBlk .blk-h .grow{flex:1}
 #guideBlk .blk-sub{margin:6px 0 14px}
 .g-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
-.g-step{text-decoration:none;display:flex;gap:10px;align-items:flex-start;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px;cursor:pointer;color:var(--ink);font:inherit}
-.g-step:hover{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.g-step{display:flex;gap:10px;align-items:flex-start;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px;color:var(--ink);font:inherit}
+.g-more{text-decoration:none;color:var(--accent);margin-left:6px;white-space:nowrap}.g-more:hover{border-color:var(--accent)}
 .g-n{width:32px;height:32px;border-radius:9px;color:#fff;display:grid;place-items:center;flex:none;font-family:Montserrat,"Noto Sans TC",sans-serif;font-size:17px}
 .g-t{display:flex;flex-direction:column;gap:3px;min-width:0}
 .g-t b{font-size:15px}
@@ -1038,10 +1038,10 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
   </section>
 
   <section class="blk" id="guideBlk">
-    <div class="blk-h"><span class="bi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg></span><h2>使用說明</h2><span class="grow"></span><button type="button" class="mini-btn" id="guideToggle" aria-expanded="true">收合說明</button></div>
+    <div class="blk-h"><span class="bi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg></span><h2>使用說明</h2><a class="mini-btn g-more" href="guide.html" target="_blank" rel="noopener">詳細說明 ↗</a><span class="grow"></span><button type="button" class="mini-btn" id="guideToggle" aria-expanded="true">收合說明</button></div>
     <div id="guideBody">
-    <p class="blk-sub">5 個步驟做好 Kahoot 題目，點步驟看詳細說明（另開新頁）。檔案和題目只在你的瀏覽器裡處理，不會上傳；做到一半會自動存草稿。</p>
-    <div class="g-steps" role="group" aria-label="使用步驟"><a class="g-step" href="guide.html#step-1" target="_blank" rel="noopener"><span class="g-n" style="background:var(--k0)">1</span><span class="g-t"><b>選擇製作方式</b><small>上傳檔案、挑選題庫、貼上文字或直接編輯</small></span></a><a class="g-step" href="guide.html#step-2" target="_blank" rel="noopener"><span class="g-n" style="background:var(--k1)">2</span><span class="g-t"><b>確認辨識結果</b><small>自動抓出題目、選項和答案，沒抓到的馬上補</small></span></a><a class="g-step" href="guide.html#step-3" target="_blank" rel="noopener"><span class="g-n" style="background:var(--k2)">3</span><span class="g-t"><b>編輯題目</b><small>改題型、秒數、分數，放上題目和選項圖片</small></span></a><a class="g-step" href="guide.html#step-4" target="_blank" rel="noopener"><span class="g-n" style="background:var(--k3)">4</span><span class="g-t"><b>預覽畫面</b><small>看主持大螢幕和玩家手機上的樣子</small></span></a><a class="g-step" href="guide.html#step-5" target="_blank" rel="noopener"><span class="g-n" style="background:var(--k5)">5</span><span class="g-t"><b>導出並傳給小幫手</b><small>下載 Excel 或 ZIP，用 LINE「檔案」傳送</small></span></a></div>
+    <p class="blk-sub">5 個步驟做好 Kahoot 題目。檔案和題目只在你的瀏覽器裡處理，不會上傳；做到一半會自動存草稿。</p>
+    <div class="g-steps" role="group" aria-label="使用步驟"><div class="g-step"><span class="g-n" style="background:var(--k0)">1</span><span class="g-t"><b>選擇製作方式</b><small>上傳檔案、挑選題庫、貼上文字或直接編輯</small></span></div><div class="g-step"><span class="g-n" style="background:var(--k1)">2</span><span class="g-t"><b>確認辨識結果</b><small>自動抓出題目、選項和答案，沒抓到的馬上補</small></span></div><div class="g-step"><span class="g-n" style="background:var(--k2)">3</span><span class="g-t"><b>編輯題目</b><small>改題型、秒數、分數，放上題目和選項圖片</small></span></div><div class="g-step"><span class="g-n" style="background:var(--k3)">4</span><span class="g-t"><b>預覽畫面</b><small>看主持大螢幕和玩家手機上的樣子</small></span></div><div class="g-step"><span class="g-n" style="background:var(--k5)">5</span><span class="g-t"><b>導出並傳給小幫手</b><small>下載 Excel 或 ZIP，用 LINE「檔案」傳送</small></span></div></div>
     </div>
     </div>
   </section>
@@ -1177,7 +1177,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.24b</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.24c</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
