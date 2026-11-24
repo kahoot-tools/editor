@@ -748,6 +748,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 .pv-slide{position:absolute;left:10%;right:10%;top:9cqw;bottom:4cqw;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2cqw;z-index:2;text-align:center}
 .pv-slide .sb{background:rgba(255,255,255,.9);border-radius:.4cqw;padding:1.4cqw 2cqw;font-size:2cqw;max-width:100%}
 
+.gc-list{margin:4px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
 /* 使用說明 */
 #guideBlk .blk-h .grow{flex:1}
 #guideBlk .blk-sub{margin:6px 0 14px}
@@ -1156,13 +1157,15 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     <div class="guide">
       <div class="gcard">
         <h3>如何匯入 Kahoot？</h3>
-        到 Kahoot 選擇 <span class="k">建立</span> › <span class="k">空白</span> › <span class="k">新增題目</span> › <span class="k">匯入</span> › 最下方 <span class="k">匯入試算表</span>，上傳下載的 Excel 即可。
-        <div class="note-p"><b>下載前</b>請確認每題都有勾選正確答案；文字雲、票選、開放式問答等不計對錯的題型可不勾。</div>
+        <ul class="gc-list">
+          <li>Kahoot 只能匯入題目文字，圖片、投影片、影音等其他素材皆須由帳號後台手動添加。</li>
+          <li>除了測驗（選擇題）以外的其他題型，於匯入後須手動更改題型和設定。</li>
+        </ul>
       </div>
       <div class="gcard">
         <h3>有附圖片的題目</h3>
         每題可放 <b>題目圖</b>、<b>解答圖</b>，選項也可以換成圖片。有圖片時下載 <b>ZIP</b>（Excel＋依題號命名的圖片），整包傳給我們即可。
-        <div class="note-p">請用 LINE 的<b>「檔案」</b>傳送 ZIP，不要用「相片」，避免被壓縮。</div>
+        <div class="note-p">請用 LINE 的<b>「檔案」</b>傳送 ZIP，電腦版可以直接拖曳至訊息框內上傳。</div>
       </div>
     </div>
   </section>
@@ -1181,7 +1184,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.24d</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.25a</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
