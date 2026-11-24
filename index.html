@@ -446,6 +446,10 @@ footer p{color:var(--muted);font-size:14px}
 @media (max-width:560px){.btn .full{display:none}.btn .short{display:inline}}
 .statrow{display:flex;align-items:center;gap:12px;margin-top:4px}.statrow .stat{margin-top:0}
 .top .row{padding-block:10px;flex-wrap:wrap}
+@media (min-width:861px){.top .row{flex-wrap:nowrap}.topnav{flex-wrap:nowrap;flex:none}.topnav a{white-space:nowrap}.brand{flex:none}}
+@media (min-width:861px) and (max-width:1180px){.sc-l{display:none}}
+@media (min-width:861px) and (max-width:1060px){.top .dl .btn .full{display:none}.top .dl .btn .short{display:inline}.topnav a{padding:6px 7px}}
+@media (min-width:861px) and (max-width:960px){.savechip{display:none}}
 @media (max-width:860px){.topnav{order:5;width:100%;margin-left:-10px}}
 .top .dl .btn{padding:10px 14px;font-size:14px}
 .navrow{padding-bottom:8px}
@@ -1177,7 +1181,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.24c</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.24d</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -2705,8 +2709,7 @@ function save(now){
     try{await idbSet(data);ok=true}catch(e){
       try{localStorage.setItem('kahootQEditor',JSON.stringify({...data,qs:data.qs.map(q=>({...q,qimg:null,aimg:null,qbg:null,oimgs:[],pin:null}))}));ok=true}catch(e2){}
     }
-    const d=new Date();
-    $('#saveChip').textContent=ok?`✓ 已自動儲存在此瀏覽器 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`:'⚠ 此瀏覽器無法儲存草稿';
+    $('#saveChip').innerHTML=ok?'✓ 已自動儲存<span class="sc-l">在此瀏覽器</span>':'⚠ <span class="sc-l">此瀏覽器</span>無法儲存草稿';
     $('#saveChip').classList.toggle('ok',ok);
   },now?0:500);
 }
