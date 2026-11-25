@@ -1213,7 +1213,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.26c</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.26d</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1472,8 +1472,8 @@ function pickSeq(ms){
 }
 function findLabels(n,loose){
   const ms=[];let m;
-  const re=loose?/(?<![A-Za-z])([A-F])(?![a-z])/g:/\(\s*([A-Fa-f])\s*\)|(?<![A-Za-z])([A-F])\s*(?:[、:)]|\.(?!\d))|(?<=^|[\s(（])([A-F])\s*\.(?=\d)/gm;
-  while((m=re.exec(n))) ms.push({idx:(m[1]||m[2]||m[3]).toUpperCase().charCodeAt(0)-65,start:m.index,end:m.index+m[0].length});
+  const re=loose?/(?<![A-Za-z])([A-F])(?![a-z])/g:/\(\s*([A-Fa-f])\s*\)|(?<![A-Za-z])([A-F])\s*(?:[、:)]|\.(?!\d))|(?<=^|[\s(（])([A-F])\s*\.(?=\d)|(?<=^|[\s(（])([A-F])[ \t]*[-–—](?![A-Za-z\-])/gm;
+  while((m=re.exec(n))) ms.push({idx:(m[1]||m[2]||m[3]||m[4]).toUpperCase().charCodeAt(0)-65,start:m.index,end:m.index+m[0].length});
   if(!loose){const rc=/[①②③④⑤⑥]/g;while((m=rc.exec(n))) ms.push({idx:CIRCLED.indexOf(m[0]),start:m.index,end:m.index+1});const rcc=/©/g;while((m=rcc.exec(n))) ms.push({idx:2,start:m.index,end:m.index+1});ms.sort((a,b)=>a.start-b.start)}
   return ms;
 }
@@ -1481,7 +1481,10 @@ const OPT_SEP=/、|\||(?<!\d)\/|\/(?!\d)/;
 function sepParts(t,base){const parts=[];const re=/(?:[^、|\/]|(?<=\d)\/(?=\d))+/g;let m;while((m=re.exec(t))){if(m[0].trim())parts.push({s:base+m.index,e:base+m.index+m[0].length})}return parts}
 // 選項用數字當代號，而且在行首：1・實習醫師鬥格 / 2．好運來
 function findNumLabels(n){const ms=[];const re=/(^|\n)([ \t]*)([1-6])[ \t]*[・‧·•.、:)][ \t]*(?=\S)/g;let m;
-  while((m=re.exec(n))){const st=m.index+m[1].length+m[2].length;ms.push({idx:+m[3]-1,start:st,end:m.index+m[0].length})}return ms}
+  while((m=re.exec(n))){const st=m.index+m[1].length+m[2].length;ms.push({idx:+m[3]-1,start:st,end:m.index+m[0].length})}
+  // (1)4/9 (2)4/10 這種括號數字，可以在同一行
+  if(ms.length<2){const r2=/[(]\s*([1-6])\s*[)]/g;const ps=[];while((m=r2.exec(n)))ps.push({idx:+m[1]-1,start:m.index,end:m.index+m[0].length});if(ps.length>=2)return ps}
+  return ms}
 function lineSplit(o,n){
   // 沒有 A/B/C/D 代號：題目可能跨行（以？結尾判斷），選項為頓號分隔的一行或一行一個
   const lines=[];let p=0;
@@ -1541,6 +1544,12 @@ function ansOne(t,options,on){
 }
 function resolveAnswers(raw,options){
   if(raw==null) return [];
+  // 答案後面附的說明：「D（子翔生日5/23…）」「B. 飛蛾（歷史上…）」→ 先試完整，不行再拿掉括號說明
+  {const r0=resolveAnswers0(raw,options);if(r0.length) return r0;
+   const cut=String(raw).replace(/\s*[(（][^)）]*[)）]?[^(（]*$/,'').trim();if(cut&&cut!==String(raw).trim()) return resolveAnswers0(cut,options);return r0}
+}
+function resolveAnswers0(raw,options){
+  if(raw==null) return [];
   raw=String(raw).trim().replace(/[。,，、;；\s]+$/,'').replace(/(?<=\D)\.$/,'');
   raw=raw.replace(ANS_KW,'').replace(/^[)）]\s*/,'').trim();
   if(!raw) return [];
@@ -1560,7 +1569,7 @@ function resolveAnswers(raw,options){
   if(/^[1-6]{2,6}$/.test(nr)&&options.filter(Boolean).length>=2&&!on.includes(nk(nr))) return fin([...nr].map(Number));
   return [];
 }
-const MARK_RE=/✅|☑️|☑|✔️|✔|✓|√|ˇ|※|\(\s*答案\s*\)|(?<=^[ \t]*)答案(?=[ \t]+\S)|(?<=[\s)\]】」』》〉])答案(?=[ \t]*$)|(?<![^\s、,，(（])\*|\*(?![^\s、,，)）])/gm;
+const MARK_RE=/✅|☑️|☑|✔️|✔|✓|√|ˇ|※|\(\s*(?:答案|解答|正解|正確答案|正確)\s*\)|(?<=^[ \t]*)答案(?=[ \t]+\S)|(?<=[\s)\]】」』》〉])(?:答案|解答|正解)(?=[ \t]*(?:✅|☑️|☑|✔️|✔)?[ \t]*$)|(?<=^[ \t]*(?:[A-Fa-f][.、:)][ \t]*)?)(?:正解|解答)(?=[ \t]*(?:⟦|$|\s))|(?<![^\s、,，(（])\*|\*(?![^\s、,，)）])/gm;
 const WRAP_PAIRS={'【':'】','「':'」','『':'』','《':'》','〈':'〉','(':')','（':'）'};
 // 最後一個選項後面又接一段答案：「(d)買樓房、(a)增產報國」「花蓮、台北」
 function tailAnswer(options,labeled){
@@ -1623,7 +1632,7 @@ function parseBlock(o,n){
   // 「✅ 答案：B」：答案前面的勾選符號屬於答案行，不是選項的標記
   {const re=/(?:✅|☑️|☑|✔️|✔|✓|√)[ \t]*(?=(?:正確答案|參考答案|標準答案|答案|解答|正解|ans))/gi;let mm;const rr=[];while((mm=re.exec(n)))rr.push([mm.index,mm.index+mm[0].length]);for(const [a,b] of rr){o=blankRange(o,a,b);n=blankRange(n,a,b)}}
   // 答案（必須在行首、空白或括號後，避免誤判題目裡的「答案」兩字）
-  const ansRe=/(?<![^\s(、,])\(?\s*(?:正確答案|參考答案|標準答案|正確選項|答案|解答|正解|答(?=\s*[:=])|ans(?:wer)?)\s*(?:[:=]\s*|(?:是|為)\s*(?=\S)|(?=\(?[A-F1-6①②③④⑤⑥©]\)?(?:\s*[),、&\/及和與]|\s*$)))((?:\([A-Fa-f]\)|[^\n)])*)\)?/gim;
+  const ansRe=/(?<![^\s(、,?？:：])\(?\s*(?:正確答案|參考答案|標準答案|正確選項|答案|解答|正解|答(?=\s*[:=])|ans(?:wer)?)\s*(?:[:=]\s*|(?:是|為)\s*(?=\S)|(?=\(?[A-F1-6①②③④⑤⑥©]\)?(?:\s*[),、&\/及和與]|\s*$)))((?:\([A-Fa-f]\)|[^\n)])*)\)?/gim;
   let last=null;while((m=ansRe.exec(n))) last=m;
   let rawAns='';
   // 題目問號後面直接寫答案：「請問今天的主角是誰？A」
@@ -1635,7 +1644,8 @@ function parseBlock(o,n){
   // 「A：3」當答案（A = Answer），只在沒有 B 選項時
   if(!last&&!rawAns){const aq=/(^|\n)[ \t]*(?:A|Q?A|ans?)[ \t]*[:=][ \t]*((?:[1-6①②③④⑤⑥]|\(?[A-Fa-f]\)?)(?:[ \t]*[,、&\/][ \t]*(?:[1-6]|[A-Fa-f]))*)[ \t]*(?=\n|$)/i.exec(n);
     if(aq&&!/(^|\n)\s*\(?B\s*[:.、)]/.test(n)){const st=aq.index+aq[1].length;const g=n.indexOf(aq[2],st);rawAns=o.slice(g,g+aq[2].length);o=blankRange(o,st,aq.index+aq[0].length);n=blankRange(n,st,aq.index+aq[0].length)}}
-  if(last){
+  let ansAt=-1;
+  if(last){ansAt=last.index;
     if(last[1]){const g=last.index+last[0].lastIndexOf(last[1]);rawAns=o.slice(g,g+last[1].length).replace(MARK_RE,'')}
     o=blankRange(o,last.index,last.index+last[0].length);n=blankRange(n,last.index,last.index+last[0].length);
   }
@@ -1663,6 +1673,8 @@ function parseBlock(o,n){
   if(!ranges.length&&seq.length>=2){
     labeled=true;text=cleanPart(o.slice(0,seq[0].start));
     ranges=seq.map((s,i)=>({s:s.end,e:i+1<seq.length?seq[i+1].start:o.length}));labelStarts=seq.map(s=>s.start);
+    // 答案行在最後一個選項之後：答案行（含後面的說明）不算進最後一個選項
+    if(ansAt>seq[seq.length-1].end){const lr=ranges[ranges.length-1];const nl=n.lastIndexOf('\n',ansAt);lr.e=Math.max(lr.s,nl>lr.s?nl:ansAt)}
   }
   if(!ranges.length) text=cleanPart(o);
   text=text.replace(/^(?:題目|問題|題幹)\s*[:：]\s*/,'');
@@ -1685,61 +1697,101 @@ function parseBlock(o,n){
   }
   if(ranges.length&&!rawAns&&options.length>=2){const t=tailAnswer(options,labeled);if(t){options=t.options;tickAns.push(...t.ans)}}
   if(ranges.length){const w=wrapAnswers(text,options);text=w.text;options=w.options;tickAns.push(...w.hits)}
+  // 每個選項都被標記（例如整份都是紅字）→ 不算答案
+  {const nf=options.filter(Boolean).length;const tu=new Set(tickAns);if(nf>=3&&tu.size>=nf){tickAns.length=0}}
   const answers=[...new Set([...resolveAnswers(rawAns,options),...tickAns])].sort((a,b)=>a-b);
-  let qimgNum=null,oimgNum=null;
-  for(const k of marks){
+  // 選項只剩自己的代號（表格裡 A、B 後面空白，或「2.」）→ 空白選項（之後放圖片）
+  {const self=(t,k)=>{const x=normalize(t).trim();return x==='ABCDEF'[k]||new RegExp('^(?:'+'ABCDEF'[k]+'|'+(k+1)+')\\s*[.、:)\\-]$').test(x)};
+   const filled=options.filter(t=>t.trim());if(filled.length>=2&&options.every((t,k)=>!t.trim()||self(t,k)))options=options.map(()=>'')}
+  let qimgNum=null,oimgNum=null;const optImgs=[];
+  // 圖片在某個選項裡（A. ⟦圖2⟧）→ 選項圖片
+  let rest=marks;
+  if(labeled&&ranges.length){rest=[];for(const k of marks){let hit=-1;for(let r=0;r<ranges.length;r++){if(k.pos>=labelStarts[r]&&k.pos<ranges[r].e){hit=r;break}}
+    if(hit>=0&&optImgs[hit]==null&&(!options[hit]||/^\s*(?:正解|解答)?\s*$/.test(options[hit]))){optImgs[hit]=k.num;options[hit]=''}else rest.push(k)}}
+  for(const k of rest){
     if(k.pos<optStart&&qimgNum===null) qimgNum=k.num;
     else if(oimgNum===null) oimgNum=k.num;
     else if(qimgNum===null) qimgNum=k.num;
   }
+  // 只有一張圖、放在選項後面，但題目寫「附圖／下圖／照片」→ 當題目圖
+  if(qimgNum===null&&oimgNum!==null&&rest.length===1&&/附圖|下圖|圖中|圖片|照片|如圖/.test(text)){qimgNum=oimgNum;oimgNum=null}
   while(options.length<4&&options.length>0) options.push('');
   if(!options.length) options=['','','',''];
-  return {text,options,answers,qimgNum,oimgNum};
+  return {text,options,answers,qimgNum,oimgNum,optImgs};
 }
 function parseTextCore(raw){
   const o=raw.replace(/\r\n?|[\u2028\u2029\v\f]/g,'\n').replace(/[\u00a0\u3000\t ]+$/gm,'');const n=normalize(o);
   const starts=[];let lastNum=null,p=0;
   const LS=n.split('\n');let prevBlank=true;
   const nextIsQ=i=>{for(let j=i+1;j<LS.length;j++){if(LS[j].trim())return /^[ \t]*(?:\(\d{1,3}\)|(?:Q|第)?[ \t]*\d{1,3}[ \t]*題?[ \t]*(?:\.(?!\d)|[、:)\]])|暖身題|【)/i.test(LS[j])}return true};
-  let optExp=0,prevQ=false;
+  let optExp=0,prevQ=false,prevPlain=false,prevPrevBlank=true,since=0,prevStartsBlock=true,curStartsBlock=true,skipEx=false,prevLineS=0,curLineS=0;
+  const nextIsNum=i=>{for(let j=i+1;j<LS.length;j++){if(LS[j].trim())return /^[ \t]*(?:\(\d{1,3}\)|(?:Q|第|題目|問題)?[ \t]*\d{1,3}[ \t]*題?[ \t]*(?:\.(?!\d)|[、:)\]])|【\s*第)/i.test(LS[j])&&!/^[ \t]*[1-6][ \t]*[.、)]/.test(LS[j])}return true};
+  const LBL=/^[ \t]*(?:[(\[（]?\s*[A-Fa-f]\s*[)\]）.、:：\-]|[①②③④⑤⑥©]|[(（]\s*[1-6]\s*[)）]|[✅☑✔✓√*＊※ˇ])/;
+  const ANSL=/^[ \t]*(?:[✅☑✔✓√]\S*\s*)?(?:正確答案|參考答案|答案|解答|正解|詳解|解析|說明|備註|ans)/i;
+  const push=(o)=>{starts.push(o);since=0;optExp=0;if(!o.plain)skipEx=false};
   for(let li=0;li<LS.length;li++){
     const L=LS[li];const wasBlank=prevBlank;prevBlank=!L.trim();
     const s=p;p+=L.length+1;let m;
-    // 題目下面用 1・2・3・ 當選項代號：不要當成新題號
-    {const om=L.match(/^[ \t]*([1-6])[ \t]*[・‧·•.、:)][ \t]*(\S.*)$/);const wasQ=prevQ;
-      prevQ=L.trim()?/[?？]\s*$/.test(L):prevQ;
-      if(!L.trim()){optExp=0}
-      else if(om&&!/[?？]\s*$/.test(om[2])&&((+om[1]===1&&wasQ)||(optExp&&+om[1]===optExp))){optExp=+om[1]+1;prevQ=false;continue}
-      else if(!om) optExp=0;}
-    if(/^\s*【[^】]*】\s*$/.test(L)&&(wasBlank||!starts.length||(nextIsQ(li)&&!/^\s*【\s*(?:[A-F]\s*[.、:)]|[①②③④⑤⑥])/.test(L)))){starts.push({s,e:s+L.length,header:true});lastNum=0;continue}
-    if((m=L.match(/^\s*(?:\d{1,3}\s*[.、]?\s*)?[(（【]?\s*暖身題\s*[)）】]?\s*[:：.、]?\s*/))){starts.push({s,e:s+m[0].length,warm:true});lastNum=0;continue}
-    if((m=L.match(/^\s*【([^】]+)】\s*(?=\S)/))){starts.push({s,e:s+m[0].length,open:m[1].trim()});continue}
+    if(!L.trim()){optExp=0;prevPrevBlank=true;continue}
+    prevStartsBlock=curStartsBlock;curStartsBlock=prevPrevBlank;prevLineS=curLineS;curLineS=s;const ppb=prevStartsBlock;prevPrevBlank=false;
+    // 題目下面用 1. 2. 3. 當選項代號：不要當成新題號（「1.醫生 2.軍人」一行好幾個也算）
+    {const om=L.match(/^[ \t]*(?:☑️|☑|✅|✔️|✔|✓|√|\*|＊)?[ \t]*([1-6])[ \t]*[・‧·•.、:)][ \t]*(.*)$/);const wasQ=prevQ,wasPlain=prevPlain;
+      prevQ=/[?？]/.test(L)&&(!LBL.test(L)||/^[ \t]*[(（]\s*\d{1,3}\s*\.?\s*[)）]/.test(L));prevPlain=!om&&!LBL.test(L)&&!/^[ \t]*(?:\(\d{1,3}\)|(?:Q|第|題目|問題)?[ \t]*\d{1,3}[ \t]*題?[ \t]*(?:\.(?!\d)|[、:)\]]))/i.test(L);
+      if(om&&!/[?？]/.test(om[2])){
+        const nextLbl=(()=>{for(let j=li+1;j<LS.length;j++){if(!LS[j].trim())continue;return /^[ \t]*[(\[（]?\s*[A-F]\s*[)\]）.、:：]/.test(LS[j])&&!/^[ \t]*(?:A|ans?)[ \t]*[:=：][ \t]*[\dA-F①-⑥ ,、]+[ \t]*$/i.test(LS[j])}return false})();
+        const mx=Math.max(+om[1],...[...om[2].matchAll(/(?:^|[\s☑✅✔✓√️*＊])([1-6])\s*[.、)]/g)].map(x=>+x[1]));
+        if(!nextLbl&&((+om[1]===1&&(wasQ||(wasPlain&&ppb)))||(optExp&&+om[1]===optExp))){
+          // 沒有問號的題目句（段落第一行）後面接 1. → 那一行是新的一題
+          if(+om[1]===1&&!wasQ&&wasPlain&&ppb&&since>=2&&!skipEx&&!starts.some(x=>x.s===prevLineS)){starts.push({s:prevLineS,e:prevLineS,plain:true});since=1}
+          optExp=mx+1;prevQ=false;prevPlain=false;since++;continue}
+      }
+      if(!om) optExp=0;}
+    // 分隔線（-----新郎知多少-----）：分段標題，題號可以重新從 1 開始
+    if(/^\s*[-=—_~＝－─━*]{3,}.*[-=—_~＝－─━*]{3,}\s*$/.test(L)||/^\s*[-=—_~＝－─━]{5,}\s*$/.test(L)){starts.push({s,e:s+L.length,header:true});lastNum=null;continue}
+    if(/^\s*【[^】]*】\s*$/.test(L)&&!/^\s*【\s*第\s*[\d一二三四五六七八九十百零〇兩]{1,4}\s*題\s*】/.test(L)&&(wasBlank||!starts.length||(nextIsQ(li)&&!/^\s*【\s*(?:[A-F]\s*[.、:)]|[①②③④⑤⑥])/.test(L)))){starts.push({s,e:s+L.length,header:true});lastNum=0;skipEx=/範例|範本|example|sample|說明|注意事項/i.test(L);continue}
+    // 暖身題／熱身題／試玩題／測試題／練習題
+    if((m=L.match(/^\s*(?:\d{1,3}\s*[.、]?\s*)?[(（【]?\s*(暖身題|熱身題|試玩題|測試題|練習題)\s*[)）】]?(?:\s*[(（]?\s*不計分\s*[)）]?)?\s*[:：.、]?\s*/))){push({s,e:s+m[0].length,warm:true,kw:m[1]});lastNum=0;continue}
+    // 【第一題】可以當暖身題 不計分 → 後面那段是附註（下一行是「題目：」時）
+    if((m=L.match(/^\s*【\s*第\s*(\d{1,3}|[一二三四五六七八九十百零〇兩]{1,4})\s*題\s*】\s*/))){
+      const num=/\d/.test(m[1])?+m[1]:cnNum(m[1]);const rest=L.slice(m[0].length).trim();let e=s+m[0].length,remark='';
+      if(rest){for(let j=li+1;j<LS.length;j++){if(!LS[j].trim())continue;if(/^\s*(?:題目|問題|題幹)\s*[:：]/.test(LS[j])||!/[?？]/.test(rest)){e=s+L.length;remark=rest}break}}
+      push({s,e,srcNo:m[0].trim(),remark});if(num!=null)lastNum=num;continue}
+    if((m=L.match(/^\s*【([^】]+)】\s*(?=\S)/))){push({s,e:s+m[0].length,open:m[1].trim()});continue}
     if((m=L.match(/^[ \t]*第[ \t]*(\d{1,3}|[一二三四五六七八九十百零〇兩]{1,4})[ \t]*題(?:[ \t]*[|:、.\-—–·]+[ \t]*|[ \t]+|$)/))){
       const num=/\d/.test(m[1])?+m[1]:cnNum(m[1]);
       if(num!=null&&(lastNum===null||(num>lastNum&&num<=lastNum+3))){
         let e=s+m[0].length;const rest=L.slice(m[0].length).trim();
         // 「第 1 題｜創辦人」下一行是「題目：…」→ 後面那段是分類，不算題目
         if(rest&&!/[?？]/.test(rest)){for(let j=li+1;j<LS.length;j++){if(!LS[j].trim())continue;if(/^\s*(?:題目|問題|題幹)\s*[:：]/.test(LS[j]))e=s+L.length;break}}
-        starts.push({s,e,srcNo:m[0].trim()});lastNum=num;continue}
+        push({s,e,srcNo:m[0].trim()});lastNum=num;continue}
+    }
+    // 題目1 新郎… / 題目6新娘… / Q3 …（沒有標點也算）
+    if((m=L.match(/^[ \t]*(?:題目|問題|Q)[ \t]*(\d{1,3})(?:[ \t]*[.、:：)\]][ \t]*|[ \t]+|(?=[㐀-鿿]))/i))){
+      const num=+m[1];const rest=L.slice(m[0].length);
+      if(lastNum===null||((num>lastNum||(num===lastNum&&/[?？]/.test(rest)))&&num<=lastNum+3)){push({s,e:s+m[0].length,srcNo:m[0].trim()});lastNum=num;continue}
     }
     if((m=L.match(/^[ \t]*(?:\((\d{1,3})\s*\.?\s*\)|(?:Q|第)?[ \t]*(\d{1,3})[ \t]*題?[ \t]*(?:\.(?!\d)|[、:)\]]))/i))){
       const num=+(m[1]||m[2]);
       const rest=L.slice(m[0].length);
       const optLike=!/[?？:：]/.test(rest)&&!/^[^(（、\/]+[(（][^)）]*[、\/][^)）]*[)）]\s*$/.test(rest)&&rest.split(/[、\/]/).length>=3&&rest.split(/[、\/]/).every(x=>x.trim().length<=12);
-      if((lastNum===null||(num>lastNum&&num<=lastNum+3))&&!(optLike&&lastNum!==null)){starts.push({s,e:s+m[0].length,srcNo:m[0].trim()});lastNum=num}
+      if((lastNum===null||((num>lastNum||(num===lastNum&&/[?？]/.test(rest)))&&num<=lastNum+3))&&!(optLike&&lastNum!==null)){push({s,e:s+m[0].length,srcNo:m[0].trim()});lastNum=num;continue}
     }
+    // 沒有題號：有問號的句子，而且上一題已經有選項 → 新的一題
+    if(/[?？]/.test(L)&&!LBL.test(L)&&!ANSL.test(L)&&!skipEx&&(since>=2||(wasBlank&&since>=1)||(!starts.some(x=>!x.header)&&!nextIsNum(li)))){push({s,e:s,plain:true});continue}
+    since++;
   }
   const real=starts.filter(x=>!x.header);
   const out=[];
   if(real.length){
-    const pre=(n.slice(0,real[0].s).match(/⟦圖\d+⟧/g)||[]).join('');
+    const preAll=n.slice(0,real[0].s);const pre=preAll.replace(/⟦圖\d+⟧/g,'').trim()?'':(preAll.match(/⟦圖\d+⟧/g)||[]).join('');
     starts.forEach((st,i)=>{
       if(st.header) return;
       const end=i+1<starts.length?starts[i+1].s:n.length;
       const px=st===real[0]?pre:'';
       const q=parseBlock(px+o.slice(st.e,end),px+n.slice(st.e,end));
       // 暖身題：題目保留「暖身題：」字樣（0(暖身題)、這種寫法統一成「暖身題：」），分數設不計分
-      if(st.warm){if(!/^暖身題/.test(q.text))q.text='暖身題：'+q.text;q.note=WARMUP;q.points='none'}
+      if(st.warm){const kw=st.kw||'暖身題';if(!q.text.startsWith(kw))q.text=kw+'：'+q.text;q.note=WARMUP;q.points='none'}
+      if(st.remark){q.note=st.remark;if(/暖身|不計分/.test(st.remark))q.points='none';else if(/加倍|雙倍/.test(st.remark))q.points='double'}
       if(st.srcNo) q.srcNo=st.srcNo;
       if(st.open){const tt=tagType(st.open);q.type=['wordcloud','open','brainstorm','slide'].includes(tt)?tt:'wordcloud';q.note=st.open;q.options=['','','',''];q.answers=[]}
       out.push(q);
@@ -1790,21 +1842,31 @@ function prepExam(raw){
   if(!key){let j=lines.length;while(j>0&&!lines[j-1].trim())j--;let i=j;
     while(i>0&&lines[i-1].trim()&&keyItems(lines[i-1])&&keyItems(lines[i-1]).map&&!/[?？]/.test(lines[i-1]))i--;
     if(i<j){const k=keyItems(lines.slice(i,j).join('\n'));if(k&&k.map&&Object.keys(k.map).length>=2){key=k;lines.length=i}}}
+  // 1b. 開頭的答案列（例如第一行「答案BBDACB DCADB…」），在任何題目之前
+  if(!key){for(let i=0;i<Math.min(lines.length,8);i++){const L=lines[i];if(!L.trim())continue;if(/[?？]/.test(L))break;
+    const m=normalize(L).match(/^\s*(?:參考答案|正確答案|標準答案|答案|解答)\s*[:：]?\s*([A-F][A-F\s,，、]{2,})$/i);
+    if(m){const k=keyItems(m[1]);if(k){key=k;lines.splice(i,1)}break}}}
+  // 1c. 標題列：「標題：xxx」「遊戲標題：xxx」
+  let title='';
+  for(let i=0;i<Math.min(lines.length,8);i++){const m=lines[i].match(/^\s*(?:遊戲)?(?:標題|名稱|主題)\s*[:：]\s*(.+?)\s*$/);if(m){title=m[1];lines.splice(i,1);break}if(/[?？]/.test(lines[i]))break}
   t=lines.join('\n');
   // 2. 多題擠在同一行：題號照順序出現在行中間就斷行
   {const re=/(?:[(（][ \t　]*[A-FＡ-Ｆa-f]?[ \t　]*[)）][ \t]*)?(?<![\d.])(\d{1,3}|[０-９]{1,3})[ \t]*[.、．](?![\d０-９])/g;let m,exp=null,out='',last=0;
     while((m=re.exec(t))){const num=+normalize(m[1]);const bol=/(^|\n)[ \t　]*$/.test(t.slice(Math.max(0,m.index-40),m.index));
       if(bol){exp=num+1;continue}
-      if(exp!==null&&num===exp&&/[\s)）。？?!！]$/.test(t.slice(0,m.index))){out+=t.slice(last,m.index).replace(/[ \t　]+$/,'')+'\n';last=m.index;exp=num+1}}
+      if(exp!==null&&num===exp&&/[\s)）。？?!！☑✅✔✓√️*＊]$/.test(t.slice(0,m.index))){
+        // 「交友軟體 ☑️4.青梅竹馬」：緊貼在題號前的勾選符號屬於下一個選項
+        const seg=t.slice(last,m.index);const mk=seg.match(/[ \t　]*((?:☑️|☑|✅|✔️|✔|✓|√|\*|＊)[ \t　]*)$/);const cut=mk?m.index-mk[1].length:m.index;
+        out+=t.slice(last,cut).replace(/[ \t　]+$/,'')+'\n';last=cut;exp=num+1}}
     t=out+t.slice(last);}
   // 3. 題號前的作答框：( B )1.  (  )2.  （Ａ）3.
   const box={};
   t=t.replace(/^([ \t　]*)[(（][ \t　]*([A-FＡ-Ｆa-f]{0,4})[ \t　]*[)）][ \t　]*(?=((?:Q|第)?[ \t]*(?:\d{1,3}|[０-９]{1,3}))[ \t]*題?[ \t]*(?:[.．](?![\d０-９])|[、:：)）]))/gim,(m,sp,l,num)=>{const k=+normalize(num).replace(/\D/g,'');if(l)box[k]=[...new Set(l.split('').map(LET2I))].sort();return sp});
-  return {text:t,key,box};
+  return {text:t,key,box,title};
 }
 function parseText(raw){
   const pre=prepExam(raw);
-  const out=parseTextCore(pre.text);
+  const out=parseTextCore(pre.text);if(pre.title) out.title=pre.title;
   out.forEach((q,i)=>{
     if(q.answers.length) return;
     const num=q.srcNo?+normalize(q.srcNo).replace(/\D/g,''):i+1;
@@ -1823,8 +1885,8 @@ function enrich(p){
     [/文字雲/,x=>x.type='wordcloud'],[/票選|投票/,x=>x.type='poll'],[/是非/,x=>x.type='tf'],[/開放式/,x=>x.type='open'],[/排列|排序題/,x=>x.type='jumble']];
   q.text=(q.text||'').replace(/[\(（]([^()（）]{1,12})[\)）]/g,(all,inner)=>{let hit=false;for(const [re,fn] of tags) if(re.test(inner)){fn(q);hit=true}return hit?'':all}).trim();
   const pick=num=>{if(num==null)return null;const it=POOL.get(num);return it?makeImg(it.blob,it.name):null};
-  q.qimg=pick(p.qimgNum);q.aimg=pick(p.oimgNum);q.oimgs=[];
-  delete q.qimgNum;delete q.oimgNum;
+  q.qimg=pick(p.qimgNum);q.aimg=pick(p.oimgNum);q.oimgs=Array.from(p.optImgs||[],x=>x==null?null:pick(x));
+  delete q.qimgNum;delete q.oimgNum;delete q.optImgs;
   return q;
 }
 
@@ -1867,27 +1929,102 @@ async function readTxt(file){
   try{return new TextDecoder('utf-8',{fatal:true}).decode(buf)}catch(e){}
   try{return new TextDecoder('big5').decode(buf)}catch(e){return new TextDecoder().decode(buf)}
 }
+// Word：直接讀 docx 內的 XML（段落、自動編號、表格、圖片、標色答案），不再用 mammoth
 async function readDocx(file){
-  await loadScript(LIB.mammoth);
-  let k=0;
-  const r=await mammoth.convertToHtml({arrayBuffer:await file.arrayBuffer()},{convertImage:mammoth.images.imgElement(async img=>{
-    const ext=(img.contentType||'').split('/')[1]||'png';
-    const blob=b64ToBlob(await img.read('base64'),img.contentType);
-    const mk=addPool(blob,`word圖片${++k}.${ext==='jpeg'?'jpg':ext}`);
-    return {src:mk?'marker:'+mk:'skip:'};
-  })});
-  const doc=new DOMParser().parseFromString(r.value,'text/html');
-  const lines=[];const BLOCK=/^(P|H[1-6]|LI|TR)$/;
-  const txt=node=>{
-    if(node.nodeType===3) return node.data;
-    if(node.nodeName==='IMG'){const s=node.getAttribute('src')||'';return s.startsWith('marker:')?s.slice(7):''}
-    if(node.nodeName==='BR') return '\n';
-    let s=[...node.childNodes].map(txt).join('');
-    if(node.nodeName==='TD'||node.nodeName==='TH') s+=' ';
-    return s;
+  await loadScript(LIB.jszip);
+  const zip=await JSZip.loadAsync(await file.arrayBuffer());
+  const rd=async path=>{const f=zip.file(path);return f?new DOMParser().parseFromString(await f.async('string'),'application/xml'):null};
+  const doc=await rd('word/document.xml');if(!doc) throw new Error('找不到 Word 內容');
+  const relDoc=await rd('word/_rels/document.xml.rels');const rels={};
+  if(relDoc) for(const r of relDoc.getElementsByTagName('*')) if(r.localName==='Relationship') rels[r.getAttribute('Id')]=r.getAttribute('Target');
+  const kids=(el,name)=>el?[...el.children].filter(c=>c.localName===name):[];
+  const kid=(el,name)=>kids(el,name)[0]||null;
+  const wv=el=>el?(el.getAttribute('w:val')??el.getAttributeNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main','val')):null;
+  // ---- 自動編號
+  const numX=await rd('word/numbering.xml');const abs={},nums={};
+  if(numX){
+    for(const a of numX.getElementsByTagName('*')) if(a.localName==='abstractNum'){const id=a.getAttribute('w:abstractNumId');const lv={};
+      for(const l of kids(a,'lvl')) lv[l.getAttribute('w:ilvl')]={fmt:wv(kid(l,'numFmt'))||'decimal',text:wv(kid(l,'lvlText'))??'%1.',start:+(wv(kid(l,'start'))||1)};abs[id]=lv}
+    for(const n of numX.getElementsByTagName('*')) if(n.localName==='num'){const id=n.getAttribute('w:numId');const lv=JSON.parse(JSON.stringify(abs[wv(kid(n,'abstractNumId'))]||{}));
+      for(const o of kids(n,'lvlOverride')){const il=o.getAttribute('w:ilvl');const so=kid(o,'startOverride');if(so&&lv[il])lv[il].start=+wv(so)}nums[id]=lv}
+  }
+  const counters={};
+  const LETTER=/^(upperLetter|lowerLetter|ideographTraditional|ideographZodiac|aiueo|iroha)$/;
+  const numLabel=(numId,ilvl)=>{
+    const lv=nums[numId];if(!lv||!lv[ilvl]) return '';
+    const c=counters[numId]||(counters[numId]={});
+    for(const k of Object.keys(c)) if(+k>+ilvl) delete c[k];
+    c[ilvl]=(c[ilvl]==null?lv[ilvl].start:c[ilvl]+1);
+    const L=lv[ilvl];if(/bullet|none/.test(L.fmt)) return '';
+    const n=c[ilvl];
+    // 字母類編號一律寫成 A. B. C.；數字、國字、羅馬數字寫成 1. 2. 3.
+    return LETTER.test(L.fmt)?('ABCDEFGHIJ'[n-1]||n)+'. ':n+'. ';
   };
-  const walk=el=>{for(const c of el.children){if(BLOCK.test(c.nodeName))lines.push(txt(c));else walk(c)}};
-  walk(doc.body);
+  // ---- 標色（螢光筆、網底、紅字）視為答案標記
+  const redish=hex=>{if(!hex||!/^[0-9A-Fa-f]{6}$/.test(hex))return false;const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);return r>=0xB0&&g<0x70&&b<0x70};
+  const runMark=rPr=>{if(!rPr)return false;const hl=kid(rPr,'highlight');if(hl&&wv(hl)&&wv(hl)!=='none')return true;
+    const sh=kid(rPr,'shd');const f=sh&&sh.getAttribute('w:fill');if(f&&!/^(auto|FFFFFF|000000)$/i.test(f))return true;
+    return redish(wv(kid(rPr,'color')))};
+  let imgN=0;
+  const media=async rid=>{const t=rels[rid];if(!t)return '';const path=resolvePath('word/document.xml',t);const f=zip.file(path);if(!f)return '';
+    const ext=(path.split('.').pop()||'png').toLowerCase();const type=ext==='jpg'?'image/jpeg':'image/'+ext;
+    return addPool(new Blob([await f.async('uint8array')],{type}),`word圖片${++imgN}.${ext==='jpeg'?'jpg':ext}`)};
+  // 段落文字：回傳 {text, marked(標色字數), plain(未標色字數)}
+  const SKIP=/^(del|delText|instrText|rPr|pPr|fldChar|commentReference|footnoteReference|endnoteReference)$/;
+  async function inline(el,acc){
+    for(const c of el.children){
+      const ln=c.localName;if(SKIP.test(ln)) continue;
+      if(ln==='r'){const mk=runMark(kid(c,'rPr'));
+        for(const x of c.children){const n=x.localName;
+          if(n==='t'){const t=x.textContent;acc.text+=t;const len=t.replace(/\s/g,'').length;if(mk)acc.marked+=len;else acc.plain+=len}
+          else if(n==='tab') acc.text+=' ';else if(n==='br'||n==='cr') acc.text+='\n';
+          else if(n==='drawing'||n==='pict'||n==='object'){for(const b of x.getElementsByTagName('*')){if(b.localName==='blip'){const id=b.getAttribute('r:embed');if(id)acc.text+=await media(id)}else if(b.localName==='imagedata'){const id=b.getAttribute('r:id');if(id)acc.text+=await media(id)}}}
+          else if(n==='AlternateContent'){const ch=kid(x,'Choice')||kid(x,'Fallback');if(ch)await inline({children:[{localName:'r',children:ch.children}]},acc)}
+        }}
+      else await inline(c,acc);
+    }
+    return acc;
+  }
+  async function para(p){
+    const pPr=kid(p,'pPr');const np=pPr&&kid(pPr,'numPr');let label='';
+    if(np){const id=wv(kid(np,'numId'));const il=wv(kid(np,'ilvl'))||'0';if(id&&id!=='0')label=numLabel(id,il)}
+    const acc=await inline(p,{text:'',marked:0,plain:0});
+    let t=acc.text;
+    // 整段（或大部分）是標色字，而且不是題目句 → 視為答案
+    if(acc.marked>0&&acc.marked>=acc.plain*2&&!/[?？]/.test(t)&&t.replace(/\s/g,'').length<=80) t=t.replace(/\s+$/,'')+' ✅';
+    return (t.trim()?label:'')+t;
+  }
+  const lines=[];const tables=[];let title='';
+  async function block(el){
+    for(const c of el.children){
+      const ln=c.localName;
+      if(ln==='p') lines.push(await para(c));
+      else if(ln==='tbl'){
+        const rows=[];
+        for(const tr of kids(c,'tr')){const row=[];
+          for(const tc of kids(tr,'tc')){const tcPr=kid(tc,'tcPr');const vm=tcPr&&kid(tcPr,'vMerge');
+            if(vm&&wv(vm)!=='restart'){row.push('');continue}
+            const ps=[];for(const p of kids(tc,'p'))ps.push(await para(p));
+            for(const t of kids(tc,'tbl')) for(const tr2 of kids(t,'tr')){const cs=[];for(const tc2 of kids(tr2,'tc')){const pp=[];for(const p of kids(tc2,'p'))pp.push(await para(p));cs.push(pp.join(' '))}ps.push(cs.filter(x=>x.trim()).join(' '))}
+            let txt=ps.join('\n').replace(/\n+$/,'');
+            const sh=tcPr&&kid(tcPr,'shd');const f=sh&&sh.getAttribute('w:fill');
+            if(txt.trim()&&f&&!/^(auto|FFFFFF|000000)$/i.test(f)&&!/✅/.test(txt)&&!/[?？]/.test(txt)) txt+=' ✅';
+            row.push(txt);
+            const span=tcPr&&kid(tcPr,'gridSpan');if(span) for(let k=1;k<+wv(span);k++) row.push('');
+          }
+          rows.push(row)}
+        tables.push(rows);
+        for(const r of rows){const cells=r.filter(x=>x.trim());lines.push(cells.join(' '))}
+      }
+      else if(ln==='sdt'){const sc=kid(c,'sdtContent');if(sc)await block(sc)}
+      else if(ln==='customXml'||ln==='smartTag') await block(c);
+    }
+  }
+  await block(kid(doc.documentElement,'body'));
+  // 表格有「題目／答案」等標題列 → 跟 Excel 一樣逐列讀
+  const qs=[];
+  for(const rows of tables){const r=sheetRowsToQs(rows);if(r&&r.questions.length){qs.push(...r.questions);if(r.title&&!title)title=r.title}}
+  if(qs.length) return {questions:qs,title};
   return lines.join('\n');
 }
 function resolvePath(base,target){
@@ -1896,9 +2033,165 @@ function resolvePath(base,target){
   for(const seg of target.split('/')){if(seg==='..')parts.pop();else if(seg!=='.')parts.push(seg)}
   return parts.join('/');
 }
+// 數學粗體字母 𝐀𝐁𝐂（PPT 常見）→ 一般英數字
+function plainAlnum(t){return String(t).replace(/[\u{1D400}-\u{1D6A3}]/gu,c=>{const i=(c.codePointAt(0)-0x1D400)%52;return String.fromCharCode(i<26?65+i:97+i-26)}).replace(/[\u{1D7CE}-\u{1D7FF}]/gu,c=>String((c.codePointAt(0)-0x1D7CE)%10))}
+// PPT：逐張投影片讀版面（題目、表格／A B C D 標籤的選項、選項圖、下一張的答案頁與解答圖、備註答案）
 async function readPptx(file){
   await loadScript(LIB.jszip);
   const zip=await JSZip.loadAsync(await file.arrayBuffer());
+  try{const r=await readPptxSlides(zip);if(r&&r.questions.length) return r}catch(e){console.warn('PPT 版面辨識失敗，改用文字',e)}
+  return {text:await readPptxText(zip)};
+}
+async function readPptxSlides(zip){
+  const names=Object.keys(zip.files).filter(n=>/^ppt\/slides\/slide\d+\.xml$/.test(n)).sort((a,b)=>(+a.match(/(\d+)\.xml/)[1])-(+b.match(/(\d+)\.xml/)[1]));
+  const kids=(el,ln)=>el?[...el.children].filter(c=>c.localName===ln):[];
+  const kid=(el,ln)=>kids(el,ln)[0]||null;
+  const deep=(el,ln)=>el?[...el.getElementsByTagName('*')].filter(c=>c.localName===ln):[];
+  const parse=async path=>{const f=zip.file(path);return f?new DOMParser().parseFromString(await f.async('string'),'application/xml'):null};
+  const relsOf=async path=>{const r={},types={};const d=await parse(path.replace(/([^/]+)$/,'_rels/$1.rels'));if(d)for(const x of d.getElementsByTagName('*'))if(x.localName==='Relationship'){r[x.getAttribute('Id')]=x.getAttribute('Target');types[x.getAttribute('Id')]=x.getAttribute('Type')||''}return {r,types}};
+  const cache={};
+  const media=async(slidePath,target)=>{const path=resolvePath(slidePath,target);if(cache[path]!==undefined)return {mk:cache[path],path};
+    const f=zip.file(path);let mk='';if(f){const fname=path.split('/').pop();const mime=mimeOf(fname.split('.').pop()||'');if(mime)mk=addPool(new Blob([await f.async('arraybuffer')],{type:mime}),'ppt_'+fname)}cache[path]=mk;return {mk,path}};
+  const redish=hex=>{if(!hex||!/^[0-9A-Fa-f]{6}$/.test(hex))return false;const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);return r>=0xB0&&g<0x70&&b<0x70};
+  const fillOf=spPr=>{const sf=spPr&&kid(spPr,'solidFill');const c=sf&&(kid(sf,'srgbClr'));return c?c.getAttribute('val'):(sf?'scheme':'')};
+  const parasOf=tx=>kids(tx,'p').map(p=>{let t='',mark=false;for(const r of p.children){if(r.localName==='r'||r.localName==='fld'){const tt=kid(r,'t');t+=tt?tt.textContent:'';const rp=kid(r,'rPr');if(rp&&(kid(rp,'highlight')))mark=true;if(rp&&tt&&tt.textContent.trim()){const sf=kid(rp,'solidFill');const c=sf&&kid(sf,'srgbClr');if(c&&redish(c.getAttribute('val')))p.__red=(p.__red||0)+1;else p.__blk=(p.__blk||0)+1}}else if(r.localName==='br')t+='\n'}return {t:plainAlnum(t).replace(/\u000b/g,'\n'),mark,red:(p.__red||0)>0&&!(p.__blk||0)}}).filter(p=>p.t.trim());
+  const slides=[];
+  for(const nm of names){
+    const doc=await parse(nm);const {r:rels,types}=await relsOf(nm);
+    const S={texts:[],tables:[],pics:[],notes:'',path:nm};
+    // 備註
+    for(const id in types) if(/notesSlide$/.test(types[id])){const np=resolvePath(nm,rels[id]);const nd=await parse(np);if(nd){const bodies=deep(nd,'sp').filter(sp=>{const ph=deep(sp,'ph')[0];return ph&&ph.getAttribute('type')==='body'});S.notes=bodies.map(sp=>deep(sp,'t').map(t=>t.textContent).join('')).join('\n').trim()}}
+    const walk=async(el,T)=>{
+      for(const c of el.children){
+        const ln=c.localName;
+        const xf=(pr)=>{const x=pr&&kid(pr,'xfrm');const off=x&&kid(x,'off'),ext=x&&kid(x,'ext');if(!off||!ext)return null;return {x:T.ox+T.sx*+off.getAttribute('x'),y:T.oy+T.sy*+off.getAttribute('y'),w:T.sx*+ext.getAttribute('cx'),h:T.sy*+ext.getAttribute('cy')}};
+        if(ln==='grpSp'){const gp=kid(c,'grpSpPr');const x=gp&&kid(gp,'xfrm');let T2=T;
+          if(x){const off=kid(x,'off'),ext=kid(x,'ext'),co=kid(x,'chOff'),ce=kid(x,'chExt');if(off&&ext&&co&&ce){const kx=(+ce.getAttribute('cx'))?(+ext.getAttribute('cx'))/(+ce.getAttribute('cx')):1,ky=(+ce.getAttribute('cy'))?(+ext.getAttribute('cy'))/(+ce.getAttribute('cy')):1;
+            T2={ox:T.ox+T.sx*(+off.getAttribute('x')-(+co.getAttribute('x'))*kx),oy:T.oy+T.sy*(+off.getAttribute('y')-(+co.getAttribute('y'))*ky),sx:T.sx*kx,sy:T.sy*ky}}}
+          await walk(c,T2);continue}
+        if(ln==='sp'||ln==='cxnSp'){const spPr=kid(c,'spPr');let g=xf(spPr);const ph=deep(c,'ph')[0];const phT=ph?(ph.getAttribute('type')||'body'):'';
+          if(!g)g={x:0,y:/title/i.test(phT)?0:2e6,w:9e6,h:/title/i.test(phT)?8e5:4e6,noPos:true};
+          const bf=spPr&&kid(spPr,'blipFill');const blip=bf&&deep(bf,'blip')[0];if(blip){const id=blip.getAttribute('r:embed');if(id&&rels[id]){const m=await media(nm,rels[id]);if(m.mk)S.pics.push({...g,mk:m.mk,path:m.path})}}
+          const tx=kid(c,'txBody');if(tx){const ps=parasOf(tx);if(ps.length)S.texts.push({...g,paras:ps,fill:fillOf(spPr),title:/title/i.test(phT)})}
+          continue}
+        if(ln==='pic'){const g=xf(kid(c,'spPr'));const blip=deep(c,'blip')[0];if(g&&blip){const id=blip.getAttribute('r:embed');if(id&&rels[id]){const m=await media(nm,rels[id]);if(m.mk)S.pics.push({...g,mk:m.mk,path:m.path})}}continue}
+        if(ln==='graphicFrame'){const tbl=deep(c,'tbl')[0];const x=kid(c,'xfrm');if(!tbl)continue;
+          const off=x&&kid(x,'off');const gx=off?T.ox+T.sx*+off.getAttribute('x'):0,gy=off?T.oy+T.sy*+off.getAttribute('y'):0;
+          const cols=deep(tbl,'gridCol').map(g=>T.sx*+g.getAttribute('w'));const rows=[];let yy=gy;
+          for(const tr of kids(tbl,'tr')){const h=T.sy*+(tr.getAttribute('h')||0);const row=[];let ci=0,xx=gx;
+            for(const tc of kids(tr,'tc')){const span=+(tc.getAttribute('gridSpan')||1);const w=cols.slice(ci,ci+span).reduce((a,b)=>a+b,0)||cols[ci]||0;
+              if(tc.getAttribute('hMerge')||tc.getAttribute('vMerge')){row.push(null)}else{const ps=parasOf(kid(tc,'txBody'));row.push({x:xx,y:yy,w,h,text:ps.map(p=>p.t).join('\n'),mark:ps.some(p=>p.mark),fill:fillOf(kid(tc,'tcPr'))})}
+              ci+=span;xx+=w}
+            rows.push(row);yy+=h}
+          S.tables.push({rows});continue}
+        if(ln==='AlternateContent'){const ch=kid(c,'Choice')||kid(c,'Fallback');if(ch)await walk(ch,T)}
+      }
+    };
+    const tree=deep(doc,'spTree')[0];if(tree) await walk(tree,{ox:0,oy:0,sx:1,sy:1});
+    slides.push(S);
+  }
+  // ---------- 逐張分析 ----------
+  const LET='ABCDEF';
+  const stripQ=t=>t.replace(/^[\s⓵-⓾①-⑳❶-❿➀-➉]+/,'').split('\n').map(l=>l.replace(/^\s*(?:第\s*[\d一二三四五六七八九十]+\s*題|Q\s*\d{1,3}|\d{1,3}(?=\s*[.、:：)]))\s*[.、:：)]?\s*/i,'').replace(/^\s*(?:warm[\s-]*up\s*\d*|暖身\s*\d*|熱身題?|練習題|測試題|試玩題)\s*[:：.、]?\s*/i,'')).join('\n').trim();
+  const qKey=t=>nk(stripQ(t).replace(/[?？].*$/s,'')).replace(/[^\p{L}\p{N}]/gu,'');
+  const LABEL=/^\s*(?:\(\s*([A-Fa-f1-6])\s*\)|([A-F])(?=\s*(?:[.、:：)\-]|\s|$))|([1-6])(?=\s*[.、:：)]))\s*[.、:：)\-]?\s*/;
+  const isLabelOnly=t=>/^\s*(?:\(\s*[A-Fa-f1-6]\s*\)|[A-F]|[1-6][.、)]?)\s*$/.test(t);
+  const center=g=>({x:g.x+g.w/2,y:g.y+g.h/2});const inside=(p,g,pad=0)=>p.x>=g.x-pad&&p.x<=g.x+g.w+pad&&p.y>=g.y-pad&&p.y<=g.y+g.h+pad;
+  const bigr=t=>{const a=[];for(let i=0;i<t.length-1;i++)a.push(t.slice(i,i+2));return a};
+  const sim=(a,b)=>{if(!a||!b)return 0;if(a===b)return 1;const A=bigr(a),B=bigr(b);if(!A.length||!B.length)return 0;let m=0;const bb=[...B];for(const x of A){const i=bb.indexOf(x);if(i>=0){m++;bb.splice(i,1)}}return 2*m/(A.length+B.length)};
+  // 每張都有的圖（背景、logo）不算題目圖
+  const useCnt={};slides.forEach(S=>new Set(S.pics.map(p=>p.path)).forEach(p=>useCnt[p]=(useCnt[p]||0)+1));
+  slides.forEach(S=>{S.pics=S.pics.filter(p=>!(slides.length>=4&&useCnt[p.path]>=Math.max(3,slides.length*0.5)))});
+  const summary={};let title='';
+  const qs=[];let prev=null;
+  for(const S of slides){
+    // 總表（Question／Answer 標題列）→ 當作答案表
+    let sumHit=false;
+    for(const tb of S.tables){const h=(tb.rows[0]||[]).map(c=>c?nk(c.text):'');const ai=h.findIndex(x=>/^(answer|答案|正解|解答)$/.test(x));const qi=h.findIndex(x=>/question|題目/.test(x));
+      if(ai>=0&&qi>=0){sumHit=true;for(const r of tb.rows.slice(1)){const cells=r.map(c=>c?c.text:'');const no=parseInt(cells.find(x=>/^\s*\d{1,3}\s*$/.test(x))||'');const qt=cells.reduce((a,b)=>b.length>a.length?b:a,'');summary[isNaN(no)?qKey(qt):no]={ans:cells[ai],key:qKey(qt)};if(qt)summary[qKey(qt)]={ans:cells[ai]}}}}
+    if(sumHit) continue;
+    // 題目：有問號的段落／表格格子（最上面的）
+    const cand=[];
+    S.texts.forEach(b=>b.paras.forEach((p,i)=>cand.push({t:p.t,y:b.y+i,box:b,pi:i})));
+    S.tables.forEach(tb=>tb.rows.forEach((r,ri)=>r.forEach(c=>{if(c&&c.text.trim())cand.push({t:c.text,y:c.y,cell:c,tb})})));
+    let q=cand.filter(c=>/[?？]/.test(c.t)).sort((a,b)=>a.y-b.y)[0]||null;
+    if(!q){const num=cand.filter(c=>/^\s*(?:第\s*[\d一二三四五六七八九十]+\s*題|Q\s*\d{1,3}\s*[.:：、]|\d{1,3}\s*[.、]\s*\S)/i.test(c.t)&&c.t.length>=6).sort((a,b)=>a.y-b.y)[0];if(num)q=num}
+    const warmSlide=/warm[\s-]*up|暖身|熱身|練習題|試玩題|測試題/i.test(S.texts.map(b=>b.paras.map(p=>p.t).join(' ')).join(' ')+' '+S.notes)||/暖身|熱身|送分/.test(S.notes);
+    let qText=q?q.t:'',ansTail='';
+    if(q){const m=qText.match(/^([\s\S]*[?？])\s*(\S[\s\S]*)$/);const tl=m?m[2].trim():'';if(m&&LABEL.test(tl)&&tl.length<=40&&!/\n/.test(tl)){qText=m[1];ansTail=tl}}
+    // 這張有自己的一組選項（跟上一題不同）→ 是新題目，不是答案頁
+    const ownOpts=S.tables.some(tb=>{const cs=tb.rows.flat().filter(c=>c&&c.text.trim()&&(!q||c!==q.cell)).map(c=>nk(c.text.replace(LABEL,'')));const po=prev?prev.options.map(nk).filter(Boolean):[];return cs.length>=2&&prev&&!cs.every(x=>po.some(o=>o===x||o.includes(x)||x.includes(o)||sim(o,x)>=0.7))});
+    const isAnsSlide=prev&&!ownOpts&&(!q||(qKey(qText)&&sim(qKey(qText),prev.key)>=0.7));
+    if(isAnsSlide){
+      // 答案頁：找答案（單一代號／跟選項一樣的文字／標色方塊），以及新的圖片當解答圖
+      const opts=prev.options;let got=[];
+      const pool=[];if(ansTail)pool.push(ansTail);
+      S.texts.forEach(b=>b.paras.forEach((p,i)=>{if(q&&b===q.box&&i<=q.pi)return;pool.push((b.fill&&b.fill!=='scheme'&&!/^(FFFFFF|FEFCFB)$/i.test(b.fill)?'★':'')+p.t)}));
+      S.tables.forEach(tb=>tb.rows.forEach(r=>r.forEach(c=>{if(c&&c.text.trim()&&(!q||c!==q.cell))pool.push(c.text)})));
+      pool.sort((a,b)=>(b[0]==='★')-(a[0]==='★'));
+      for(let t of pool){t=t.replace(/^★/,'').replace(MARK_RE,'').replace(/\s+/g,' ').trim();if(!t)continue;
+        const lab=t.match(/^\s*(?:\(\s*([A-Fa-f1-6])\s*\)|([A-F])|([1-6]))(?=\s*(?:[.、:：)\-]|\s|$))/);
+        let a=[];
+        if(lab&&(t.length<=2||opts.length)) a=resolveAnswers(t,opts);
+        if(!a.length){const x=opts.map(nk).indexOf(nk(t));if(x>=0&&opts[x])a=[x+1]}
+        if(!a.length&&t.length>=2){let best=-1,bv=0;opts.forEach((o,i)=>{const v=sim(nk(o),nk(t));if(v>bv){bv=v;best=i}});if(bv>=0.75)a=[best+1]}
+        if(a.length){got=a;break}}
+      if(got.length&&!prev.answers.length) prev.answers=got;
+      const newPics=S.pics.filter(p=>!prev.paths.includes(p.path)).sort((a,b)=>b.w*b.h-a.w*a.h);
+      if(newPics.length&&prev.aimgNum==null) prev.aimgNum=+newPics[0].mk.match(/\d+/)[0];
+      continue;
+    }
+    if(!q) continue;
+    const noQMark=!/[?？]/.test(q.t);
+    // ---- 選項 ----
+    let opts=[];// {t, g, mark}
+    const used=new Set();
+    // (1) 表格
+    let tb=q.tb||S.tables.filter(t=>t.rows.flat().filter(Boolean).length>=2).sort((a,b)=>b.rows.flat().length-a.rows.flat().length)[0];
+    if(tb){for(const r of tb.rows)for(const c of r){if(!c||c===q.cell)continue;
+      // 表格格子是空的，文字用另外的文字方塊疊在上面
+      let t=c.text;if(!t.trim()){const ov=S.texts.filter(b=>b!==q.box&&inside(center(b),c)).sort((a,b)=>a.y-b.y);if(ov.length){t=ov.map(b=>b.paras.map(p=>p.t).join(' ')).join(' ');ov.forEach(b=>used.add(b))}}
+      opts.push({t,g:c,mark:c.mark})}}
+    // (2) A B C D 標籤方塊
+    if(opts.filter(o=>o.t.trim()||1).length<2){
+      const labs=S.texts.filter(b=>b.paras.length===1&&isLabelOnly(b.paras[0].t));
+      if(labs.length>=2){labs.sort((a,b)=>{const la=a.paras[0].t.match(/[A-F1-6]/)[0],lb=b.paras[0].t.match(/[A-F1-6]/)[0];return la.localeCompare(lb)});
+        opts=labs.map(l=>{used.add(l);const col={x:l.x,w:l.w};
+          const tbox=S.texts.filter(b=>b!==q.box&&!labs.includes(b)&&!used.has(b)).filter(b=>{const c=center(b);return c.x>=col.x-30e4&&c.x<=col.x+col.w+30e4&&b.y>=l.y-20e4}).sort((a,b)=>a.y-b.y)[0];
+          if(tbox)used.add(tbox);
+          return {t:tbox?tbox.paras.map(p=>p.t).join(' '):'',g:{x:l.x,y:l.y,w:l.w,h:9e6},fill:tbox?tbox.fill:'',mark:tbox?tbox.paras.some(p=>p.mark):false,lab:l}})}}
+    // (3) 題目方塊後面的段落，或另一個多行方塊
+    if(opts.length<2&&q.box){const rest=q.box.paras.slice(q.pi+1).filter(p=>p.t.trim().length<=60);if(rest.length>=2&&rest.length<=6)opts=rest.map(p=>({t:p.t,mark:p.mark,red:p.red}))}
+    if(opts.length<2){const mb=S.texts.filter(b=>b!==q.box&&b.paras.length>=2&&b.paras.length<=6&&b.paras.every(p=>p.t.trim().length<=60)).sort((a,b)=>a.y-b.y)[0];if(mb){used.add(mb);opts=mb.paras.map(p=>({t:p.t,mark:p.mark,red:p.red}))}}
+    opts=opts.slice(0,6);
+    if(noQMark&&opts.length<2) continue;
+    if(!opts.some(o=>o.mark)){const reds=opts.filter(o=>o.red);if(reds.length===1)reds[0].mark=true}
+    // 只有一個選項有不同的底色 → 那就是答案
+    {const fs=opts.map(o=>(o.g&&o.g.fill)||o.fill||'');const cnt={};fs.forEach(f=>cnt[f]=(cnt[f]||0)+1);const odd=fs.map((f,i)=>f&&f!=='scheme'&&cnt[f]===1&&opts.length>=2&&Object.keys(cnt).length===2?i:-1).filter(i=>i>=0);if(odd.length===1&&!opts.some(o=>o.mark))opts[odd[0]].mark=true}
+    // 選項文字去掉代號
+    opts.forEach(o=>{o.t=o.t.replace(/\s+/g,' ').trim();const m=o.t.match(LABEL);if(m)o.t=o.t.slice(m[0].length).trim()});
+    // 圖片：在選項格子／欄位內 → 選項圖；其他 → 題目圖
+    const optImg=[];const paths=S.pics.map(p=>p.path);let qimg=null;
+    for(const p of S.pics.sort((a,b)=>b.w*b.h-a.w*a.h)){const c=center(p);let k=-1;
+      opts.forEach((o,i)=>{if(k<0&&o.g&&(inside(c,o.g)||(o.lab&&inside(center(o.lab),p))))k=i});
+      if(k>=0&&optImg[k]==null)optImg[k]=+p.mk.match(/\d+/)[0];else if(qimg==null)qimg=+p.mk.match(/\d+/)[0]}
+    // 用文字跑一次原本的辨識，沿用答案標記（✅、(答案)、正解…）
+    const marked=opts.filter(o=>o.mark).length===1;
+    const block=stripQ(qText)+'\n'+opts.map((o,i)=>`${LET[i]}. ${o.t}${marked&&o.mark?' ✅':''}`).join('\n')+(ansTail?'\n答案：'+ansTail:'');
+    const pb=parseBlock(block,normalize(block));
+    let answers=pb.answers;
+    if(!answers.length&&S.notes&&S.notes.length<=30){answers=resolveAnswers(S.notes.replace(/^.*?(?:答案|answer|ans)\s*[:：]?\s*/i,''),pb.options)}
+    const no=(q.t.match(/^\s*(?:[⓵-⓾]|第\s*([\d]+)\s*題|Q\s*(\d{1,3})|(\d{1,3})\s*[.、:：])/i)||[]);
+    const item={text:pb.text,options:pb.options,answers,qimgNum:qimg,oimgNum:null,optImgs:optImg,warm:warmSlide,key:qKey(qText),paths,no:+(no[1]||no[2]||no[3]||0)||null};
+    qs.push(item);prev=item;
+  }
+  // 總表的答案補進去
+  for(const it of qs){if(it.answers.length)continue;const s=(it.no&&summary[it.no])||summary[it.key];if(s&&s.ans)it.answers=resolveAnswers(s.ans,it.options)}
+  const out=qs.filter(it=>it.text||it.options.some(Boolean)).map(it=>{const q=enrich({text:it.text,options:it.options,answers:it.answers,qimgNum:it.qimgNum,oimgNum:it.aimgNum??null,optImgs:it.optImgs});
+    if(it.warm){q.points='none';if(!q.note)q.note=WARMUP}return q});
+  return {questions:out,title};
+}
+async function readPptxText(zip){
   const names=Object.keys(zip.files).filter(n=>/^ppt\/slides\/slide\d+\.xml$/.test(n)).sort((a,b)=>(+a.match(/(\d+)\.xml/)[1])-(+b.match(/(\d+)\.xml/)[1]));
   const A='http://schemas.openxmlformats.org/drawingml/2006/main',R='http://schemas.openxmlformats.org/officeDocument/2006/relationships';
   const out=[];
@@ -2012,28 +2305,21 @@ function readKahootReport(wb){
   if(!wb.SheetNames.some(n=>/^\s*\d+\s+\S/.test(n))) return null;
   return parseKahootReport(wb.SheetNames.map(n=>({name:n,rows:XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:'',raw:false})})));
 }
-async function readSheet(file){
-  await loadScript(LIB.xlsx);
-  const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellNF:true});
-  const kr=readKahootReport(wb);if(kr) return kr;
-  const sh=wb.Sheets[wb.SheetNames[0]];
-  // 一律讀「畫面上看到的文字」，日期不要變成 46045 這種序號
-  for(const k of Object.keys(sh)){if(k[0]==='!')continue;const c=sh[k];
-    if(c.t==='n'&&c.z&&XLSX.SSF.is_date(c.z)){
-      const d=XLSX.SSF.parse_date_code(c.v);if(!d) continue;const z=String(c.z);
-      // Excel 內建的「系統日期」格式在台灣顯示為 2026/1/25，照這個樣子顯示；其他格式照原本畫面上的文字
-      if(z==='m/d/yy'||z==='m/d/yyyy'||z==='mm/dd/yy') c.w=`${d.y}/${d.m}/${d.d}`;
-      else if(z==='m/d/yy h:mm') c.w=`${d.y}/${d.m}/${d.d} ${d.H}:${String(d.M).padStart(2,'0')}`;
-      else if(!c.w) c.w=`${d.y}/${d.m}/${d.d}`;
-    }}
-  const rows=XLSX.utils.sheet_to_json(sh,{header:1,defval:'',raw:false});
+// 表格（Excel 或 Word 表格）有標題列時逐列讀：題目、選項1~6、秒數、答案、分數、備註
+function sheetRowsToQs(rows,fills){
+  // 一組選項裡只有一格不同底色（或後面有 ✅）→ 那就是答案
+  const oddMark=(cells,keys)=>{const idx=cells.map((t,i)=>i).filter(i=>String(cells[i]).trim());if(idx.length<2)return -1;const ks=idx.map(i=>keys[i]||'');const cnt={};ks.forEach(k=>cnt[k]=(cnt[k]||0)+1);const odd=idx.filter((i,n)=>ks[n]&&cnt[ks[n]]===1);return odd.length===1&&Object.keys(cnt).length===2?odd[0]:-1};
   for(let r=0;r<Math.min(rows.length,15);r++){
     const h=rows[r].map(c=>String(c).trim().toLowerCase());
     const qi=h.findIndex(c=>/^question|題目|問題|題幹/.test(c));
     // 選項欄：Answer 1、選項1、選項A、選項一、Option 1、A、(A)
     const optCol=k=>h.findIndex(c=>new RegExp('^(?:answer|option|選項|選擇|答案)\\s*(?:'+k+'(?!\\d)|'+'ABCDEF'[k-1].toLowerCase()+'(?![a-z])|'+'一二三四五六'[k-1]+')|^[(（]?(?:'+'abcdef'[k-1]+'|'+k+'(?:\\.0+)?|'+'一二三四五六'[k-1]+')[)）]?$').test(c));
     const ai=[1,2,3,4,5,6].map(optCol);
-    if(qi>=0&&ai[0]>=0&&ai[1]>=0){
+    // 沒有選項欄、選項寫在題目格裡（(A)…(B)…）：要有「答案」欄才算
+    const ciAny=h.findIndex(c=>c.length<=12&&/correct|答案|正解|解答|^ans/.test(c));
+    const inline=qi>=0&&h[qi].length<=12&&ai[0]<0&&ciAny>=0;
+    if(qi>=0&&((ai[0]>=0&&ai[1]>=0)||inline)){
+      const pi=h.findIndex((c,x)=>c.length<=8&&/分數|計分|points?/.test(c)&&!ai.includes(x));
       const ti=h.findIndex(c=>/time|秒|時間/.test(c));
       const ci=h.findIndex((c,x)=>/correct|答案|正解|解答|^ans/.test(c)&&!ai.includes(x));
       const ni=h.findIndex(c=>/備註|note|remark/.test(c));
@@ -2049,7 +2335,11 @@ async function readSheet(file){
         let text=String(row[qi]??'').trim();if(!text) continue;
         // 題目本身寫的題號（1. 請問…）先拿出來，匯入時照原樣放回（開啟「顯示題號」時才詢問要不要取代）
         let rowNo='';{const nm=text.match(QNUM_RE);if(nm&&text.slice(nm[0].length).trim()){rowNo=nm[0];text=text.slice(nm[0].length)}}
-        let options=ai.filter(i=>i>=0).map(i=>String(row[i]??'').trim());
+        let options=ai.filter(i=>i>=0).map(i=>String(row[i]??'').trim());let pb=null;
+        const ri=rows.indexOf(row);const optCols=ai.filter(i=>i>=0);
+        let markIdx=-1;{const ck=options.map(t=>/✅\s*$/.test(t)?'✅':'');const m1=ck.filter(Boolean).length===1?ck.indexOf('✅'):-1;options=options.map(t=>t.replace(/\s*✅\s*$/,''));
+          markIdx=m1>=0?m1:(fills&&fills[ri]?oddMark(options,optCols.map(c=>fills[ri][c])):-1)}
+        if(inline){pb=parseBlock(text,normalize(text));text=pb.text;options=pb.options.slice()}
         // 只有文字、沒有選項的列（例如「IG 追蹤：＠xxx」）→ 併到上一題的備註
         const noteTxt=ni>=0?String(row[ni]??'').trim():'';
         const tagM=text.match(/^【([^】]+)】\s*/);const sType=tagType(noteTxt.length<=10?noteTxt:'')||tagType(tagM?tagM[1]:'')||(tagM&&!options.some(Boolean)?'wordcloud':null);
@@ -2061,9 +2351,11 @@ async function readSheet(file){
         while(options.length<4) options.push('');
         const cv=String(row[ci]??'').trim();
         // Kahoot 範本的 Correct Answer 是選項編號（1~6）；其他答案欄可能寫代號或選項文字
-        const answers=ci<0?[]:(/correct/.test(h[ci])&&/^[1-6](?:\.0+)?(?:\s*[,、，\/]\s*[1-6])*$/.test(normalize(cv)))?[...new Set(normalize(cv).replace(/\.0+/g,'').match(/[1-6]/g).map(Number))].sort():resolveAnswers(cv,options);
+        const answers=ci<0?[]:(/correct/.test(h[ci])&&/^[1-6](?:\.0+)?(?:\s*[,、，\/]\s*[1-6])*$/.test(normalize(cv)))?[...new Set(normalize(cv).replace(/\.0+/g,'').match(/[1-6]/g).map(Number))].sort():(cv?resolveAnswers(cv,options):(pb?pb.answers:[]));
         const t=ti>=0?parseInt(normalize(String(row[ti]??''))):NaN;
-        const q=enrich({text,options,answers,note:ni>=0?String(row[ni]??'').trim():''});
+        const q=enrich({text,options,answers,note:ni>=0?String(row[ni]??'').trim():'',qimgNum:pb?pb.qimgNum:null,oimgNum:pb?pb.oimgNum:null});
+        if(!q.answers.length&&markIdx>=0&&options[markIdx]) q.answers=[markIdx+1];
+        if(pi>=0){const pv=String(row[pi]??'').trim();if(/暖身|不計分|^0$|none/i.test(pv))q.points='none';else if(/加倍|雙倍|兩倍|double|^2$/i.test(pv))q.points='double'}
         if(TIMES.includes(t)) q.time=t;else if(TIMES.includes(gTime)&&sType!=='wordcloud') q.time=gTime;
         if(warm){q.points='none';if(!q.note)q.note=WARMUP}
         if(rowNo){q.srcNo=rowNo;q.keepNo=true}
@@ -2077,6 +2369,29 @@ async function readSheet(file){
       if(qs.length) return {questions:qs,title};
     }
   }
+  return null;
+}
+async function readSheet(file){
+  await loadScript(LIB.xlsx);
+  const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellNF:true,cellStyles:true});
+  const kr=readKahootReport(wb);if(kr) return kr;
+  const sh=wb.Sheets[wb.SheetNames[0]];
+  // 一律讀「畫面上看到的文字」，日期不要變成 46045 這種序號
+  for(const k of Object.keys(sh)){if(k[0]==='!')continue;const c=sh[k];
+    if(c.t==='n'&&c.z&&XLSX.SSF.is_date(c.z)){
+      const d=XLSX.SSF.parse_date_code(c.v);if(!d) continue;const z=String(c.z);
+      // Excel 內建的「系統日期」格式在台灣顯示為 2026/1/25，照這個樣子顯示；其他格式照原本畫面上的文字
+      if(z==='m/d/yy'||z==='m/d/yyyy'||z==='mm/dd/yy') c.w=`${d.y}/${d.m}/${d.d}`;
+      else if(z==='m/d/yy h:mm') c.w=`${d.y}/${d.m}/${d.d} ${d.H}:${String(d.M).padStart(2,'0')}`;
+      else if(!c.w) c.w=`${d.y}/${d.m}/${d.d}`;
+    }}
+  const rows=XLSX.utils.sheet_to_json(sh,{header:1,defval:'',raw:false,blankrows:true});
+  // 儲存格底色（用來找「用底色標記的答案」）
+  const fills=[];
+  try{const rg=XLSX.utils.decode_range(sh['!ref']||'A1');for(let i=0;i<rows.length;i++){fills[i]=[];for(let j=0;j<(rows[i]||[]).length;j++){const c=sh[XLSX.utils.encode_cell({r:rg.s.r+i,c:rg.s.c+j})];const st=c&&c.s;let k='';
+    if(st&&st.patternType&&st.patternType!=='none'){const fg=st.fgColor||{};k=fg.rgb?String(fg.rgb).slice(-6).toUpperCase():(fg.theme!=null?'T'+fg.theme+(fg.tint?':'+fg.tint:''):(fg.indexed!=null?'I'+fg.indexed:'S'));if(/^(FFFFFF|I64|I65)$/.test(k))k=''}
+    fills[i][j]=k}}}catch(e){console.warn(e)}
+  {const r=sheetRowsToQs(rows,fills);if(r) return r}
   // 沒有標題列：每一列當一題，題號、題目、選項、答案各在一格
   const isAns=(t,opts)=>{const nt=normalize(t).replace(/©/g,'(C)').trim();
     const short=x=>/^[(\[【]?\s*[A-Fa-f1-6①②③④⑤⑥]\s*[)\]】]?$/.test(normalize(x).replace(/©/g,'(C)').trim());
@@ -2087,8 +2402,10 @@ async function readSheet(file){
     // 代號＋文字（(b)顏質高）而且跟某個選項相符
     return opts.length>=2&&resolveAnswers(t,opts).length>0&&/^\s*(?:[(\[]\s*[A-Fa-f]\s*[)\]]|[A-Fa-f]\s*[.、:)]|©)/.test(normalize(t))};
   const blocks=[];
-  for(const r of rows){
-    let cells=r.map(c=>String(c).trim()).filter(Boolean);if(!cells.length) continue;
+  for(let ri=0;ri<rows.length;ri++){const r=rows[ri];
+    const fr=(fills&&fills[ri])||[];const raw=r.map(c=>String(c).trim());
+    {const idx=raw.map((t,i)=>i).filter(i=>raw[i]);if(idx.length>=4){const opt=idx.slice(2);const ks=opt.map(i=>fr[i]||'');const cnt={};ks.forEach(k=>cnt[k]=(cnt[k]||0)+1);const odd=opt.filter((i,n)=>ks[n]&&cnt[ks[n]]===1);if(odd.length===1&&Object.keys(cnt).length===2)raw[odd[0]]+=' ✅'}}
+    let cells=raw.filter(Boolean);if(!cells.length) continue;
     if(cells.length<3){blocks.push(cells.join('、'));continue}
     let no='';if(/^\d{1,3}(?:\s*[.、]?\s*[(（]?\s*暖身題\s*[)）]?)?\s*[.、]?$/.test(normalize(cells[0]))&&cells.length>=4){no=cells.shift().replace(/[.、]\s*$/,'')+'、'}
     const q=cells.shift();let ans='';
@@ -2314,8 +2631,8 @@ async function extractFile(file,setSt){
   if(IMG_EXT.test(ext)||IMG_MIME.test(file.type)) return {text:await readImage(file,setSt)};
   if(ext==='pdf'){const r=await readPdf(file,setSt);return typeof r==='string'?{text:r}:r}
   if(ext==='txt') return {text:await readTxt(file)};
-  if(ext==='docx') return {text:await readDocx(file)};
-  if(ext==='pptx') return {text:await readPptx(file)};
+  if(ext==='docx'){const r=await readDocx(file);return typeof r==='string'?{text:r}:r}
+  if(ext==='pptx') return await readPptx(file);
   return await readSheet(file);
 }
 async function handleFiles(files){
@@ -2347,7 +2664,7 @@ async function handleFiles(files){
     if(!it.text) continue;
     let qs=null;
     if(aiSample){try{qs=await aiParse(it.text)}catch(e){console.warn(e)}}
-    if(!qs) qs=parseText(it.text).map(enrich);
+    if(!qs){const pr=parseText(it.text);if(pr.title&&!S.title.trim()){S.title=pr.title.slice(0,95);const gt=$('#gTitle');if(gt)gt.value=S.title}qs=pr.map(enrich)}
     if(qs.length){all.push(...qs);it.row.textContent+=`，辨識出 ${qs.length} 題`}
     else{pasteTexts.push(it.text);it.row.textContent+='，沒有辨識到題目（已放到貼上文字區）'}
   }
@@ -3232,7 +3549,7 @@ $('#parseBtn').onclick=async()=>{
   try{
     let qs=null;
     if(aiSample){try{qs=await aiParse(text)}catch(e){console.warn(e);toast(e&&e.code==='not_granted'?'未允許 AI，改用規則辨識':'AI 辨識失敗，改用規則辨識')}}
-    if(!qs) qs=parseText(text).map(enrich);
+    if(!qs){const pr=parseText(text);if(pr.title&&!S.title.trim()){S.title=pr.title.slice(0,95);const gt=$('#gTitle');if(gt)gt.value=S.title}qs=pr.map(enrich)}
     if(!qs.length) toast('沒有辨識到題目，請確認每題前面有題號（例如 1、 2、）');
     else await applyParsed(qs);
   }finally{btn.disabled=false;btn.textContent='✦ 開始辨識題目'}
