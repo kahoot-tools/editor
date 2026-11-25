@@ -1213,7 +1213,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.26b</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.26c</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1620,6 +1620,8 @@ function parseBlock(o,n){
   const marks=[];let m;const mre=/⟦圖(\d+)⟧/g;
   while((m=mre.exec(n))) marks.push({num:+m[1],pos:m.index,len:m[0].length});
   for(const k of marks){o=blankRange(o,k.pos,k.pos+k.len);n=blankRange(n,k.pos,k.pos+k.len)}
+  // 「✅ 答案：B」：答案前面的勾選符號屬於答案行，不是選項的標記
+  {const re=/(?:✅|☑️|☑|✔️|✔|✓|√)[ \t]*(?=(?:正確答案|參考答案|標準答案|答案|解答|正解|ans))/gi;let mm;const rr=[];while((mm=re.exec(n)))rr.push([mm.index,mm.index+mm[0].length]);for(const [a,b] of rr){o=blankRange(o,a,b);n=blankRange(n,a,b)}}
   // 答案（必須在行首、空白或括號後，避免誤判題目裡的「答案」兩字）
   const ansRe=/(?<![^\s(、,])\(?\s*(?:正確答案|參考答案|標準答案|正確選項|答案|解答|正解|答(?=\s*[:=])|ans(?:wer)?)\s*(?:[:=]\s*|(?:是|為)\s*(?=\S)|(?=\(?[A-F1-6①②③④⑤⑥©]\)?(?:\s*[),、&\/及和與]|\s*$)))((?:\([A-Fa-f]\)|[^\n)])*)\)?/gim;
   let last=null;while((m=ansRe.exec(n))) last=m;
@@ -1663,6 +1665,7 @@ function parseBlock(o,n){
     ranges=seq.map((s,i)=>({s:s.end,e:i+1<seq.length?seq[i+1].start:o.length}));labelStarts=seq.map(s=>s.start);
   }
   if(!ranges.length) text=cleanPart(o);
+  text=text.replace(/^(?:題目|問題|題幹)\s*[:：]\s*/,'');
   ranges=ranges.slice(0,6);labelStarts=labelStarts.slice(0,6);
   if(ranges.length) optStart=labelStarts[0];
   let options=ranges.map(r=>cleanPart(o.slice(r.s,r.e)));
@@ -1711,6 +1714,14 @@ function parseTextCore(raw){
     if(/^\s*【[^】]*】\s*$/.test(L)&&(wasBlank||!starts.length||(nextIsQ(li)&&!/^\s*【\s*(?:[A-F]\s*[.、:)]|[①②③④⑤⑥])/.test(L)))){starts.push({s,e:s+L.length,header:true});lastNum=0;continue}
     if((m=L.match(/^\s*(?:\d{1,3}\s*[.、]?\s*)?[(（【]?\s*暖身題\s*[)）】]?\s*[:：.、]?\s*/))){starts.push({s,e:s+m[0].length,warm:true});lastNum=0;continue}
     if((m=L.match(/^\s*【([^】]+)】\s*(?=\S)/))){starts.push({s,e:s+m[0].length,open:m[1].trim()});continue}
+    if((m=L.match(/^[ \t]*第[ \t]*(\d{1,3}|[一二三四五六七八九十百零〇兩]{1,4})[ \t]*題(?:[ \t]*[|:、.\-—–·]+[ \t]*|[ \t]+|$)/))){
+      const num=/\d/.test(m[1])?+m[1]:cnNum(m[1]);
+      if(num!=null&&(lastNum===null||(num>lastNum&&num<=lastNum+3))){
+        let e=s+m[0].length;const rest=L.slice(m[0].length).trim();
+        // 「第 1 題｜創辦人」下一行是「題目：…」→ 後面那段是分類，不算題目
+        if(rest&&!/[?？]/.test(rest)){for(let j=li+1;j<LS.length;j++){if(!LS[j].trim())continue;if(/^\s*(?:題目|問題|題幹)\s*[:：]/.test(LS[j]))e=s+L.length;break}}
+        starts.push({s,e,srcNo:m[0].trim()});lastNum=num;continue}
+    }
     if((m=L.match(/^[ \t]*(?:\((\d{1,3})\s*\.?\s*\)|(?:Q|第)?[ \t]*(\d{1,3})[ \t]*題?[ \t]*(?:\.(?!\d)|[、:)\]]))/i))){
       const num=+(m[1]||m[2]);
       const rest=L.slice(m[0].length);
@@ -1740,6 +1751,11 @@ function parseTextCore(raw){
   }
   return out.filter(q=>q.text||q.options.some(Boolean));
 }
+// 中文數字（一～九十九）→ 數字
+function cnNum(t){const D={零:0,〇:0,一:1,二:2,兩:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9};t=String(t);
+  if(t.includes('百')) return null;
+  if(t.includes('十')){const [a,b]=t.split('十');const tens=a?D[a]:1;const ones=b?D[b]:0;return tens==null||ones==null?null:tens*10+ones}
+  return t.length===1&&D[t]!=null?D[t]:null}
 // 【文字雲】這類標記 → 題型（沒認得的維持 null）
 function tagType(tag){tag=String(tag||'');
   return /文字雲|留言/.test(tag)?'wordcloud':/開放/.test(tag)?'open':/腦力激盪/.test(tag)?'brainstorm':/投影片/.test(tag)?'slide':/票選|投票/.test(tag)?'poll':/排列|排序/.test(tag)?'jumble':/滑桿/.test(tag)?'slider':/圖標/.test(tag)?'pin':/是非/.test(tag)?'tf':/簡答/.test(tag)?'typeans':null}
