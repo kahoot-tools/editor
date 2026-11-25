@@ -749,6 +749,34 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 .pv-slide .sb{background:rgba(255,255,255,.9);border-radius:.4cqw;padding:1.4cqw 2cqw;font-size:2cqw;max-width:100%}
 
 .gc-list{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+
+/* 預覽全部題目 */
+.modal.wide.peekm .mbody{max-height:min(70vh,760px);overflow:auto;padding-right:4px}
+.pk-tip{color:var(--muted);font-size:13.5px;margin:0 0 10px}
+.pk-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pk-card{display:flex;flex-direction:column;gap:8px;text-align:left;background:#faf8fd;border:1.5px solid var(--line);border-radius:14px;padding:12px;font:inherit;color:var(--ink);cursor:pointer;min-width:0}
+.pk-card:hover{border-color:var(--accent)}
+.pk-card.bad{border-color:#fdba74;background:#fffaf5}
+.pk-h{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.pk-n{background:var(--accent);color:#fff;border-radius:7px;min-width:24px;height:24px;display:grid;place-items:center;font-family:Montserrat,sans-serif;font-size:13px;padding:0 5px}
+.pk-type,.pk-tag{background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:1px 8px}
+.pk-time{margin-left:auto}
+.pk-q{font-size:15px;line-height:1.5;white-space:pre-line;word-break:break-word}
+.pk-imgs{display:flex;gap:8px;flex-wrap:wrap}
+.pk-img{margin:0;width:120px;background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.pk-img img{display:block;width:100%;height:76px;object-fit:contain;background:#f1edf7}
+.pk-img figcaption{font-size:11.5px;color:var(--muted);text-align:center;padding:2px}
+.pk-opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.pk-opt{display:flex;align-items:center;gap:6px;border-radius:8px;padding:5px 8px;color:#fff;font-size:13px;min-width:0;opacity:.6}
+.pk-opt.k0{background:var(--k0)}.pk-opt.k1{background:var(--k1)}.pk-opt.k2{background:var(--k2)}.pk-opt.k3{background:var(--k3)}
+.pk-opt.ok{opacity:1;box-shadow:0 0 0 2.5px #fff,0 0 0 4.5px var(--good)}
+.pk-opt i{font-style:normal;font-family:Montserrat,sans-serif;font-size:12px;opacity:.85;flex:none}
+.pk-opt img{width:34px;height:34px;object-fit:cover;border-radius:5px;background:#fff;flex:none}
+.pk-opt span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.pk-opt b{flex:none}
+.pk-meta{font-size:12.5px;color:var(--muted)}
+.pk-warn{font-size:12.5px;color:#9a3412}
+@media (max-width:640px){.pk-list{grid-template-columns:minmax(0,1fr)}}
 /* 使用說明 */
 #guideBlk .blk-h .grow{flex:1}
 #guideBlk .blk-sub{margin:6px 0 14px}
@@ -1068,7 +1096,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
         <h3>拖曳、點擊或貼上你的題目檔案</h3>
         <p>文件：docx、pptx、xlsx、xls、csv、pdf、txt　圖片：jpeg、jpg、png、gif、webp（單檔 50 MB 內）</p>
         <p>Word / PPT 裡的圖片會自動放進對應題目</p><p class="pv-mini">🔒 檔案只在你的瀏覽器中處理，不會上傳到網路</p>
-        <span class="tip">擷取的文字會先放到「貼上文字」區，確認後再辨識</span>
+        <span class="tip">上傳後直接辨識題目；TXT 文字檔會先放到「貼上文字」區，確認後再辨識</span>
         <input type="file" id="fileInput" multiple hidden>
       </div>
       <div class="filelist" id="filelist"></div>
@@ -1185,7 +1213,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.26a</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.26b</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -2276,7 +2304,7 @@ async function extractFile(file,setSt){
 }
 async function handleFiles(files){
   if(!files.length) return;
-  const list=$('#filelist');const sheetQs=[];const texts=[];
+  const list=$('#filelist');const items=[];const pasteTexts=[];
   for(const f of files){
     const ext=(f.name.split('.').pop()||'').toLowerCase();
     const row=document.createElement('div');
@@ -2290,19 +2318,30 @@ async function handleFiles(files){
     try{
       const before=poolSeq;
       const r=await extractFile(f,setSt);
-      if(r.questions){sheetQs.push(...r.questions);st.textContent=r.kahootReport?`✓ Kahoot 遊戲報告，讀到 ${r.questions.length} 題（報告 Excel 沒有圖片）`:r.kahootPdf?`✓ Kahoot 題目 PDF，讀到 ${r.questions.length} 題、${r.questions.reduce((a,q)=>a+(q.qimg?1:0)+(q.oimgs||[]).filter(Boolean).length,0)} 張圖`:`✓ 直接讀到 ${r.questions.length} 題`;
+      if(r.questions){items.push({qs:r.questions});st.textContent=r.kahootReport?`✓ Kahoot 遊戲報告，讀到 ${r.questions.length} 題（報告 Excel 沒有圖片）`:r.kahootPdf?`✓ Kahoot 題目 PDF，讀到 ${r.questions.length} 題、${r.questions.reduce((a,q)=>a+(q.qimg?1:0)+(q.oimgs||[]).filter(Boolean).length,0)} 張圖`:`✓ 直接讀到 ${r.questions.length} 題`;
         if(r.title&&!S.title.trim()){S.title=r.title.slice(0,95);const gt=$('#gTitle');if(gt)gt.value=S.title}}
-      else{texts.push(r.text.trim());const imgs=poolSeq-before;st.textContent=`✓ 擷取 ${r.text.replace(/\s|⟦圖\d+⟧/g,'').length} 字`+(imgs?`、${imgs} 張圖`:'')}
+      else{if(ext==='txt')pasteTexts.push(r.text.trim());else items.push({text:r.text.trim(),row:st,name:f.name});const imgs=poolSeq-before;st.textContent=`✓ 擷取 ${r.text.replace(/\s|⟦圖\d+⟧/g,'').length} 字`+(imgs?`、${imgs} 張圖`:'')}
       st.classList.add('ok');
     }catch(e){console.error(e);row.className='';row.innerHTML=`<div class="errbox"><div class="eh">ⓘ <b>${esc(f.name)}</b> 讀取失敗</div>${esc(e.message||'')}</div>`}
   }
-  if(sheetQs.length) await applyParsed(sheetQs);
-  const t=texts.filter(Boolean);
+  // 除了 txt，其他檔案直接辨識、進入識別結果；辨識不到題目的才放到「貼上文字」區
+  const all=[];
+  for(const it of items){
+    if(it.qs){all.push(...it.qs);continue}
+    if(!it.text) continue;
+    let qs=null;
+    if(aiSample){try{qs=await aiParse(it.text)}catch(e){console.warn(e)}}
+    if(!qs) qs=parseText(it.text).map(enrich);
+    if(qs.length){all.push(...qs);it.row.textContent+=`，辨識出 ${qs.length} 題`}
+    else{pasteTexts.push(it.text);it.row.textContent+='，沒有辨識到題目（已放到貼上文字區）'}
+  }
+  if(all.length) await applyParsed(all);
+  const t=pasteTexts.filter(Boolean);
   if(t.length){
     const p=$('#paste');let mode='add';
     if(p.value.trim()) mode=await modal('貼上文字區已經有內容','「貼上文字」區原本已有文字或範本，新上傳檔案的內容要怎麼處理？',[{label:'接續在後面',value:'add'},{label:'覆蓋原本內容',value:'rep',primary:true}]);
     p.value=(mode==='add'&&p.value.trim()?p.value.trim()+'\n\n':'')+t.join('\n\n');
-    setMode('paste');save();toast('文字已放到「貼上文字」區，確認後按「開始辨識題目」');
+    if(S.view==='input')setMode('paste');save();toast('文字已放到「貼上文字」區，確認後按「開始辨識題目」');
   }
 }
 
@@ -2518,9 +2557,10 @@ function renderDone(start,n,keep){
    <div class="done-sum"><div><b>${n}</b>題目</div><div><b>${imgs}</b>張圖片</div><div class="${bad.length?'w':''}"><b>${bad.length}</b>待確認</div></div>
    ${bad.length?`<ul class="done-list">${bad.slice(0,6).map(([no,is])=>`<li>⚠ 第 ${no} 題：${esc(is.join('、'))}</li>`).join('')}${bad.length>6?`<li>…還有 ${bad.length-6} 題，進入編輯後可在左側看到紅點</li>`:''}</ul>`:'<p class="done-ok">✓ 每一題都有題目、選項與答案</p>'}
    ${fixHtml}
-   <div class="done-btns"><button type="button" class="btn btn-ghost" id="goBack">← 返回繼續識別</button><button type="button" class="btn btn-purple" id="goEdit">進入題目編輯 →</button></div></div>`;
+   <div class="done-btns"><button type="button" class="btn btn-ghost" id="goBack">← 返回繼續識別</button><button type="button" class="btn btn-ghost" id="goPeek">👀 預覽全部題目</button><button type="button" class="btn btn-purple" id="goEdit">進入題目編輯 →</button></div></div>`;
   $('#goEdit').onclick=()=>{setView('edit');setTimeout(()=>focusQuestion(),50)};
   $('#goBack').onclick=backToInput;
+  $('#goPeek').onclick=()=>peekAll(start,n);
   const card=$('#doneCard');const keepScroll=()=>{const l=card.querySelector('.qf-list');return l?l.scrollTop:0};
   const rerender=()=>{const st=keepScroll();renderDone(start,n,true);const l=card.querySelector('.qf-list');if(l)l.scrollTop=st;save()};
   card.querySelectorAll('.qf-opt').forEach(b=>b.onclick=()=>{const q=S.qs.find(x=>x.id===b.dataset.qid);if(!q)return;const k=+b.dataset.k;
@@ -2531,6 +2571,29 @@ function renderDone(start,n,keep){
       let cnt=0;fixQs.forEach((q,i)=>{const a=k.map?k.map[S.qs.indexOf(q)+1]:k.seq[i];if(a&&a.length){q.answers=a.filter(x=>x>=1&&x<=optCount(q)&&optFilled(q,x-1));if(q.answers.length)cnt++}});
       rerender();toast(cnt?`已設定 ${cnt} 題的答案`:'沒有對應到任何題目，請確認題號或數量');};
     ap.onclick=doApply;$('#qfBulk').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();doApply()}}}
+}
+// 識別完成頁：快速預覽這次辨識到的所有題目（題目、圖片、選項、答案）
+async function peekAll(start,n){
+  const qs=S.qs.slice(start,start+n);const LET='ABCDEF';
+  const img=(im,cls,label)=>im?`<figure class="pk-img ${cls}"><img src="${vis(im).url}" alt="${label}"><figcaption>${label}</figcaption></figure>`:'';
+  const html=`<div class="pk-list">${qs.map((q,k)=>{
+    const i=start+k;const T=TYPES[q.type];const nOpt=TILE.includes(q.type)||q.type==='typeans'||q.type==='jumble'?optCount(q):0;const bad=issuesOf(q);
+    const opts=nOpt?`<div class="pk-opts">${Array.from({length:nOpt},(_,o)=>{const im=q.type!=='tf'&&q.oimgs[o];const txt=(q.options[o]||'').trim();if(!txt&&!im)return '';const ok=q.answers.includes(o+1)&&q.type!=='poll';
+      return `<div class="pk-opt k${o%4}${ok?' ok':''}"><i>${LET[o]}</i>${im?`<img src="${vis(im).url}" alt="選項 ${LET[o]} 圖片">`:''}<span>${esc(txt)}</span>${ok?'<b>✓</b>':''}</div>`}).join('')}</div>`:'';
+    const extra=q.type==='slider'?`<div class="pk-meta">範圍 ${esc(q.slider.min)}～${esc(q.slider.max)}，答案 ${esc(q.slider.ans||'未設定')}</div>`:'';
+    const imgs=img(q.qimg,'','題目圖')+img(q.qbg,'','本題背景')+img(q.aimg,'','解答圖')+(q.pin&&q.pin.img?img(q.pin.img,'','圖標答題圖'):'');
+    return `<button type="button" class="pk-card${bad.length?' bad':''}" data-pk="${i}">
+      <div class="pk-h"><span class="pk-n">${i+1}</span>${q.type!=='quiz'?`<span class="pk-type">${T.label}</span>`:''}<span class="pk-time">${q.time} 秒</span>${q.points==='none'?'<span class="pk-tag">不計分</span>':q.points==='double'?'<span class="pk-tag">分數加倍</span>':''}</div>
+      <div class="pk-q">${esc(q.text.trim()||'（題目空白）')}</div>
+      ${imgs?`<div class="pk-imgs">${imgs}</div>`:''}${opts}${extra}
+      ${q.note?`<div class="pk-meta">備註：${esc(q.note)}</div>`:''}
+      ${bad.length?`<div class="pk-warn">⚠ ${esc(bad.join('、'))}</div>`:''}
+    </button>`}).join('')}</div>`;
+  let target=null;
+  const p=modal(`預覽全部題目（${n} 題）`,`<p class="pk-tip">點任一題可以直接前往編輯</p>${html}`,[{label:'關閉',value:null},{label:'進入題目編輯 →',value:'edit',primary:true}],'wide peekm');
+  $('#mBody').querySelector('.pk-list').onclick=e=>{const c=e.target.closest('[data-pk]');if(!c)return;target=+c.dataset.pk;[...$('#mBtns').children].pop().click()};
+  const v=await p;
+  if(v==='edit'){if(target!==null)S.cur=target;setView('edit');setTimeout(()=>focusQuestion(),50)}
 }
 function backToInput(){
   setView('input');
