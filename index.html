@@ -1884,9 +1884,94 @@ async function readPptx(file){
   }
   return out.join('\n\n');
 }
+/* ---- Kahoot 匯出的「遊戲報告」Excel（Overview、1 Quiz、2 Quiz…）：每題一張工作表，直接讀出題目 ----
+   讀法和報告查詢網站後台（kahoot-tools/report-admin 的 build_report.py）相同，新舊兩種格式都支援 */
+const KR_SHAPES='▲♦◆●■▼★';
+const KR_YES=/^(yes|true|✔︎?|✓)$/i;
+const KR_UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function parseKahootReport(sheets){
+  const qSheets=[];
+  for(const sh of sheets){const m=String(sh.name).match(/^\s*(\d+)\s+(.+?)\s*$/);if(m) qSheets.push({n:+m[1],type:m[2].toLowerCase(),rows:sh.rows})}
+  const s=v=>String(v??'').trim();
+  const find=(rows,label)=>rows.find(r=>r&&s(r[0]).toLowerCase().startsWith(label));
+  // 確認真的是 Kahoot 報告：題目工作表裡有「Answer options」或「Question duration」
+  if(!qSheets.length||!qSheets.some(q=>find(q.rows,'question duration')||find(q.rows,'answer options'))) return null;
+  qSheets.sort((a,b)=>a.n-b.n);
+  const first=v=>(v||[]).slice(1).map(s).find(Boolean)||'';
+  const num=v=>{const x=parseFloat(String(v??'').replace(/[^\d.\-]/g,''));return isFinite(x)?x:NaN};
+  const near=t=>TIMES.reduce((a,b)=>Math.abs(b-t)<Math.abs(a-t)?b:a,TIMES[0]);
+  const fmt=v=>{const x=num(v);return isFinite(x)?String(+x.toFixed(4)):s(v)};
+  let title='';
+  const ov=sheets.find(sh=>/^overview$/i.test(s(sh.name)));
+  title=s(ov&&ov.rows[0]&&ov.rows[0][0])||s(qSheets[0].rows[0]&&qSheets[0].rows[0][0]);
+  const out=[];
+  for(const {type,rows} of qSheets){
+    let text=s(rows[1]&&rows[1][1]).replace(/^\d{1,3}\s*[.、]\s*/,'');   // 題目自帶的「1. 」題號拿掉（同一般 Excel）
+    const dur=num(first(find(rows,'question duration')));
+    const correctRow=(find(rows,'correct answer')||[]).slice(1).map(s).filter(Boolean);
+    const range=first(find(rows,'choice range'));
+    // 選項：舊版「選項文字」一格一個；新版「▲ 文字 ♦ 文字…」圖形和文字交錯；圖片選項沒有文字
+    const opts=find(rows,'answer options'),isc=find(rows,'is answer correct');
+    const options=[],correct=[];let imgOpt=false;
+    if(opts&&!opts.slice(1).some(c=>s(c)&&s(c)!=='-')&&isc){
+      isc.slice(1).map(s).filter(Boolean).forEach(c=>{options.push('');correct.push(KR_YES.test(c));imgOpt=true});
+    }else if(opts){
+      let cols=[];for(let i=1;i<opts.length;i++) if(s(opts[i])&&s(opts[i])!=='-') cols.push(i);
+      const paired=cols.length&&KR_SHAPES.includes(s(opts[cols[0]]));
+      if(paired) cols=cols.filter(i=>KR_SHAPES.includes(s(opts[i])));
+      for(const i of cols){const t=s(paired?opts[i+1]:opts[i]);if(!t||t==='-') continue;
+        const im=KR_UUID.test(t);if(im) imgOpt=true;
+        options.push(im?'':t);correct.push(isc?KR_YES.test(s(isc[i])):false)}
+    }
+    // 每位玩家這題的得分：有人答對但全部 0 分＝不計分
+    const hi=rows.findIndex(r=>r&&s(r[0]).toLowerCase()==='player'&&r.slice(1).some(c=>s(c).toLowerCase()==='answer'));
+    let scores=[];
+    if(hi>=0){const si=rows[hi].findIndex(c=>s(c).toLowerCase().startsWith('score'));
+      if(si>=0) scores=rows.slice(hi+1).filter(r=>r&&s(r[0])).map(r=>num(r[si])).filter(isFinite)}
+    const q={text,options:[],answers:[],note:''};
+    const notes=[];
+    if(/^(quiz|multiple[- ]select quiz)$/.test(type)){
+      q.options=options;q.answers=correct.map((c,k)=>c?k+1:0).filter(Boolean);
+    }else if(type==='true or false'){
+      q.type='tf';const k=correct.indexOf(true),t=options[k]||'';
+      q.answers=k<0?[]:/^(true|正確|是|對|o|○|◯)$/i.test(t)?[1]:/^(false|錯誤|否|錯|x|×)$/i.test(t)?[2]:[k+1];
+    }else if(type==='poll'){q.type='poll';q.options=options;
+    }else if(type==='type answer'){
+      q.type='typeans';q.options=correctRow.join(',').split(',').map(x=>x.trim()).filter(Boolean).slice(0,4);
+    }else if(type==='slider'){
+      const r=(range.match(/-?\d+(?:\.\d+)?/g)||[]);
+      q.type='slider';q.slider={min:r[0]!=null?fmt(r[0]):'0',max:r[1]!=null?fmt(r[1]):'50',ans:correctRow[0]!=null?fmt(correctRow[0]):''};
+    }else if(type==='puzzle'){
+      q.type='jumble';q.options=correctRow.map(t=>t.replace(/^\d+\.\s*/,'')).map(t=>KR_UUID.test(t)?'':t);
+      if(q.options.some(t=>!t)) imgOpt=true;
+    }else if(/^(pin it|pin answer|drop pin)$/.test(type)){
+      q.type='pin';notes.push('原始 Excel 沒有圖片，請上傳圖片並標出正確位置');
+    }else if(type==='word cloud'){q.type='wordcloud';
+    }else if(type==='open-ended'){q.type='open';
+    }else if(type==='brainstorm'){q.type='brainstorm';
+    }else{q.options=options;q.answers=correct.map((c,k)=>c?k+1:0).filter(Boolean);notes.push('原始題型：'+type)}
+    if(imgOpt) notes.push('選項為圖片（原始 Excel 沒有圖片，請補上）');
+    if(['wordcloud','open','brainstorm','pin','slider'].includes(q.type)) q.options=['','','',''];
+    while(q.options.length<4) q.options.push('');
+    if(q.options.length>6) q.options=q.options.slice(0,6);
+    if(isFinite(dur)&&dur>0) q.time=near(dur);
+    const scored=!['poll','wordcloud','open','brainstorm'].includes(q.type||'quiz');
+    if(/^暖身/.test(text)){q.points='none';notes.unshift(WARMUP)}
+    else if(scored&&scores.length&&scores.every(x=>x===0)&&(q.answers.length||q.type==='typeans'||q.type==='slider'||q.type==='jumble')) {q.points='none';notes.unshift('不計分')}
+    q.note=notes.join('；');
+    const e=enrich(q);if(q.points) e.points=q.points;
+    out.push(e);
+  }
+  return out.length?{questions:out,title,kahootReport:true}:null;
+}
+function readKahootReport(wb){
+  if(!wb.SheetNames.some(n=>/^\s*\d+\s+\S/.test(n))) return null;
+  return parseKahootReport(wb.SheetNames.map(n=>({name:n,rows:XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:'',raw:false})})));
+}
 async function readSheet(file){
   await loadScript(LIB.xlsx);
   const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellNF:true});
+  const kr=readKahootReport(wb);if(kr) return kr;
   const sh=wb.Sheets[wb.SheetNames[0]];
   // 一律讀「畫面上看到的文字」，日期不要變成 46045 這種序號
   for(const k of Object.keys(sh)){if(k[0]==='!')continue;const c=sh[k];
@@ -2025,7 +2110,7 @@ async function handleFiles(files){
     try{
       const before=poolSeq;
       const r=await extractFile(f,setSt);
-      if(r.questions){sheetQs.push(...r.questions);st.textContent=`✓ 直接讀到 ${r.questions.length} 題`;
+      if(r.questions){sheetQs.push(...r.questions);st.textContent=r.kahootReport?`✓ Kahoot 遊戲報告，讀到 ${r.questions.length} 題（報告 Excel 沒有圖片）`:`✓ 直接讀到 ${r.questions.length} 題`;
         if(r.title&&!S.title.trim()){S.title=r.title.slice(0,95);const gt=$('#gTitle');if(gt)gt.value=S.title}}
       else{texts.push(r.text.trim());const imgs=poolSeq-before;st.textContent=`✓ 擷取 ${r.text.replace(/\s|⟦圖\d+⟧/g,'').length} 字`+(imgs?`、${imgs} 張圖`:'')}
       st.classList.add('ok');
