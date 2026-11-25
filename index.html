@@ -2050,10 +2050,187 @@ async function readSheet(file){
   }
   return {text:blocks.join('\n\n')};
 }
+/* ---- Kahoot「詳細資料」頁列印成的 PDF（每題一張卡片：「N - 測驗」標籤、上方題目、下方色塊選項、正確答案有 ✓）----
+   直接讀出題型、題目、選項、正確答案、題目圖、選項圖；圖標答題另外找出解答圈的位置 */
+const KP_TYPES=[[/投影片|幻燈片|slide/i,'slide'],[/是非|true/i,'tf'],[/票選|投票|poll/i,'poll'],[/簡答|填答|type/i,'typeans'],[/滑桿|slider/i,'slider'],
+  [/排列|排序|解謎|puzzle/i,'jumble'],[/圖標|標記|pin/i,'pin'],[/文字雲|word/i,'wordcloud'],[/開放|open/i,'open'],[/腦力|brain/i,'brainstorm'],[/複選|測驗|quiz/i,'quiz']];
+const KP_CJK=/[⺀-鿿豈-﫿＀-￯]/;
+async function readKahootPdf(pdf,setSt){
+  const OPS=pdfjsLib.OPS;
+  const N=t=>String(t||'').replace(/[\u2e80-\u2fdf]/g,c=>c.normalize('NFKC'));
+  const pages=[];
+  for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p);const v=page.view,H=v[3];
+    const items=[];
+    for(const it of (await page.getTextContent()).items){
+      const str=N(it.str);if(!str.trim()||!it.transform) continue;
+      const size=Math.hypot(it.transform[2],it.transform[3])||it.height||8;
+      const x0=it.transform[4],bl=H-it.transform[5],w=it.width||size*str.length*0.6;
+      const o={s:str.trim(),x0,x1:x0+w,top:bl-size*0.85,bottom:bl+size*0.15,bl,size};
+      // Kahoot 的選項字會重複畫 2～3 次（加粗效果），位置幾乎一樣的只留一個
+      if(items.some(q=>q.s===o.s&&Math.abs(q.x0-o.x0)<1.5&&Math.abs(q.bl-o.bl)<1.5)) continue;
+      items.push(o);
+    }
+    pages.push({page,H,view:v,items});
+  }
+  // 卡片標籤：「1」「-」「測驗」在同一行
+  const cards=[];const labelItems=new Set();
+  pages.forEach((pg,pi)=>{for(const it of pg.items){
+    const m=it.s.match(/^(\d{1,3})(?:\s*[-－–]\s*(.*))?$/);if(!m) continue;
+    let label=m[2]||'';const dash=m[2]!=null;
+    if(!label){   // 標籤被拆成好幾段（「1 -」「投影」「片」）：接上同一行右邊的字
+      const same=[];let x=it.x1;
+      for(const o of pg.items.filter(o=>o!==it&&Math.abs(o.bl-it.bl)<3&&o.x0>it.x0).sort((a,b)=>a.x0-b.x0)){if(o.x0-x>12) break;same.push(o);x=o.x1}
+      label=same.map(o=>o.s).join('');it._same=same}
+    if(!dash&&!/^[-－–]/.test(label)) continue;
+    label=label.replace(/^[-－–\s]+/,'');
+    const tp=KP_TYPES.find(([re])=>re.test(label));
+    if(!tp&&label.length<2) continue;
+    labelItems.add(it);(it._same||[]).forEach(o=>labelItems.add(o));
+    cards.push({n:+m[1],pi,x0:it.x0,top:it.bottom+1,type:tp?tp[1]:'quiz',label,known:!!tp})}});
+  if(cards.length<1) return null;
+  // 確認是 Kahoot 的詳細資料頁：有 Kahoot 字樣或「題目 (7)」，而且大部分標籤是認得的題型
+  const allTxt=pages.map(pg=>pg.items.map(o=>o.s).join(' ')).join(' ');
+  if(!/kahoot|題目\s*[(（]\d+[)）]|questions?\s*\(\d+\)|媒體內容來源/i.test(allTxt)) return null;
+  if(cards.filter(c=>c.known).length<Math.max(1,cards.length*0.6)) return null;
+  const nums=cards.map(c=>c.n);if(new Set(nums).size!==nums.length) return null;
+  const pw=pages[0].view[2]-pages[0].view[0],margin=Math.min(...cards.map(c=>c.x0));
+  const two=cards.some(c=>c.x0>pw*0.4),colW=two?(pw-2*margin)/2-8:pw-2*margin;
+  // 每頁的圖片位置（從繪圖指令算出）
+  const mul=(m,n)=>[m[0]*n[0]+m[2]*n[1],m[1]*n[0]+m[3]*n[1],m[0]*n[2]+m[2]*n[3],m[1]*n[2]+m[3]*n[3],m[0]*n[4]+m[2]*n[5]+m[4],m[1]*n[4]+m[3]*n[5]+m[5]];
+  for(const pg of pages){
+    const ol=await pg.page.getOperatorList();let ctm=[1,0,0,1,0,0],depth=0;const st=[];pg.imgs=[];
+    for(let i=0;i<ol.fnArray.length;i++){const fn=ol.fnArray[i],a=ol.argsArray[i];
+      if(fn===OPS.save) st.push(ctm);else if(fn===OPS.restore) ctm=st.pop()||ctm;
+      else if(fn===OPS.transform) ctm=mul(ctm,a);
+      else if(fn===OPS.paintFormXObjectBegin){st.push(ctm);depth++;if(a&&a[0]&&a[0].length===6) ctm=mul(ctm,Array.from(a[0]))}
+      else if(fn===OPS.paintFormXObjectEnd){ctm=st.pop()||ctm;depth=Math.max(0,depth-1)}
+      else if(fn===OPS.paintImageXObject||fn===OPS.paintInlineImageXObject||fn===OPS.paintImageXObjectRepeat){
+        const xs=[0,1,0,1].map((x,k)=>ctm[0]*x+ctm[2]*[0,0,1,1][k]+ctm[4]),ys=[0,1,0,1].map((x,k)=>ctm[1]*x+ctm[3]*[0,0,1,1][k]+ctm[5]);
+        const r={id:typeof a[0]==='string'?a[0]:null,inline:typeof a[0]==='object'?a[0]:null,x0:Math.min(...xs),x1:Math.max(...xs),top:pg.H-Math.max(...ys),bottom:pg.H-Math.min(...ys)};
+        // 子圖層（Form XObject）裡的圖多半是圖示的陰影、濾鏡效果，不是題目照片
+        if(r.x1-r.x0>4&&r.bottom-r.top>4&&!depth) pg.imgs.push(r)}}
+    // 畫成圖片：用來找 ✓、圖標答題的解答圈，也當作取不到原圖時的備案
+    const S=Math.min(3,4000/Math.max(pg.view[2]-pg.view[0],pg.H));const vp=pg.page.getViewport({scale:S});
+    const cv=document.createElement('canvas');cv.width=Math.ceil(vp.width);cv.height=Math.ceil(vp.height);
+    await pg.page.render({canvasContext:cv.getContext('2d',{willReadFrequently:true}),viewport:vp}).promise;
+    pg.cv=cv;pg.S=S;
+  }
+  const px=(pg,x0,top,x1,bottom)=>{const S=pg.S,X=Math.max(0,Math.floor((x0-pg.view[0])*S)),Y=Math.max(0,Math.floor((top-(pg.view[3]-pg.H))*S));
+    const W=Math.max(1,Math.min(pg.cv.width-X,Math.ceil((x1-x0)*S))),Hh=Math.max(1,Math.min(pg.cv.height-Y,Math.ceil((bottom-top)*S)));
+    return {X,Y,W,H:Hh,d:pg.cv.getContext('2d').getImageData(X,Y,W,Hh).data}};
+  const toBlob=(c,png)=>new Promise(r=>c.toBlob(r,png?'image/png':'image/jpeg',0.92));
+  async function imgCanvas(pg,r){   // 先取 PDF 裡的原圖（解析度最高），取不到就從畫好的頁面裁切
+    let o=r.inline;
+    if(!o&&r.id) o=await new Promise(res=>{const t=setTimeout(()=>res(null),3000);try{(r.id.startsWith('g_')?pg.page.commonObjs:pg.page.objs).get(r.id,x=>{clearTimeout(t);res(x)})}catch(e){clearTimeout(t);res(null)}});
+    try{if(o&&o.width&&o.height){const c=document.createElement('canvas');c.width=o.width;c.height=o.height;const g=c.getContext('2d');
+      if(o.bitmap){g.drawImage(o.bitmap,0,0);return {c,alpha:true}}
+      if(o.data){const id=g.createImageData(o.width,o.height),src=o.data,n=o.width*o.height,dst=id.data;
+        if(src.length>=n*4){dst.set(src.subarray?src.subarray(0,n*4):src.slice(0,n*4))}
+        else if(src.length>=n*3){for(let i=0,j=0;i<n;i++,j+=3){dst[i*4]=src[j];dst[i*4+1]=src[j+1];dst[i*4+2]=src[j+2];dst[i*4+3]=255}}
+        else throw 0;
+        g.putImageData(id,0,0);return {c,alpha:src.length>=n*4}}}}catch(e){}
+    const b=px(pg,r.x0,r.top,r.x1,r.bottom),c=document.createElement('canvas');c.width=b.W;c.height=b.H;
+    c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(b.d),b.W,b.H),0,0);return {c,alpha:false,crop:true};
+  }
+  const hasAlpha=c=>{const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;for(let i=3;i<d.length;i+=16) if(d[i]<250) return true;return false};
+  async function saveImg(pg,r,name){const {c,alpha}=await imgCanvas(pg,r);const png=alpha&&hasAlpha(c);return makeImg(await toBlob(c,png),name+(png?'.png':'.jpg'))}
+  // 圖標答題：PDF 上的解答圈是畫在照片上的，比對「原圖」和「頁面上畫出來的樣子」找出差異最大的一塊
+  async function pinShape(pg,r){
+    const {c,crop}=await imgCanvas(pg,r);if(crop) return null;
+    const W=120,Hh=Math.max(20,Math.round(W*(r.bottom-r.top)/(r.x1-r.x0)));
+    const a=document.createElement('canvas');a.width=W;a.height=Hh;a.getContext('2d').drawImage(c,0,0,W,Hh);
+    const b=document.createElement('canvas');b.width=W;b.height=Hh;b.getContext('2d').drawImage(pg.cv,(r.x0-pg.view[0])*pg.S,(r.top-(pg.view[3]-pg.H))*pg.S,(r.x1-r.x0)*pg.S,(r.bottom-r.top)*pg.S,0,0,W,Hh);
+    const da=a.getContext('2d').getImageData(0,0,W,Hh).data,db=b.getContext('2d').getImageData(0,0,W,Hh).data;
+    const hot=new Uint8Array(W*Hh),dim=new Uint8Array(W*Hh);let ndim=0;
+    for(let i=0;i<W*Hh;i++){const k=i*4,lo=da[k]*0.3+da[k+1]*0.59+da[k+2]*0.11,lr=db[k]*0.3+db[k+1]*0.59+db[k+2]*0.11;
+      if(Math.abs(da[k]-db[k])+Math.abs(da[k+1]-db[k+1])+Math.abs(da[k+2]-db[k+2])>150) hot[i]=1;
+      // 變暗：原本夠亮、畫出來只剩 8 成以下；原本就很暗的點分不出來，當作背景
+      if(lo<=50||lr<lo*0.8){dim[i]=1;if(lo>50)ndim++}}
+    const bright=Array.from({length:W*Hh},(_,i)=>(da[i*4]*0.3+da[i*4+1]*0.59+da[i*4+2]*0.11)>50).filter(Boolean).length;
+    const spot=ndim>bright*0.6;   // 大部分都變暗＝聚光燈畫法
+    if(spot) hot.set(dim);
+    // Kahoot 的畫法：整張照片調暗、只有解答圈是亮的 → 找「沒變」的那一塊（不碰到邊）；只畫一個小記號的話 → 找「有變」的那一塊
+    const want=spot?0:1;
+    const seen=new Uint8Array(W*Hh);let best=null;
+    for(let i=0;i<W*Hh;i++){if(hot[i]!==want||seen[i]) continue;const q=[i];seen[i]=1;let n=0,x0=W,x1=0,y0=Hh,y1=0,edge=false;
+      while(q.length){const j=q.pop();n++;const x=j%W,y=(j/W)|0;if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;if(!x||!y||x===W-1||y===Hh-1)edge=true;
+        for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]]){const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=W||yy>=Hh) continue;const jj=yy*W+xx;if(hot[jj]===want&&!seen[jj]){seen[jj]=1;q.push(jj)}}}
+      if(want===0&&edge) continue;
+      if(!best||n>best.n) best={n,x0,x1,y0,y1}}
+    if(!best||best.n<15) return null;
+    const rx=(best.x1-best.x0+1)/2/W,ry=(best.y1-best.y0+1)/2/Hh;
+    if(rx<0.01||rx>0.45||ry<0.01||ry>0.45) return null;
+    return {t:'ellipse',cx:+((best.x0+best.x1+1)/2/W).toFixed(3),cy:+((best.y0+best.y1+1)/2/Hh).toFixed(3),rx:+rx.toFixed(3),ry:+ry.toFixed(3)};
+  }
+  const joinTxt=list=>{const lines=[];for(const o of [...list].sort((a,b)=>a.top-b.top||a.x0-b.x0)){const L=lines.find(l=>Math.abs(l.bl-o.bl)<o.size*0.5);if(L)L.items.push(o);else lines.push({bl:o.bl,items:[o]})}
+    return lines.map(l=>l.items.sort((a,b)=>a.x0-b.x0).reduce((acc,o,i,arr)=>{if(!i) return o.s;const gap=o.x0-arr[i-1].x1;return acc+(gap>o.size*0.25||(gap>o.size*0.05&&!(KP_CJK.test(acc.slice(-1))||KP_CJK.test(o.s[0])))?' ':'')+o.s},'')).reduce((acc,l)=>acc+(acc&&!(KP_CJK.test(acc.slice(-1))||KP_CJK.test(l[0]))?' ':'')+l,'').replace(/\s+/g,' ').trim()};
+  cards.sort((a,b)=>a.n-b.n);
+  const out=[];let title='';
+  { const pg=pages[cards[0].pi];const above=pg.items.filter(o=>o.bottom<cards[0].top-4&&!/^kahoot!?$/i.test(o.s)&&!/^題目|^questions?/i.test(o.s));
+    const big=above.sort((a,b)=>b.size-a.size)[0];if(big) title=joinTxt(above.filter(o=>Math.abs(o.size-big.size)<0.5&&Math.abs(o.bl-big.bl)<big.size*2)); }
+  for(const cd of cards){
+    setSt&&setSt(`讀取第 ${cd.n} 題`);
+    const pg=pages[cd.pi];
+    let fr={x0:cd.x0,top:cd.top,x1:cd.x0+colW,bottom:cd.top+colW*9/16+8};
+    const inF=(o,f)=>{const cx=(o.x0+o.x1)/2,cy=(o.top+o.bottom)/2;return cx>=f.x0-4&&cx<=f.x1+4&&cy>=f.top-4&&cy<=f.bottom+4};
+    let imgs=pg.imgs.filter(r=>inF(r,fr));
+    const bg=imgs.filter(r=>r.x1-r.x0>0.9*colW&&r.bottom-r.top>0.5*colW).sort((a,b)=>(b.x1-b.x0)-(a.x1-a.x0))[0];
+    if(bg){fr={x0:bg.x0,top:bg.top,x1:bg.x1,bottom:bg.bottom};imgs=pg.imgs.filter(r=>r!==bg&&inF(r,fr))}
+    const fw=fr.x1-fr.x0,fh=fr.bottom-fr.top,fy=o=>((o.top+o.bottom)/2-fr.top)/fh,fx=o=>((o.x0+o.x1)/2-fr.x0)/fw;
+    const texts=pg.items.filter(o=>!labelItems.has(o)&&inF(o,fr));
+    const type=cd.type,isGrid=['quiz','tf','poll','typeans'].includes(type);
+    const qTexts=texts.filter(o=>type==='slide'||fy(o)<0.42);
+    const optImgs=imgs.filter(r=>(r.bottom-r.top)/fh<0.25&&fy(r)>0.42&&(isGrid||type==='jumble'));
+    const qImg=imgs.filter(r=>!optImgs.includes(r)).sort((a,b)=>(b.x1-b.x0)*(b.bottom-b.top)-(a.x1-a.x0)*(a.bottom-a.top))[0];
+    const q={type,text:joinTxt(qTexts),options:[],answers:[],note:''};
+    if(type==='slide'){const t=[...qTexts].sort((a,b)=>a.top-b.top);q.text=t.length?joinTxt(t.filter(o=>Math.abs(o.bl-t[0].bl)<2)):'';q.body=joinTxt(t.filter(o=>Math.abs(o.bl-t[0].bl)>=2))}
+    let tiles=[];
+    if(isGrid||type==='jumble'){
+      const els=[...texts.filter(o=>fy(o)>=0.42).map(o=>({t:o})),...optImgs.map(r=>({r}))];
+      const rows=[];
+      for(const e of els.sort((a,b)=>fy(a.t||a.r)-fy(b.t||b.r))){const y=fy(e.t||e.r),col=type==='jumble'?0:(fx(e.t||e.r)<0.5?0:1);
+        let row=rows.find(R=>Math.abs(R.y-y)<0.065);if(!row){row={y,cells:[[],[]]};rows.push(row)}row.cells[col].push(e)}
+      rows.sort((a,b)=>a.y-b.y);
+      rows.forEach(R=>[0,1].forEach(c=>{if(R.cells[c].length) tiles.push({row:R,col:c,els:R.cells[c]})}));
+      q.options=tiles.map(T=>joinTxt(T.els.filter(e=>e.t).map(e=>e.t)));
+      q.oimgs=[];
+      for(let k=0;k<tiles.length;k++){const e=tiles[k].els.find(e=>e.r);q.oimgs[k]=e?await saveImg(pg,e.r,`第${cd.n}題-選項${k+1}`):null}
+    }
+    // 正確答案：色塊右側的白色 ✓（排除選項文字蓋到的地方）
+    if(['quiz','tf'].includes(type)){
+      tiles.forEach((T,k)=>{
+        const right=fr.x0+fw*(T.col?0.98:0.49),zx0=right-fw*0.075,zx1=right-fw*0.006;
+        const cy=fr.top+fh*T.row.y,zy0=cy-fh*0.045,zy1=cy+fh*0.045;
+        const b=px(pg,zx0,zy0,zx1,zy1);const S=pg.S;
+        const mask=texts.concat(optImgs).filter(o=>o.x1>zx0&&o.x0<zx1&&o.bottom>zy0&&o.top<zy1);
+        let white=0,col=0;
+        for(let y=0;y<b.H;y++) for(let x=0;x<b.W;x++){
+          const X=zx0+x/S,Y=zy0+y/S;if(mask.some(o=>X>=o.x0-1&&X<=o.x1+1&&Y>=o.top-1&&Y<=o.bottom+1)) continue;
+          const i=(y*b.W+x)*4,r=b.d[i],g=b.d[i+1],bb=b.d[i+2],mx=Math.max(r,g,bb),mn=Math.min(r,g,bb);
+          if(mn>240&&mx-mn<20) white++;else if(mx-mn>60) col++}
+        if(white>=12&&col>=b.W*b.H*0.25) q.answers.push(k+1)});
+    }
+    if(type==='tf'){const k=q.answers[0]-1,t=q.options[k]||'';q.answers=k<0?[]:/^(true|正確|是|對|o|○)$/i.test(t)?[1]:/^(false|錯誤|否|錯|x|×)$/i.test(t)?[2]:[k+1];q.options=['','','','']}
+    if(type==='typeans'){q.options=q.options.filter(Boolean).slice(0,4);q.oimgs=[]}
+    if(['wordcloud','open','brainstorm','slider','pin','slide'].includes(type)){q.options=['','','',''];q.oimgs=[]}
+    if(type==='slider') q.note='滑桿數值請確認（PDF 沒有標出答案）';
+    if(type==='quiz'&&!q.answers.length&&q.options.some(Boolean)) q.note='沒有找到正確答案，請確認';
+    while(q.options.length<4) q.options.push('');
+    if(q.options.length>6) q.options=q.options.slice(0,6);
+    const e=enrich(q);if(q.body) e.body=q.body;
+    e.oimgs=q.oimgs||[];
+    if(qImg){e.qimg=await saveImg(pg,qImg,`第${cd.n}題`);
+      if(type==='pin'){try{const sh=await pinShape(pg,qImg);if(sh) e.pin=await makePinImg(e.qimg,sh);else e.note='請標出正確位置'}catch(x){e.note='請標出正確位置'}}}
+    out.push(e);
+  }
+  return out.length?{questions:out,title,kahootPdf:true}:null;
+}
 async function readPdf(file,setSt){
   await loadScript(LIB.pdf);await loadScript(LIB.pdfw);
   pdfjsLib.GlobalWorkerOptions.workerSrc=LIB.pdfw;
   const pdf=await pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+  try{const kp=await readKahootPdf(pdf,setSt);if(kp) return kp}catch(e){console.warn('Kahoot PDF 讀取失敗，改用一般方式',e)}
   let text='';
   for(let p=1;p<=pdf.numPages;p++){
     setSt(`讀取第 ${p}/${pdf.numPages} 頁`);
@@ -2088,7 +2265,7 @@ const DOC_EXT=['pdf','txt','docx','pptx','xlsx','xls','csv'];
 async function extractFile(file,setSt){
   const ext=(file.name.split('.').pop()||'').toLowerCase();
   if(IMG_EXT.test(ext)||IMG_MIME.test(file.type)) return {text:await readImage(file,setSt)};
-  if(ext==='pdf') return {text:await readPdf(file,setSt)};
+  if(ext==='pdf'){const r=await readPdf(file,setSt);return typeof r==='string'?{text:r}:r}
   if(ext==='txt') return {text:await readTxt(file)};
   if(ext==='docx') return {text:await readDocx(file)};
   if(ext==='pptx') return {text:await readPptx(file)};
@@ -2110,7 +2287,7 @@ async function handleFiles(files){
     try{
       const before=poolSeq;
       const r=await extractFile(f,setSt);
-      if(r.questions){sheetQs.push(...r.questions);st.textContent=r.kahootReport?`✓ Kahoot 遊戲報告，讀到 ${r.questions.length} 題（報告 Excel 沒有圖片）`:`✓ 直接讀到 ${r.questions.length} 題`;
+      if(r.questions){sheetQs.push(...r.questions);st.textContent=r.kahootReport?`✓ Kahoot 遊戲報告，讀到 ${r.questions.length} 題（報告 Excel 沒有圖片）`:r.kahootPdf?`✓ Kahoot 題目 PDF，讀到 ${r.questions.length} 題、${r.questions.reduce((a,q)=>a+(q.qimg?1:0)+(q.oimgs||[]).filter(Boolean).length,0)} 張圖`:`✓ 直接讀到 ${r.questions.length} 題`;
         if(r.title&&!S.title.trim()){S.title=r.title.slice(0,95);const gt=$('#gTitle');if(gt)gt.value=S.title}}
       else{texts.push(r.text.trim());const imgs=poolSeq-before;st.textContent=`✓ 擷取 ${r.text.replace(/\s|⟦圖\d+⟧/g,'').length} 字`+(imgs?`、${imgs} 張圖`:'')}
       st.classList.add('ok');
