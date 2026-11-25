@@ -1185,7 +1185,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.25b</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.26a</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -2002,7 +2002,9 @@ async function readSheet(file){
           if(/^(?:秒數|時間|time(?:\s*limit)?)\s*[:：]?$/i.test(c)&&/^\s*\d{1,3}\s*(?:秒|s|sec)?\s*$/i.test(normalize(nx))) gTime=parseInt(normalize(nx))});}
       const qs=[];
       for(const row of rows.slice(r+1)){
-        let text=String(row[qi]??'').trim().replace(/^\d{1,3}\s*[.、]\s*/,'');if(!text) continue;
+        let text=String(row[qi]??'').trim();if(!text) continue;
+        // 題目本身寫的題號（1. 請問…）先拿出來，匯入時照原樣放回（開啟「顯示題號」時才詢問要不要取代）
+        let rowNo='';{const nm=text.match(QNUM_RE);if(nm&&text.slice(nm[0].length).trim()){rowNo=nm[0];text=text.slice(nm[0].length)}}
         let options=ai.filter(i=>i>=0).map(i=>String(row[i]??'').trim());
         // 只有文字、沒有選項的列（例如「IG 追蹤：＠xxx」）→ 併到上一題的備註
         const noteTxt=ni>=0?String(row[ni]??'').trim():'';
@@ -2020,6 +2022,7 @@ async function readSheet(file){
         const q=enrich({text,options,answers,note:ni>=0?String(row[ni]??'').trim():''});
         if(TIMES.includes(t)) q.time=t;else if(TIMES.includes(gTime)&&sType!=='wordcloud') q.time=gTime;
         if(warm){q.points='none';if(!q.note)q.note=WARMUP}
+        if(rowNo){q.srcNo=rowNo;q.keepNo=true}
         if(sType){q.type=sType;if(!q.note)q.note=TYPES[sType].label;
           if(['wordcloud','open','brainstorm','slide','pin','slider'].includes(sType)){q.options=['','','',''];q.answers=[]}
           if(sType==='poll'||sType==='jumble'||sType==='typeans') q.answers=[];}
@@ -2390,9 +2393,11 @@ function fixQMarks(qs){
 const QNUM_RE=/^\s*(?:\(\d{1,3}\)|（\d{1,3}）|(?:Q|第)?\s*\d{1,3}\s*題?\s*(?:\.(?!\d)|[、．:：)）\]]))\s*/i;
 function warmup(q){if(!q.note)q.note=WARMUP;q.points='none'}
 async function applyParsed(arr){
-  const srcNos=arr.map(x=>x.srcNo||'');arr.forEach(x=>delete x.srcNo);
-  const qs=arr.map(x=>newQ(x));qs.forEach(q=>delete q.srcNo);
+  const srcNos=arr.map(x=>x.srcNo||'');const keepNo=arr.map(x=>!!x.keepNo);arr.forEach(x=>{delete x.srcNo;delete x.keepNo});
+  const qs=arr.map(x=>newQ(x));qs.forEach(q=>{delete q.srcNo;delete q.keepNo});
   fixQMarks(qs);
+  // Excel 題目本身的題號：沒開「顯示題號」時照原樣保留
+  if(S.qNo==='none') qs.forEach((q,i)=>{if(keepNo[i]&&srcNos[i])q.text=srcNos[i]+q.text});
   if(S.qNo!=='none'&&srcNos.some(Boolean)){
     const ex=srcNos.find(Boolean);
     const v=await modal('題目本身已有題號',`貼上的題目原本就有題號（例如「${esc(ex)}」），目前也開啟了「顯示題號」。<br>要用自動題號<b>取代</b>原本的題號嗎？`,[{label:'保留原本題號',value:'keep'},{label:'取代',value:'replace',primary:true}]);
