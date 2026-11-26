@@ -1213,7 +1213,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.26d</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.26e</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -2314,7 +2314,11 @@ function sheetRowsToQs(rows,fills){
     const qi=h.findIndex(c=>/^question|題目|問題|題幹/.test(c));
     // 選項欄：Answer 1、選項1、選項A、選項一、Option 1、A、(A)
     const optCol=k=>h.findIndex(c=>new RegExp('^(?:answer|option|選項|選擇|答案)\\s*(?:'+k+'(?!\\d)|'+'ABCDEF'[k-1].toLowerCase()+'(?![a-z])|'+'一二三四五六'[k-1]+')|^[(（]?(?:'+'abcdef'[k-1]+'|'+k+'(?:\\.0+)?|'+'一二三四五六'[k-1]+')[)）]?$').test(c));
-    const ai=[1,2,3,4,5,6].map(optCol);
+    let ai=[1,2,3,4,5,6].map(optCol);
+    // 只有一格寫「答案選項／選項」，右邊幾欄標題空白 → 那幾欄都是選項
+    if(ai[0]<0){const oc=h.findIndex(c=>/^(?:答案)?選項(?:內容)?$|^options?$|^choices?$|^answers?$/.test(c));
+      if(oc>=0&&!h[oc+1]){const cols=[oc];for(let k=oc+1;k<oc+6&&k<Math.max(...rows.slice(r+1).map(x=>x.length),0);k++){if(h[k])break;if(rows.slice(r+1).some(x=>String(x[k]??'').trim()))cols.push(k);else break}
+        if(cols.length>=2)ai=[0,1,2,3,4,5].map(k=>cols[k]??-1)}}
     // 沒有選項欄、選項寫在題目格裡（(A)…(B)…）：要有「答案」欄才算
     const ciAny=h.findIndex(c=>c.length<=12&&/correct|答案|正解|解答|^ans/.test(c));
     const inline=qi>=0&&h[qi].length<=12&&ai[0]<0&&ciAny>=0;
@@ -2339,6 +2343,10 @@ function sheetRowsToQs(rows,fills){
         const ri=rows.indexOf(row);const optCols=ai.filter(i=>i>=0);
         let markIdx=-1;{const ck=options.map(t=>/✅\s*$/.test(t)?'✅':'');const m1=ck.filter(Boolean).length===1?ck.indexOf('✅'):-1;options=options.map(t=>t.replace(/\s*✅\s*$/,''));
           markIdx=m1>=0?m1:(fills&&fills[ri]?oddMark(options,optCols.map(c=>fills[ri][c])):-1)}
+        // 選項格開頭寫了自己的代號（A⏎二萬…、B. 水瓶座）→ 拿掉
+        {const lab=k=>'['+'ABCDEF'[k]+'abcdef'[k]+']';
+          if(options.filter(Boolean).length>=2&&options.every((t,k)=>!t||new RegExp('^\\s*[(（]?'+'ABCDEF'[k]+'[)）.、:：]?\\s*$').test(t))) options=options.map(()=>'');
+          else options=options.map((t,k)=>t.replace(new RegExp('^\\s*[(（]?(?:'+lab(k)+'[)）]?(?:[.、:：]\\s*|\\s*\\n\\s*|\\s+(?=\\S))|'+(k+1)+'[)）]?[.、:：\\n]\\s*)'),'').trim())}
         if(inline){pb=parseBlock(text,normalize(text));text=pb.text;options=pb.options.slice()}
         // 只有文字、沒有選項的列（例如「IG 追蹤：＠xxx」）→ 併到上一題的備註
         const noteTxt=ni>=0?String(row[ni]??'').trim():'';
@@ -2354,7 +2362,7 @@ function sheetRowsToQs(rows,fills){
         const answers=ci<0?[]:(/correct/.test(h[ci])&&/^[1-6](?:\.0+)?(?:\s*[,、，\/]\s*[1-6])*$/.test(normalize(cv)))?[...new Set(normalize(cv).replace(/\.0+/g,'').match(/[1-6]/g).map(Number))].sort():(cv?resolveAnswers(cv,options):(pb?pb.answers:[]));
         const t=ti>=0?parseInt(normalize(String(row[ti]??''))):NaN;
         const q=enrich({text,options,answers,note:ni>=0?String(row[ni]??'').trim():'',qimgNum:pb?pb.qimgNum:null,oimgNum:pb?pb.oimgNum:null});
-        if(!q.answers.length&&markIdx>=0&&options[markIdx]) q.answers=[markIdx+1];
+        if(!q.answers.length&&markIdx>=0) q.answers=[markIdx+1];
         if(pi>=0){const pv=String(row[pi]??'').trim();if(/暖身|不計分|^0$|none/i.test(pv))q.points='none';else if(/加倍|雙倍|兩倍|double|^2$/i.test(pv))q.points='double'}
         if(TIMES.includes(t)) q.time=t;else if(TIMES.includes(gTime)&&sType!=='wordcloud') q.time=gTime;
         if(warm){q.points='none';if(!q.note)q.note=WARMUP}
