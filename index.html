@@ -1213,7 +1213,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.26e</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.26f</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1749,6 +1749,8 @@ function parseTextCore(raw){
     // 分隔線（-----新郎知多少-----）：分段標題，題號可以重新從 1 開始
     if(/^\s*[-=—_~＝－─━*]{3,}.*[-=—_~＝－─━*]{3,}\s*$/.test(L)||/^\s*[-=—_~＝－─━]{5,}\s*$/.test(L)){starts.push({s,e:s+L.length,header:true});lastNum=null;continue}
     if(/^\s*【[^】]*】\s*$/.test(L)&&!/^\s*【\s*第\s*[\d一二三四五六七八九十百零〇兩]{1,4}\s*題\s*】/.test(L)&&(wasBlank||!starts.length||(nextIsQ(li)&&!/^\s*【\s*(?:[A-F]\s*[.、:)]|[①②③④⑤⑥])/.test(L)))){starts.push({s,e:s+L.length,header:true});lastNum=0;skipEx=/範例|範本|example|sample|說明|注意事項/i.test(L);continue}
+    // ❓ 開頭的題目
+    if((m=L.match(/^\s*(?:❓|❔|⁉️?|🙋|❗️?|🔸|🔹|🔶|🔷|📌)\s*/u))&&/\S/.test(L.slice(m[0].length))){push({s,e:s+m[0].length,plain:true});continue}
     // 暖身題／熱身題／試玩題／測試題／練習題
     if((m=L.match(/^\s*(?:\d{1,3}\s*[.、]?\s*)?[(（【]?\s*(暖身題|熱身題|試玩題|測試題|練習題)\s*[)）】]?(?:\s*[(（]?\s*不計分\s*[)）]?)?\s*[:：.、]?\s*/))){push({s,e:s+m[0].length,warm:true,kw:m[1]});lastNum=0;continue}
     // 【第一題】可以當暖身題 不計分 → 後面那段是附註（下一行是「題目：」時）
@@ -1842,6 +1844,8 @@ function prepExam(raw){
   if(!key){let j=lines.length;while(j>0&&!lines[j-1].trim())j--;let i=j;
     while(i>0&&lines[i-1].trim()&&keyItems(lines[i-1])&&keyItems(lines[i-1]).map&&!/[?？]/.test(lines[i-1]))i--;
     if(i<j){const k=keyItems(lines.slice(i,j).join('\n'));if(k&&k.map&&Object.keys(k.map).length>=2){key=k;lines.length=i}}}
+  // 1a. 用表情符號當答案行：📢B、💡 C、👉A、🔑 答案…
+  for(let i=0;i<lines.length;i++){lines[i]=lines[i].replace(/^([ \t]*)(?:📢|📣|💡|👉|👇|➡️?|🔑|✏️|🎯|⭕️?|✔️?答)[ \t]*[:：]?[ \t]*(?=\S)/u,'$1答案：').replace(/^([ \t]*)答案：[ \t]*(?:答案|正解|解答)[ \t]*[:：]?[ \t]*/,'$1答案：')}
   // 1b. 開頭的答案列（例如第一行「答案BBDACB DCADB…」），在任何題目之前
   if(!key){for(let i=0;i<Math.min(lines.length,8);i++){const L=lines[i];if(!L.trim())continue;if(/[?？]/.test(L))break;
     const m=normalize(L).match(/^\s*(?:參考答案|正確答案|標準答案|答案|解答)\s*[:：]?\s*([A-F][A-F\s,，、]{2,})$/i);
