@@ -1234,7 +1234,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.27e</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.27f</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1780,7 +1780,7 @@ function parseTextCore(raw){
     if((m=L.match(/^\s*【\s*第\s*(\d{1,3}|[一二三四五六七八九十百零〇兩]{1,4})\s*題\s*】\s*/))){
       const num=/\d/.test(m[1])?+m[1]:cnNum(m[1]);const rest=L.slice(m[0].length).trim();let e=s+m[0].length,remark='';
       if(rest){for(let j=li+1;j<LS.length;j++){if(!LS[j].trim())continue;if(/^\s*(?:題目|問題|題幹)\s*[:：]/.test(LS[j])||!/[?？]/.test(rest)){e=s+L.length;remark=rest}break}}
-      push({s,e,srcNo:m[0].trim(),remark});if(num!=null)lastNum=num;continue}
+      push({s,e,srcNo:m[0].trim(),srcLen:m[0].length,remark});if(num!=null)lastNum=num;continue}
     if((m=L.match(/^\s*【([^】]+)】\s*(?=\S)/))){push({s,e:s+m[0].length,open:m[1].trim()});continue}
     if((m=L.match(/^[ \t]*第[ \t]*(\d{1,3}|[一二三四五六七八九十百零〇兩]{1,4})[ \t]*題(?:[ \t]*[|:、.\-—–·]+[ \t]*|[ \t]+|$)/))){
       const num=/\d/.test(m[1])?+m[1]:cnNum(m[1]);
@@ -1788,18 +1788,18 @@ function parseTextCore(raw){
         let e=s+m[0].length;const rest=L.slice(m[0].length).trim();
         // 「第 1 題｜創辦人」下一行是「題目：…」→ 後面那段是分類，不算題目
         if(rest&&!/[?？]/.test(rest)){for(let j=li+1;j<LS.length;j++){if(!LS[j].trim())continue;if(/^\s*(?:題目|問題|題幹)\s*[:：]/.test(LS[j]))e=s+L.length;break}}
-        push({s,e,srcNo:m[0].trim()});lastNum=num;continue}
+        push({s,e,srcNo:m[0].trim(),srcLen:m[0].length});lastNum=num;continue}
     }
     // 題目1 新郎… / 題目6新娘… / Q3 …（沒有標點也算）
-    if((m=L.match(/^[ \t]*(?:題目|問題|Q)[ \t]*(\d{1,3})(?:[ \t]*[.、:：)\]][ \t]*|[ \t]+|(?=[㐀-鿿]))/i))){
+    if((m=L.match(/^[ \t]*(?:題目|問題|Q)[ \t]*(\d{1,3})(?:[ \t]*[.、:：)\]|｜][ \t]*|[ \t]+|(?=[㐀-鿿]))/i))){
       const num=+m[1];const rest=L.slice(m[0].length);
-      if(lastNum===null||((num>lastNum||(num===lastNum&&/[?？]/.test(rest)))&&num<=lastNum+3)){push({s,e:s+m[0].length,srcNo:m[0].trim()});lastNum=num;continue}
+      if(lastNum===null||((num>lastNum||(num===lastNum&&/[?？]/.test(rest)))&&num<=lastNum+3)){push({s,e:s+m[0].length,srcNo:m[0].trim(),srcLen:m[0].length});lastNum=num;continue}
     }
     if((m=L.match(/^[ \t]*(?:\((\d{1,3})\s*\.?\s*\)|(?:Q|第)?[ \t]*(\d{1,3})[ \t]*題?[ \t]*(?:\.(?!\d)|[、:)\]]))/i))){
       const num=+(m[1]||m[2]);
       const rest=L.slice(m[0].length);
       const optLike=!/[?？:：]/.test(rest)&&!/^[^(（、\/]+[(（][^)）]*[、\/][^)）]*[)）]\s*$/.test(rest)&&rest.split(/[、\/]/).length>=3&&rest.split(/[、\/]/).every(x=>x.trim().length<=12);
-      if((lastNum===null||((num>lastNum||(num===lastNum&&/[?？]/.test(rest)))&&num<=lastNum+3))&&!(optLike&&lastNum!==null)){push({s,e:s+m[0].length,srcNo:m[0].trim()});lastNum=num;continue}
+      if((lastNum===null||((num>lastNum||(num===lastNum&&/[?？]/.test(rest)))&&num<=lastNum+3))&&!(optLike&&lastNum!==null)){push({s,e:s+m[0].length,srcNo:m[0].trim(),srcLen:m[0].length});lastNum=num;continue}
     }
     // 沒有題號：有問號的句子，而且上一題已經有選項 → 新的一題
     if(/[?？]/.test(L)&&!LBL.test(L)&&!ANSL.test(L)&&!skipEx&&(since>=2||(wasBlank&&since>=1)||(!starts.some(x=>!x.header)&&!nextIsNum(li)))){push({s,e:s,plain:true});continue}
@@ -1817,7 +1817,13 @@ function parseTextCore(raw){
       // 暖身題：題目保留「暖身題：」字樣（0(暖身題)、這種寫法統一成「暖身題：」），分數設不計分
       if(st.warm){const kw=st.kw||'暖身題';if(!q.text.startsWith(kw))q.text=kw+'：'+q.text;q.note=WARMUP;q.points='none'}
       if(st.remark){q.note=st.remark;if(/暖身|不計分/.test(st.remark))q.points='none';else if(/加倍|雙倍/.test(st.remark))q.points='double'}
-      if(st.srcNo) q.srcNo=st.srcNo;
+      if(st.srcNo){
+        // 原始題號（照原文的寫法和空格保留）
+        let r=o.slice(st.s,st.s+(st.srcLen||0)).replace(/^\s+/,'');
+        if(!r.trim()) r=st.srcNo;
+        if(st.e>st.s+(st.srcLen||0)) r=r.replace(/[\s|｜:：、.\-—–·]+$/,'')+' ';
+        else{r=r.replace(/\s+$/,m=>m?' ':'');if(!/\s$/.test(r)&&/^[ \t\u3000]/.test(o.charAt(st.s+(st.srcLen||0))))r+=' '}
+        q.srcNo=r}
       if(st.sec) q.grpName=st.sec;
       if(st.open){const tt=tagType(st.open);q.type=['wordcloud','open','brainstorm','slide'].includes(tt)?tt:'wordcloud';q.note=st.open;q.options=['','','',''];q.answers=[]}
       out.push(q);
@@ -2125,7 +2131,8 @@ async function readPptxSlides(zip){
   }
   // ---------- 逐張分析 ----------
   const LET='ABCDEF';
-  const stripQ=t=>t.replace(/^[\s⓵-⓾①-⑳❶-❿➀-➉]+/,'').split('\n').map(l=>l.replace(/^\s*(?:第\s*[\d一二三四五六七八九十]+\s*題|Q\s*\d{1,3}|\d{1,3}(?=\s*[.、:：)]))\s*[.、:：)]?\s*/i,'').replace(/^\s*(?:warm[\s-]*up\s*\d*|暖身\s*\d*|熱身題?|練習題|測試題|試玩題)\s*[:：.、]?\s*/i,'')).join('\n').trim();
+  const srcNoOf=t=>{const l=t.replace(/^\s+/,'').split('\n')[0];const m=l.match(/^(?:第\s*[\d一二三四五六七八九十]+\s*題|Q\s*\d{1,3}|\d{1,3}(?=\s*[.、:：)]))\s*[.、:：)|｜]?\s*/i);return m&&l.slice(m[0].length).trim()?m[0].replace(/\s+$/,' '):''};
+  const stripQ=t=>t.replace(/^[\s⓵-⓾①-⑳❶-❿➀-➉]+/,'').split('\n').map(l=>l.replace(/^\s*(?:第\s*[\d一二三四五六七八九十]+\s*題|Q\s*\d{1,3}|\d{1,3}(?=\s*[.、:：)]))\s*[.、:：)|｜]?\s*/i,'').replace(/^\s*(?:warm[\s-]*up\s*\d*|暖身\s*\d*|熱身題?|練習題|測試題|試玩題)\s*[:：.、]?\s*/i,'')).join('\n').trim();
   const qKey=t=>nk(stripQ(t).replace(/[?？].*$/s,'')).replace(/[^\p{L}\p{N}]/gu,'');
   const LABEL=/^\s*(?:\(\s*([A-Fa-f1-6])\s*\)|([A-F])(?=\s*(?:[.、:：)\-]|\s|$))|([1-6])(?=\s*[.、:：)]))\s*[.、:：)\-]?\s*/;
   const isLabelOnly=t=>/^\s*(?:\(\s*[A-Fa-f1-6]\s*\)|[A-F]|[1-6][.、)]?)\s*$/.test(t);
@@ -2215,12 +2222,13 @@ async function readPptxSlides(zip){
     let answers=pb.answers;
     if(!answers.length&&S.notes&&S.notes.length<=30){answers=resolveAnswers(S.notes.replace(/^.*?(?:答案|answer|ans)\s*[:：]?\s*/i,''),pb.options)}
     const no=(q.t.match(/^\s*(?:[⓵-⓾]|第\s*([\d]+)\s*題|Q\s*(\d{1,3})|(\d{1,3})\s*[.、:：])/i)||[]);
-    const item={text:pb.text,options:pb.options,answers,qimgNum:qimg,oimgNum:null,optImgs:optImg,warm:warmSlide,key:qKey(qText),paths,no:+(no[1]||no[2]||no[3]||0)||null,sec:secOf[S.path]||''};
+    const item={text:pb.text,options:pb.options,answers,qimgNum:qimg,oimgNum:null,optImgs:optImg,warm:warmSlide,key:qKey(qText),srcNo:srcNoOf(qText),paths,no:+(no[1]||no[2]||no[3]||0)||null,sec:secOf[S.path]||''};
     qs.push(item);prev=item;
   }
   // 總表的答案補進去
   for(const it of qs){if(it.answers.length)continue;const s=(it.no&&summary[it.no])||summary[it.key];if(s&&s.ans)it.answers=resolveAnswers(s.ans,it.options)}
   const out=qs.filter(it=>it.text||it.options.some(Boolean)).map(it=>{const q=enrich({text:it.text,options:it.options,answers:it.answers,qimgNum:it.qimgNum,oimgNum:it.aimgNum??null,optImgs:it.optImgs});
+    if(it.srcNo) q.srcNo=it.srcNo;
     if(it.warm){q.points='none';if(!q.note)q.note=WARMUP}
     if(new Set(qs.map(x=>x.sec).filter(Boolean)).size>=2&&it.sec) q.grpName=it.sec;
     return q});
@@ -2865,7 +2873,8 @@ async function applyParsed(arr){
   if(split){const map={};gNames.forEach(n=>{if(!map[n]){map[n]={id:newGid(),name:n,title:''};newGroups.push(map[n])}});qs.forEach((q,i)=>q.grp=map[gNames[i]].id)}
   fixQMarks(qs);
   // Excel 題目本身的題號：沒開「顯示題號」時照原樣保留
-  if(S.qNo==='none') qs.forEach((q,i)=>{if(keepNo[i]&&srcNos[i])q.text=srcNos[i]+q.text});
+  // 題目本身的題號（第一題、Q1.、Q1 |、(1)…）：沒開「顯示題號」時照原樣保留
+  if(S.qNo==='none') qs.forEach((q,i)=>{if(srcNos[i]&&!q.text.startsWith(srcNos[i].trim()))q.text=srcNos[i]+q.text});
   if(S.qNo!=='none'&&srcNos.some(Boolean)){
     const ex=srcNos.find(Boolean);
     const v=await modal('題目本身已有題號',`貼上的題目原本就有題號（例如「${esc(ex)}」），目前也開啟了「顯示題號」。<br>要用自動題號<b>取代</b>原本的題號嗎？`,[{label:'保留原本題號',value:'keep'},{label:'取代',value:'replace',primary:true}]);
