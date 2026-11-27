@@ -918,6 +918,9 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 .finish-btn{font-size:17px;padding:14px 30px;border-radius:14px}
 .finish-note p{margin:0 0 8px}.finish-na{color:var(--muted);font-size:13.5px}
 .modal.finishm{max-width:560px}
+.modal.grpq{max-width:720px}.modal.grpq .mbtns{flex-wrap:nowrap}.modal.grpq .mbtns .btn{white-space:nowrap}
+@media (max-width:700px){.modal.grpq{padding:18px 16px}.modal.grpq .mbtns{gap:8px}.modal.grpq .mbtns .btn{padding:9px 12px;font-size:14px}}
+@media (max-width:560px){.modal.grpq .mbtns{display:grid;grid-template-columns:1fr 1fr}.modal.grpq .mbtns .btn{padding:9px 6px;font-size:13px}}
 .finish-name{display:flex;align-items:center;gap:10px;margin-top:6px;font-size:14px;padding:3px}
 .finish-name span{white-space:nowrap;color:var(--ink)}
 .finish-name input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-size:15px}
@@ -1230,7 +1233,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.27a</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.27b</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -2847,7 +2850,7 @@ async function applyParsed(arr){
       let nextName='';for(let i=arr.length-1;i>=0;i--){if(arr[i].grpName)nextName=arr[i].grpName;else arr[i].grpName=nextName||names[names.length-1]}
       const cnt=n=>arr.filter(x=>x.grpName===n).length;
       const v=await modal('這份題目分成好幾個題組',`偵測到 ${names.length} 個題組：<br>${names.map(n=>`・<b>${esc(n)}</b>（${cnt(n)} 題）`).join('<br>')}<br><br><span style="color:var(--muted);font-size:14px">Kahoot 一個遊戲只能匯入一份題目。分成題組後，下載時每個題組會各存成一份 Excel，分別建立遊戲。</span>`,
-        [{label:'取消',value:null},{label:'合併成同一組',value:'merge'},{label:'只匯入其中一組',value:'one'},{label:'全部匯入，分成題組',value:'split',primary:true}],'grpm');
+        [{label:'取消',value:null},{label:'合併成同一組',value:'merge'},{label:'只匯入其中一組',value:'one'},{label:'全部匯入，分成題組',value:'split',primary:true}],'grpm grpq');
       if(!v) return;
       if(v==='one'){const pick=await modal('要匯入哪一個題組？','點選要匯入的題組：',[...names.map((n,i)=>({label:`${n}（${cnt(n)} 題）`,value:'#'+i})),{label:'取消',value:null}],'grpm');
         if(!pick) return;const nm=names[+pick.slice(1)];arr=arr.filter(x=>x.grpName===nm)}
