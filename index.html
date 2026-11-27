@@ -194,6 +194,21 @@ input[type=checkbox]:checked{background:var(--accent) url("data:image/svg+xml,%3
 .tbtns button.del:hover{border-color:var(--bad);color:var(--bad)}
 .add-q{flex:none;border:2px solid var(--accent);background:#fff;border-radius:14px;padding:12px;font-weight:900;color:var(--accent);font-size:15px;box-shadow:0 4px 0 #d9c9ec;transition:background .12s,color .12s,transform .08s,box-shadow .08s}
 .add-q:hover{background:var(--accent);color:#fff;box-shadow:0 4px 0 var(--accent-dark)}
+.add-g{flex:none;border:1.5px dashed #cdb9e4;background:transparent;border-radius:12px;padding:8px;color:var(--accent);font-size:13.5px;margin-top:8px;cursor:pointer}
+.add-g:hover{background:var(--accent-soft);border-style:solid}
+.tgrp{display:flex;align-items:center;gap:6px;background:var(--accent);color:#fff;border-radius:10px;padding:6px 8px 6px 10px;margin:10px 0 6px;font-size:13.5px;min-width:0}
+.tgrp:first-child{margin-top:0}
+.tgrp .tg-n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tgrp .tg-c{font-size:12px;opacity:.85;white-space:nowrap}
+.tgrp button{border:0;background:rgba(255,255,255,.18);color:#fff;border-radius:7px;padding:2px 7px;font-size:12.5px;cursor:pointer}
+.tgrp button:hover{background:rgba(255,255,255,.32)}
+.tgrp-empty{font-size:12.5px;color:var(--muted);border:1.5px dashed var(--line);border-radius:10px;padding:10px;text-align:center;margin-bottom:6px}
+@media (max-width:860px){.tgrp{flex-direction:column;align-items:flex-start;justify-content:center;margin:0 4px 0 10px;flex:none;width:92px;align-self:stretch}.tgrp:first-child{margin-left:0}.tgrp .tg-n{white-space:normal;line-height:1.3}.tgrp-empty{flex:none;width:92px;margin:0 6px 0 0;display:flex;align-items:center}.add-g{margin:0 0 0 8px}}
+.grp-form label{display:block;font-size:14px;margin-top:8px}.grp-form input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;font:inherit;font-size:15px;margin-top:4px}
+.grp-form .gf-tip{font-size:12.5px;color:var(--muted);margin-top:4px}
+.done-groups{margin:10px 0 12px;font-size:14px;color:var(--accent);background:var(--accent-soft);border-radius:10px;padding:8px 12px;line-height:1.7}
+.sp-gsel{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:14.5px;background:#fff}
+@media (max-width:860px){.qb-g{display:none}}
 .add-q:active{background:var(--accent-dark);color:#fff;transform:translateY(3px);box-shadow:0 1px 0 var(--accent-dark)}
 .stage{min-width:0;max-width:820px;width:100%;margin:0 auto}
 .setbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
@@ -752,6 +767,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
 
 /* 預覽全部題目 */
 .modal.wide.peekm .mbody{max-height:min(70vh,760px);overflow:auto;padding-right:4px}
+.pk-ghead{grid-column:1/-1;background:var(--accent);color:#fff;border-radius:10px;padding:6px 12px;font-size:14px}
 .pk-tip{color:var(--muted);font-size:13.5px;margin:0 0 10px}
 .pk-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .pk-card{display:flex;flex-direction:column;gap:8px;text-align:left;background:#faf8fd;border:1.5px solid var(--line);border-radius:14px;padding:12px;font:inherit;color:var(--ink);cursor:pointer;min-width:0}
@@ -1171,6 +1187,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
           <div class="selbar" id="selbar" hidden><b>已選 <span id="selCount">0</span> 題</b><button type="button" class="mini-btn danger" id="selDel">🗑 刪除</button><button type="button" class="mini-btn" id="selClear">取消</button></div>
           <div id="thumbs"></div>
           <button class="add-q" id="addQ" title="新增題目">＋<span class="lg"> 加入題目</span></button>
+          <button type="button" class="add-g" id="addG" title="把題目分成多個題組（每個題組是一個 Kahoot 遊戲）">＋ 新增題組</button>
         </aside>
         <div class="stage" id="stage"></div>
         <aside class="sidecol" id="side" aria-label="題目設定"></aside>
@@ -1213,7 +1230,7 @@ body,button,input,select,textarea,.timepill,.timepill select{font-family:"Noto S
     </div>
   </div>
   <p class="disclaimer">此題目製作編輯器供尚未取得帳號權限之使用者方便製作題目和轉檔，與 Kahoot 官方網站上的編輯畫面和功能無法完全相同，若已有註冊帳號或收到帳號，請直接於 Kahoot 後台編輯。預覽畫面僅供參考，實際遊戲畫面請從帳號內查看。</p>
-  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.26f</span></div>
+  <div class="copyright">skyeva / 羿璇（小天）製作　© 2026 skyeva. All rights reserved.<span class="ver">　版本 v2026.11.27a</span></div>
 </footer>
 
 <div class="fbbg" id="fbbg"><div class="fb-panel" role="dialog" aria-modal="true" aria-label="意見反饋">
@@ -1392,7 +1409,7 @@ party:`暖身題：請問各位今天是來參加？
 答案：黑色`
 };
 
-const S={qs:[],cur:0,qNo:'none',optPrefix:'none',name:'',title:'',defTime:10,editing:false,extraOpen:false,cover:null,bg:null,setOpen:false,gsOpen:false};
+const S={groups:[],qs:[],cur:0,qNo:'none',optPrefix:'none',name:'',title:'',defTime:10,editing:false,extraOpen:false,cover:null,bg:null,setOpen:false,gsOpen:false};
 const POOL=new Map(); let poolSeq=0;
 const loading=new Set();
 let aiSample=null, aiImages=false, downloadsCap=null;
@@ -1728,7 +1745,9 @@ function parseTextCore(raw){
   const nextIsNum=i=>{for(let j=i+1;j<LS.length;j++){if(LS[j].trim())return /^[ \t]*(?:\(\d{1,3}\)|(?:Q|第|題目|問題)?[ \t]*\d{1,3}[ \t]*題?[ \t]*(?:\.(?!\d)|[、:)\]])|【\s*第)/i.test(LS[j])&&!/^[ \t]*[1-6][ \t]*[.、)]/.test(LS[j])}return true};
   const LBL=/^[ \t]*(?:[(\[（]?\s*[A-Fa-f]\s*[)\]）.、:：\-]|[①②③④⑤⑥©]|[(（]\s*[1-6]\s*[)）]|[✅☑✔✓√*＊※ˇ])/;
   const ANSL=/^[ \t]*(?:[✅☑✔✓√]\S*\s*)?(?:正確答案|參考答案|答案|解答|正解|詳解|解析|說明|備註|ans)/i;
-  const push=(o)=>{starts.push(o);since=0;optExp=0;if(!o.plain)skipEx=false};
+  let curSec='';
+  const secName=L=>L.replace(/[-=—_~＝－─━*【】\[\]]/g,' ').replace(/\s+/g,' ').trim();
+  const push=(o)=>{o.sec=curSec;starts.push(o);since=0;optExp=0;if(!o.plain)skipEx=false};
   for(let li=0;li<LS.length;li++){
     const L=LS[li];const wasBlank=prevBlank;prevBlank=!L.trim();
     const s=p;p+=L.length+1;let m;
@@ -1742,13 +1761,13 @@ function parseTextCore(raw){
         const mx=Math.max(+om[1],...[...om[2].matchAll(/(?:^|[\s☑✅✔✓√️*＊])([1-6])\s*[.、)]/g)].map(x=>+x[1]));
         if(!nextLbl&&((+om[1]===1&&(wasQ||(wasPlain&&ppb)))||(optExp&&+om[1]===optExp))){
           // 沒有問號的題目句（段落第一行）後面接 1. → 那一行是新的一題
-          if(+om[1]===1&&!wasQ&&wasPlain&&ppb&&since>=2&&!skipEx&&!starts.some(x=>x.s===prevLineS)){starts.push({s:prevLineS,e:prevLineS,plain:true});since=1}
+          if(+om[1]===1&&!wasQ&&wasPlain&&ppb&&since>=2&&!skipEx&&!starts.some(x=>x.s===prevLineS)){starts.push({s:prevLineS,e:prevLineS,plain:true,sec:curSec});since=1}
           optExp=mx+1;prevQ=false;prevPlain=false;since++;continue}
       }
       if(!om) optExp=0;}
     // 分隔線（-----新郎知多少-----）：分段標題，題號可以重新從 1 開始
-    if(/^\s*[-=—_~＝－─━*]{3,}.*[-=—_~＝－─━*]{3,}\s*$/.test(L)||/^\s*[-=—_~＝－─━]{5,}\s*$/.test(L)){starts.push({s,e:s+L.length,header:true});lastNum=null;continue}
-    if(/^\s*【[^】]*】\s*$/.test(L)&&!/^\s*【\s*第\s*[\d一二三四五六七八九十百零〇兩]{1,4}\s*題\s*】/.test(L)&&(wasBlank||!starts.length||(nextIsQ(li)&&!/^\s*【\s*(?:[A-F]\s*[.、:)]|[①②③④⑤⑥])/.test(L)))){starts.push({s,e:s+L.length,header:true});lastNum=0;skipEx=/範例|範本|example|sample|說明|注意事項/i.test(L);continue}
+    if(/^\s*[-=—_~＝－─━*]{3,}.*[-=—_~＝－─━*]{3,}\s*$/.test(L)||/^\s*[-=—_~＝－─━]{5,}\s*$/.test(L)){starts.push({s,e:s+L.length,header:true});lastNum=null;curSec=secName(L);continue}
+    if(/^\s*【[^】]*】\s*$/.test(L)&&!/^\s*【\s*第\s*[\d一二三四五六七八九十百零〇兩]{1,4}\s*題\s*】/.test(L)&&(wasBlank||!starts.length||(nextIsQ(li)&&!/^\s*【\s*(?:[A-F]\s*[.、:)]|[①②③④⑤⑥])/.test(L)))){starts.push({s,e:s+L.length,header:true});lastNum=0;skipEx=/範例|範本|example|sample|說明|注意事項/i.test(L);curSec=skipEx?'':secName(L);continue}
     // ❓ 開頭的題目
     if((m=L.match(/^\s*(?:❓|❔|⁉️?|🙋|❗️?|🔸|🔹|🔶|🔷|📌)\s*/u))&&/\S/.test(L.slice(m[0].length))){push({s,e:s+m[0].length,plain:true});continue}
     // 暖身題／熱身題／試玩題／測試題／練習題
@@ -1795,6 +1814,7 @@ function parseTextCore(raw){
       if(st.warm){const kw=st.kw||'暖身題';if(!q.text.startsWith(kw))q.text=kw+'：'+q.text;q.note=WARMUP;q.points='none'}
       if(st.remark){q.note=st.remark;if(/暖身|不計分/.test(st.remark))q.points='none';else if(/加倍|雙倍/.test(st.remark))q.points='double'}
       if(st.srcNo) q.srcNo=st.srcNo;
+      if(st.sec) q.grpName=st.sec;
       if(st.open){const tt=tagType(st.open);q.type=['wordcloud','open','brainstorm','slide'].includes(tt)?tt:'wordcloud';q.note=st.open;q.options=['','','',''];q.answers=[]}
       out.push(q);
     });
@@ -2059,6 +2079,11 @@ async function readPptxSlides(zip){
   const redish=hex=>{if(!hex||!/^[0-9A-Fa-f]{6}$/.test(hex))return false;const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);return r>=0xB0&&g<0x70&&b<0x70};
   const fillOf=spPr=>{const sf=spPr&&kid(spPr,'solidFill');const c=sf&&(kid(sf,'srgbClr'));return c?c.getAttribute('val'):(sf?'scheme':'')};
   const parasOf=tx=>kids(tx,'p').map(p=>{let t='',mark=false;for(const r of p.children){if(r.localName==='r'||r.localName==='fld'){const tt=kid(r,'t');t+=tt?tt.textContent:'';const rp=kid(r,'rPr');if(rp&&(kid(rp,'highlight')))mark=true;if(rp&&tt&&tt.textContent.trim()){const sf=kid(rp,'solidFill');const c=sf&&kid(sf,'srgbClr');if(c&&redish(c.getAttribute('val')))p.__red=(p.__red||0)+1;else p.__blk=(p.__blk||0)+1}}else if(r.localName==='br')t+='\n'}return {t:plainAlnum(t).replace(/\u000b/g,'\n'),mark,red:(p.__red||0)>0&&!(p.__blk||0)}}).filter(p=>p.t.trim());
+  // PPT 的「章節」→ 題組名稱
+  const secOf={};
+  try{const pres=await parse('ppt/presentation.xml');const {r:prels}=await relsOf('ppt/presentation.xml');
+    if(pres){const id2path={};for(const x of deep(pres,'sldId')){const rid=x.getAttribute('r:id');if(rid&&prels[rid])id2path[x.getAttribute('id')]=resolvePath('ppt/presentation.xml',prels[rid])}
+      for(const sec of deep(pres,'section')){const nmv=(sec.getAttribute('name')||'').trim();for(const x of deep(sec,'sldId')){const pth=id2path[x.getAttribute('id')];if(pth)secOf[pth]=nmv}}}}catch(e){}
   const slides=[];
   for(const nm of names){
     const doc=await parse(nm);const {r:rels,types}=await relsOf(nm);
@@ -2186,13 +2211,15 @@ async function readPptxSlides(zip){
     let answers=pb.answers;
     if(!answers.length&&S.notes&&S.notes.length<=30){answers=resolveAnswers(S.notes.replace(/^.*?(?:答案|answer|ans)\s*[:：]?\s*/i,''),pb.options)}
     const no=(q.t.match(/^\s*(?:[⓵-⓾]|第\s*([\d]+)\s*題|Q\s*(\d{1,3})|(\d{1,3})\s*[.、:：])/i)||[]);
-    const item={text:pb.text,options:pb.options,answers,qimgNum:qimg,oimgNum:null,optImgs:optImg,warm:warmSlide,key:qKey(qText),paths,no:+(no[1]||no[2]||no[3]||0)||null};
+    const item={text:pb.text,options:pb.options,answers,qimgNum:qimg,oimgNum:null,optImgs:optImg,warm:warmSlide,key:qKey(qText),paths,no:+(no[1]||no[2]||no[3]||0)||null,sec:secOf[S.path]||''};
     qs.push(item);prev=item;
   }
   // 總表的答案補進去
   for(const it of qs){if(it.answers.length)continue;const s=(it.no&&summary[it.no])||summary[it.key];if(s&&s.ans)it.answers=resolveAnswers(s.ans,it.options)}
   const out=qs.filter(it=>it.text||it.options.some(Boolean)).map(it=>{const q=enrich({text:it.text,options:it.options,answers:it.answers,qimgNum:it.qimgNum,oimgNum:it.aimgNum??null,optImgs:it.optImgs});
-    if(it.warm){q.points='none';if(!q.note)q.note=WARMUP}return q});
+    if(it.warm){q.points='none';if(!q.note)q.note=WARMUP}
+    if(new Set(qs.map(x=>x.sec).filter(Boolean)).size>=2&&it.sec) q.grpName=it.sec;
+    return q});
   return {questions:out,title};
 }
 async function readPptxText(zip){
@@ -2387,7 +2414,21 @@ async function readSheet(file){
   await loadScript(LIB.xlsx);
   const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellNF:true,cellStyles:true});
   const kr=readKahootReport(wb);if(kr) return kr;
-  const sh=wb.Sheets[wb.SheetNames[0]];
+  const names=wb.SheetNames||[];
+  if(names.length<=1) return sheetResult(wb.Sheets[names[0]]);
+  // 多個分頁：每個有題目的分頁當成一個題組（說明、參考之類的分頁略過）
+  const got=[];let title='';
+  for(const nm of names){const sh=wb.Sheets[nm];if(!sh||!sh['!ref'])continue;
+    const r=sheetResult(sh);let qs=r.questions||null;
+    if(!qs&&r.text&&r.text.trim()){const pr=parseText(r.text);qs=pr.map(enrich).filter(q=>q.options.filter(Boolean).length>=2);if(pr.title&&!title)title=pr.title}
+    if(r.title&&!title) title=r.title;
+    if(qs&&qs.length&&!(/說明|參考|範例|範本|instruction|readme|notes?$/i.test(nm)&&!r.questions)) got.push({nm,qs})}
+  if(!got.length) return sheetResult(wb.Sheets[names[0]]);
+  if(got.length===1) return {questions:got[0].qs,title};
+  got.forEach(g=>g.qs.forEach(q=>q.grpName=String(g.nm).trim()||'題組'));
+  return {questions:got.flatMap(g=>g.qs),title};
+}
+function sheetResult(sh){
   // 一律讀「畫面上看到的文字」，日期不要變成 46045 這種序號
   for(const k of Object.keys(sh)){if(k[0]==='!')continue;const c=sh[k];
     if(c.t==='n'&&c.z&&XLSX.SSF.is_date(c.z)){
@@ -2736,11 +2777,32 @@ function allImgs(q){
 function allImgsRaw(q){return [q.qimg,q.aimg,q.qbg,...q.oimgs,q.pin&&q.pin.img].filter(Boolean)}
 
 const isGif=im=>!!im&&(/\.gif$/i.test(im.name)||/gif/i.test(im.blob.type));
-function qNoLabel(i){
-  if(S.qNo==='none'||S.qs[i].type==='slide') return '';
-  let n=0;for(let j=0;j<=i;j++) if(S.qs[j].type!=='slide') n++;
+/* ================= 題組（一份題目分成多個 Kahoot 遊戲） ================= */
+const multiGroup=()=>Array.isArray(S.groups)&&S.groups.length>=2;
+const newGid=()=>'g'+Math.random().toString(36).slice(2,9);
+function groupOf(q){return multiGroup()&&q?(S.groups.find(g=>g.id===q.grp)||S.groups[0]):null}
+// 題組少於 2 個就取消分組；每題都要有題組，而且同一題組的題目排在一起
+function normGroups(){
+  if(!Array.isArray(S.groups)) S.groups=[];
+  if(S.groups.length<2){S.groups=[];S.qs.forEach(q=>delete q.grp);return}
+  const ids=S.groups.map(g=>g.id);let last=ids[0];
+  S.qs.forEach(q=>{if(!ids.includes(q.grp))q.grp=last;last=q.grp});
+  const curId=S.qs[S.cur]&&S.qs[S.cur].id;
+  S.qs=S.groups.flatMap(g=>S.qs.filter(q=>q.grp===g.id));
+  if(curId){const i=S.qs.findIndex(q=>q.id===curId);if(i>=0)S.cur=i}
+}
+const groupQs=g=>S.qs.filter(q=>q.grp===g.id);
+function groupTitle(g){return (g.title||'').trim()||[S.title.trim(),g.name].filter(Boolean).join(' ')}
+// 題目在自己題組裡的第幾題（沒有分組就是第幾題）
+function localNo(i){const q=S.qs[i];if(!q)return i+1;if(!multiGroup())return i+1;let n=0;for(let j=0;j<=i;j++)if(S.qs[j].grp===q.grp)n++;return n}
+const qLabel=i=>multiGroup()&&S.qs[i]?`${groupOf(S.qs[i]).name} 第 ${localNo(i)} 題`:`第 ${i+1} 題`;
+const titleOk=()=>!!S.title.trim()||(multiGroup()&&S.groups.every(g=>(g.title||'').trim()));
+function qNoLabelIn(list,i){
+  if(S.qNo==='none'||list[i].type==='slide') return '';
+  let n=0;for(let j=0;j<=i;j++) if(list[j].type!=='slide') n++;
   return S.qNo==='q'?`Q${n}、`:`${n}、`;
 }
+function qNoLabel(i){const q=S.qs[i];const list=multiGroup()?S.qs.filter(x=>x.grp===q.grp):S.qs;return qNoLabelIn(list,list.indexOf(q))}
 const optPre=k=>S.optPrefix==='alpha'?`${'ABCDEF'[k]}. `:S.optPrefix==='num'?`${k+1}. `:'';
 const overBy=(s,lim)=>Math.max(0,(s||'').length-lim);
 /* ================= 題目資料 ================= */
@@ -2777,8 +2839,26 @@ function fixQMarks(qs){
 const QNUM_RE=/^\s*(?:\(\d{1,3}\)|（\d{1,3}）|(?:Q|第)?\s*\d{1,3}\s*題?\s*(?:\.(?!\d)|[、．:：)）\]]))\s*/i;
 function warmup(q){if(!q.note)q.note=WARMUP;q.points='none'}
 async function applyParsed(arr){
+  // ---- 題組：來源有分頁／章節／分段標題時，問要不要分成多個題組
+  let split=false;
+  {const names=[];arr.forEach(x=>{if(x.grpName&&!names.includes(x.grpName))names.push(x.grpName)});
+    if(names.length>=2){
+      // 沒有分段名稱的題目（例如開頭的暖身題）歸到下一個題組，最後面的歸到上一個
+      let nextName='';for(let i=arr.length-1;i>=0;i--){if(arr[i].grpName)nextName=arr[i].grpName;else arr[i].grpName=nextName||names[names.length-1]}
+      const cnt=n=>arr.filter(x=>x.grpName===n).length;
+      const v=await modal('這份題目分成好幾個題組',`偵測到 ${names.length} 個題組：<br>${names.map(n=>`・<b>${esc(n)}</b>（${cnt(n)} 題）`).join('<br>')}<br><br><span style="color:var(--muted);font-size:14px">Kahoot 一個遊戲只能匯入一份題目。分成題組後，下載時每個題組會各存成一份 Excel，分別建立遊戲。</span>`,
+        [{label:'取消',value:null},{label:'合併成同一組',value:'merge'},{label:'只匯入其中一組',value:'one'},{label:'全部匯入，分成題組',value:'split',primary:true}],'grpm');
+      if(!v) return;
+      if(v==='one'){const pick=await modal('要匯入哪一個題組？','點選要匯入的題組：',[...names.map((n,i)=>({label:`${n}（${cnt(n)} 題）`,value:'#'+i})),{label:'取消',value:null}],'grpm');
+        if(!pick) return;const nm=names[+pick.slice(1)];arr=arr.filter(x=>x.grpName===nm)}
+      split=v==='split';
+    }
+    if(!split) arr.forEach(x=>delete x.grpName)}
   const srcNos=arr.map(x=>x.srcNo||'');const keepNo=arr.map(x=>!!x.keepNo);arr.forEach(x=>{delete x.srcNo;delete x.keepNo});
-  const qs=arr.map(x=>newQ(x));qs.forEach(q=>{delete q.srcNo;delete q.keepNo});
+  const gNames=arr.map(x=>x.grpName||'');
+  const qs=arr.map(x=>newQ(x));qs.forEach(q=>{delete q.srcNo;delete q.keepNo;delete q.grpName});
+  let newGroups=[];
+  if(split){const map={};gNames.forEach(n=>{if(!map[n]){map[n]={id:newGid(),name:n,title:''};newGroups.push(map[n])}});qs.forEach((q,i)=>q.grp=map[gNames[i]].id)}
   fixQMarks(qs);
   // Excel 題目本身的題號：沒開「顯示題號」時照原樣保留
   if(S.qNo==='none') qs.forEach((q,i)=>{if(keepNo[i]&&srcNos[i])q.text=srcNos[i]+q.text});
@@ -2791,9 +2871,14 @@ async function applyParsed(arr){
   if(S.qs.length&&S.qs.some(q=>q.text.trim()||q.options.some(Boolean))){
     const v=await modal('已經有題目了',`目前已有 ${S.qs.length} 題，新辨識到 ${qs.length} 題。要怎麼處理？`,[{label:'取消',value:null},{label:'加在後面',value:'append'},{label:'全部取代',value:'replace',primary:true}]);
     if(!v) return;
-    if(v==='replace'){revokeAll();S.qs=qs;S.cur=0}else{S.cur=S.qs.length;S.qs.push(...qs);replaced=false}
-  }else{revokeAll();S.qs=qs;S.cur=0}
-  S.editing=true;const start=S.qs.length-qs.length;S.cur=start;save();
+    if(v==='replace'){revokeAll();S.qs=qs;S.cur=0;S.groups=newGroups}
+    else{
+      if(split){if(!multiGroup()){const g0={id:newGid(),name:'原本的題目',title:''};S.qs.forEach(q=>q.grp=g0.id);S.groups=[g0]}S.groups.push(...newGroups)}
+      else if(multiGroup()){const lg=S.groups[S.groups.length-1].id;qs.forEach(q=>q.grp=lg)}
+      S.cur=S.qs.length;S.qs.push(...qs);replaced=false}
+  }else{revokeAll();S.qs=qs;S.cur=0;S.groups=newGroups}
+  normGroups();
+  S.editing=true;const start=Math.max(0,S.qs.findIndex(q=>q===qs[0]));S.cur=start;save();
   renderDone(start,qs.length);setView('done');
 }
 function revokeAll(){S.qs.forEach(q=>allImgsRaw(q).forEach(im=>URL.revokeObjectURL(im.url)))}
@@ -2893,14 +2978,15 @@ function renderDone(start,n,keep){
   const LET='ABCDEF';
   const fixHtml=fixQs.length?`<div class="qfix"><h3>快速設定答案</h3><p class="qf-tip">點選項就能勾選正確答案（可複選）。也可以在下方一次輸入，例如「ACBD」「1.A 2.C」或「3212」</p>
     <div class="qf-bulk"><input type="text" id="qfBulk" placeholder="依序輸入答案，例如 ACBD"><button type="button" class="btn btn-ghost" id="qfApply">套用</button></div>
-    <div class="qf-list">${fixQs.map(q=>{const no=S.qs.indexOf(q)+1;const nOpt=optCount(q);const ok=q.answers.length>0;
-      return `<div class="qf-row${ok?' ok':''}"><div class="qf-q"><b>第 ${no} 題</b><span>${esc(q.text.trim()||'（題目空白）')}</span><span class="st">${ok?'✓ 已設定':'未設定'}</span></div><div class="qf-opts">${Array.from({length:nOpt},(_,k)=>optFilled(q,k)?`<button type="button" class="qf-opt${q.answers.includes(k+1)?' on':''}" data-qid="${q.id}" data-k="${k+1}"><i>${LET[k]}</i>${esc((q.options[k]||'').trim()||'（圖片）')}</button>`:'').join('')}</div></div>`}).join('')}</div></div>`:'';
+    <div class="qf-list">${fixQs.map(q=>{const no=qLabel(S.qs.indexOf(q));const nOpt=optCount(q);const ok=q.answers.length>0;
+      return `<div class="qf-row${ok?' ok':''}"><div class="qf-q"><b>${esc(no)}</b><span>${esc(q.text.trim()||'（題目空白）')}</span><span class="st">${ok?'✓ 已設定':'未設定'}</span></div><div class="qf-opts">${Array.from({length:nOpt},(_,k)=>optFilled(q,k)?`<button type="button" class="qf-opt${q.answers.includes(k+1)?' on':''}" data-qid="${q.id}" data-k="${k+1}"><i>${LET[k]}</i>${esc((q.options[k]||'').trim()||'（圖片）')}</button>`:'').join('')}</div></div>`}).join('')}</div></div>`:'';
   const imgs=qs.reduce((a,q)=>a+allImgsRaw(q).length,0);
-  const bad=qs.map((q,k)=>[start+k+1,issuesOf(q)]).filter(x=>x[1].length);
+  const bad=qs.map((q,k)=>[qLabel(start+k),issuesOf(q)]).filter(x=>x[1].length);
   $('#doneCard').innerHTML=`<div class="done-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div>
    <div class="done-main"><h2>識別完成</h2><p>共辨識出 ${n} 題${S.qs.length>n?`（加上原本的，目前共 ${S.qs.length} 題）`:''}，接下來可以逐題編輯</p>
+   ${multiGroup()?`<div class="done-groups">分成 ${S.groups.length} 個題組（每個題組各下載一份 Excel）：<br>${S.groups.map(g=>`<b>${esc(g.name)}</b> ${groupQs(g).length} 題`).join('　')}</div>`:''}
    <div class="done-sum"><div><b>${n}</b>題目</div><div><b>${imgs}</b>張圖片</div><div class="${bad.length?'w':''}"><b>${bad.length}</b>待確認</div></div>
-   ${bad.length?`<ul class="done-list">${bad.slice(0,6).map(([no,is])=>`<li>⚠ 第 ${no} 題：${esc(is.join('、'))}</li>`).join('')}${bad.length>6?`<li>…還有 ${bad.length-6} 題，進入編輯後可在左側看到紅點</li>`:''}</ul>`:'<p class="done-ok">✓ 每一題都有題目、選項與答案</p>'}
+   ${bad.length?`<ul class="done-list">${bad.slice(0,6).map(([no,is])=>`<li>⚠ ${esc(no)}：${esc(is.join('、'))}</li>`).join('')}${bad.length>6?`<li>…還有 ${bad.length-6} 題，進入編輯後可在左側看到紅點</li>`:''}</ul>`:'<p class="done-ok">✓ 每一題都有題目、選項與答案</p>'}
    ${fixHtml}
    <div class="done-btns"><button type="button" class="btn btn-ghost" id="goBack">← 返回繼續識別</button><button type="button" class="btn btn-ghost" id="goPeek">👀 預覽全部題目</button><button type="button" class="btn btn-purple" id="goEdit">進入題目編輯 →</button></div></div>`;
   $('#goEdit').onclick=()=>{setView('edit');setTimeout(()=>focusQuestion(),50)};
@@ -2913,7 +2999,7 @@ function renderDone(start,n,keep){
   const ap=$('#qfApply');
   if(ap){const doApply=()=>{const v=$('#qfBulk').value.trim();if(!v)return;const nv=normalize(v);const k=keyItems(v)||(/^[A-Fa-f1-6\s,、]+$/.test(nv)?{map:null,seq:nv.replace(/[\s,、]/g,'').split('').map(c=>[/\d/.test(c)?+c:c.toUpperCase().charCodeAt(0)-64])}:null);
       if(!k){toast('看不懂這組答案，請輸入像「ACBD」「1.A 2.C」或「3212」');return}
-      let cnt=0;fixQs.forEach((q,i)=>{const a=k.map?k.map[S.qs.indexOf(q)+1]:k.seq[i];if(a&&a.length){q.answers=a.filter(x=>x>=1&&x<=optCount(q)&&optFilled(q,x-1));if(q.answers.length)cnt++}});
+      let cnt=0;fixQs.forEach((q,i)=>{const a=k.map?k.map[multiGroup()?i+1:S.qs.indexOf(q)+1]:k.seq[i];if(a&&a.length){q.answers=a.filter(x=>x>=1&&x<=optCount(q)&&optFilled(q,x-1));if(q.answers.length)cnt++}});
       rerender();toast(cnt?`已設定 ${cnt} 題的答案`:'沒有對應到任何題目，請確認題號或數量');};
     ap.onclick=doApply;$('#qfBulk').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();doApply()}}}
 }
@@ -2927,8 +3013,9 @@ async function peekAll(start,n){
       return `<div class="pk-opt k${o%4}${ok?' ok':''}"><i>${LET[o]}</i>${im?`<img src="${vis(im).url}" alt="選項 ${LET[o]} 圖片">`:''}<span>${esc(txt)}</span>${ok?'<b>✓</b>':''}</div>`}).join('')}</div>`:'';
     const extra=q.type==='slider'?`<div class="pk-meta">範圍 ${esc(q.slider.min)}～${esc(q.slider.max)}，答案 ${esc(q.slider.ans||'未設定')}</div>`:'';
     const imgs=img(q.qimg,'','題目圖')+img(q.qbg,'','本題背景')+img(q.aimg,'','解答圖')+(q.pin&&q.pin.img?img(q.pin.img,'','圖標答題圖'):'');
-    return `<button type="button" class="pk-card${bad.length?' bad':''}" data-pk="${i}">
-      <div class="pk-h"><span class="pk-n">${i+1}</span>${q.type!=='quiz'?`<span class="pk-type">${T.label}</span>`:''}<span class="pk-time">${q.time} 秒</span>${q.points==='none'?'<span class="pk-tag">不計分</span>':q.points==='double'?'<span class="pk-tag">分數加倍</span>':''}</div>
+    const gh=multiGroup()&&(k===0||qs[k-1].grp!==q.grp)?`<div class="pk-ghead">${esc(groupOf(q).name)}</div>`:'';
+    return gh+`<button type="button" class="pk-card${bad.length?' bad':''}" data-pk="${i}">
+      <div class="pk-h"><span class="pk-n">${localNo(i)}</span>${q.type!=='quiz'?`<span class="pk-type">${T.label}</span>`:''}<span class="pk-time">${q.time} 秒</span>${q.points==='none'?'<span class="pk-tag">不計分</span>':q.points==='double'?'<span class="pk-tag">分數加倍</span>':''}</div>
       <div class="pk-q">${esc(q.text.trim()||'（題目空白）')}</div>
       ${imgs?`<div class="pk-imgs">${imgs}</div>`:''}${opts}${extra}
       ${q.note?`<div class="pk-meta">備註：${esc(q.note)}</div>`:''}
@@ -2961,7 +3048,7 @@ function thumbHTML(q,i){
   const thumbImg=vis(q.type==='pin'&&q.pin?q.pin.img:(q.qimg||q.qbg));
   return `<div class="titem ${i===S.cur?'on':''} ${selIds.size>1&&selIds.has(q.id)?'sel':''}" data-i="${i}">
     <div class="thumb" role="button" tabindex="0" aria-label="第 ${i+1} 題">
-      <span class="tn">${i+1}</span>${q.type!=='quiz'?`<span class="ttype">${TYPES[q.type].label}</span>`:''}${bad?'<span class="tdot" title="有欄位待確認"></span>':''}
+      <span class="tn">${localNo(i)}</span>${q.type!=='quiz'?`<span class="ttype">${TYPES[q.type].label}</span>`:''}${bad?'<span class="tdot" title="有欄位待確認"></span>':''}
       <div class="tv">${thumbImg?`<img src="${thumbImg.url}" alt="">`:`<svg width="30" height="30"><use href="#i-img"/></svg>`}</div>
       <div class="tt">${esc(q.text)||'<span style="color:#a59db8">（未輸入題目）</span>'}</div>
       <div class="tbars">${bars}</div>
@@ -2971,7 +3058,11 @@ function thumbHTML(q,i){
 }
 const selIds=new Set();let selAnchor=0;
 function renderRail(){
-  $('#thumbs').innerHTML=S.qs.map(thumbHTML).join('');
+  if(multiGroup()){
+    $('#thumbs').innerHTML=S.groups.map(g=>{const idx=S.qs.map((q,i)=>q.grp===g.id?i:-1).filter(i=>i>=0);
+      return `<div class="tgrp" data-g="${g.id}"><span class="tg-n" title="${esc(groupTitle(g))}">${esc(g.name)}</span><span class="tg-c">${idx.length} 題</span><button type="button" data-gact="edit" data-g="${g.id}" aria-label="編輯題組「${esc(g.name)}」" title="改名稱、遊戲標題、順序或刪除">✎</button></div>`+
+        (idx.length?idx.map(i=>thumbHTML(S.qs[i],i)).join(''):`<div class="tgrp-empty" data-g="${g.id}">把題目拖到這裡</div>`)}).join('');
+  }else $('#thumbs').innerHTML=S.qs.map(thumbHTML).join('');
   const sb=$('#selbar');if(sb){sb.hidden=selIds.size<2;$('#selCount').textContent=selIds.size}
   const on=document.querySelector('.titem.on');
   if(on){const r=$('#rail'),a=on.getBoundingClientRect(),c=r.getBoundingClientRect();
@@ -3066,7 +3157,7 @@ function renderStage(){
   else body=`<div class="infocard"><div class="ill">${infoIll(t)}</div><p>${INFO[t]}</p></div>`;
   st.innerHTML=`
     <div class="canvas">
-      <div class="cv-top"><span class="qbadge">第 ${S.cur+1} 題／共 ${S.qs.length} 題</span><span class="cvr"><button type="button" class="pvbtn" data-act="preview" title="預覽主持視角與玩家手機畫面">${EYE_IC}<span class="lbl">預覽</span></button><button type="button" class="setbtn" data-side="open" title="題目設定" aria-label="題目設定">${SLIDERS_IC}<span class="lbl">題目設定</span></button><button type="button" class="timepill" id="pill" data-side="time" title="點擊修改答題秒數"><span class="tic">⏱ </span>${timeLabel(q.time)}</button></span></div>
+      <div class="cv-top"><span class="qbadge">${multiGroup()?`<span class="qb-g">${esc(groupOf(q).name)}・</span>第 ${localNo(S.cur)} 題／共 ${groupQs(groupOf(q)).length} 題`:`第 ${S.cur+1} 題／共 ${S.qs.length} 題`}</span><span class="cvr"><button type="button" class="pvbtn" data-act="preview" title="預覽主持視角與玩家手機畫面">${EYE_IC}<span class="lbl">預覽</span></button><button type="button" class="setbtn" data-side="open" title="題目設定" aria-label="題目設定">${SLIDERS_IC}<span class="lbl">題目設定</span></button><button type="button" class="timepill" id="pill" data-side="time" title="點擊修改答題秒數"><span class="tic">⏱ </span>${timeLabel(q.time)}</button></span></div>
       <div class="qarea ${q.qbg||S.bg?'hasbg':''}" ${q.qbg||S.bg?`style="background-image:url(&quot;${q.qbg?vis(q.qbg).url:S.bg.img.url}&quot;)"`:''}>
       <div class="qbox ${qNoLabel(S.cur)?'haspre':''}">${qNoLabel(S.cur)?`<span class="qpre">${qNoLabel(S.cur).trim()}</span>`:''}<textarea data-f="text" rows="1" placeholder="${t==='slide'?'輸入投影片標題':'開始輸入你的題目'}">${esc(q.text)}</textarea><span class="cnt"></span></div>
       <div class="qmedia">${q.qbg?`<div class="slot filled slot-gap" aria-hidden="true"><img src="${vis(q.qbg).url}" alt=""></div><div class="bgbar"><span>🖼 已設為本題背景</span><button data-act="bgmedia" title="把背景改回題目圖片">設為媒體內容</button><button data-act="crop" data-slot="qbg" title="編輯背景裁剪內容">${CROP_IC}</button><button data-act="rmbg" title="移除此題背景">${TRASH_IC}</button></div>`:slotHTML(q,'qimg',t==='pin'?'題目圖（必填）':'')}</div>
@@ -3134,7 +3225,7 @@ function flip(els,mutate){
     el.style.transform='';
   });
 }
-function makeSortable(box,{itemSel,handleSel,axis,longPress,ignore,onTap,onCommit,scroller,onStart}){
+function makeSortable(box,{itemSel,handleSel,axis,longPress,ignore,onTap,onCommit,scroller,onStart,anchorSel}){
   if(!box) return;
   let d=null;
   const items=()=>[...box.children].filter(x=>x.matches(itemSel)&&!x.classList.contains('gh'));
@@ -3173,10 +3264,13 @@ function makeSortable(box,{itemSel,handleSel,axis,longPress,ignore,onTap,onCommi
     const p=(y?cy-br.top:cx-br.left)-d.grab; // 拖曳中項目的左上位置
     const size=y?d.it.offsetHeight:d.it.offsetWidth;const center=p+size/2;
     const all=items();const others=all.filter(x=>x!==d.it);
+    // 分組標題（anchor）固定不動，拖到標題上方就是放進上一組的最後面
+    const seq=anchorSel?[...box.children].filter(x=>x!==d.it&&(others.includes(x)||x.matches(anchorSel))):others;
     let before=null;
-    for(const o of others){const mid=y?o.offsetTop+o.offsetHeight/2:o.offsetLeft+o.offsetWidth/2;if(center<mid){before=o;break}}
-    const need=before?d.it.nextElementSibling!==before:all[all.length-1]!==d.it;
-    if(need) flip(others,()=>{before?box.insertBefore(d.it,before):box.appendChild(d.it)});
+    for(const o of seq){const mid=y?o.offsetTop+o.offsetHeight/2:o.offsetLeft+o.offsetWidth/2;if(center<mid){before=o;break}}
+    const lastEl=[...box.children].filter(x=>x===d.it||seq.includes(x)).pop();
+    const need=before?d.it.nextElementSibling!==before:lastEl!==d.it;
+    if(need) flip(seq,()=>{before?box.insertBefore(d.it,before):box.appendChild(d.it)});
     const nat=y?d.it.offsetTop:d.it.offsetLeft;
     d.it.style.transform=y?`translateY(${p-nat}px) scale(1.03)`:`translateX(${p-nat}px) scale(1.03)`;
   }
@@ -3382,7 +3476,7 @@ function save(now){
   saveT=setTimeout(async()=>{savePending=false;
     const strip=im=>im?{blob:im.blob,name:im.name,cut:im.cut?{blob:im.cut.blob,name:im.cut.name,st:im.cut.st}:null}:null;
     const data={v:6,setOpen:S.setOpen,gsOpen:S.gsOpen,cur:S.cur,qNo:S.qNo,cover:strip(S.cover),bg:S.bg?{kind:S.bg.kind,name:S.bg.name||'',img:strip(S.bg.img)}:null,optPrefix:S.optPrefix,name:S.name,title:S.title,defTime:S.defTime,editing:S.editing,extraOpen:S.extraOpen,
-      noBgTip:!!S.noBgTip,
+      noBgTip:!!S.noBgTip,groups:S.groups||[],
       qs:S.qs.map(q=>({...q,qimg:strip(q.qimg),aimg:strip(q.aimg),qbg:strip(q.qbg),oimgs:q.oimgs.map(strip),pin:q.pin?{shape:q.pin.shape,img:strip(q.pin.img)}:null}))};
     let ok=false;
     try{await idbSet(data);ok=true}catch(e){
@@ -3405,6 +3499,7 @@ async function restore(){
     const n=newQ({...q,qimg:mk(q.qimg),aimg:mk(q.aimg||q.oimg),qbg:mk(q.qbg),oimgs:(q.oimgs||[]).map(mk),pin});
     delete n.oimg;return n;
   });
+  S.groups=Array.isArray(d.groups)?d.groups:[];normGroups();
   S.cur=Math.min(d.cur||0,Math.max(0,S.qs.length-1));
   return S.qs.length>0;
 }
@@ -3428,21 +3523,21 @@ function rowCorrect(q){
   if(q.type==='quiz'||q.type==='tf'){const a=q.answers.filter(x=>x<=optCount(q));return a.length===1?a[0]:a.join(',')}
   return 1;
 }
-function buildRows(){
-  const opts=S.qs.map(rowOptions);
-  let maxOpt=4;opts.forEach((o,i)=>{if(TILE.includes(S.qs[i].type)){let n=o.length;while(n>4&&!o[n-1])n--;maxOpt=Math.max(maxOpt,n)}});
+function buildRows(list=S.qs){
+  const opts=list.map(rowOptions);
+  let maxOpt=4;opts.forEach((o,i)=>{if(TILE.includes(list[i].type)){let n=o.length;while(n>4&&!o[n-1])n--;maxOpt=Math.max(maxOpt,n)}});
   const head=['No','Question',...Array.from({length:maxOpt},(_,i)=>'Answer '+(i+1)),'Time Limit','Correct Answer','備註'];
-  const rows=S.qs.map((q,i)=>{
+  const rows=list.map((q,i)=>{
     const o=Array.from({length:maxOpt},(_,k)=>opts[i][k]||'');
-    return [i+1,qNoLabel(i)+q.text.trim(),...o,q.time,rowCorrect(q),composeNote(q)];
+    return [i+1,qNoLabelIn(list,i)+q.text.trim(),...o,q.time,rowCorrect(q),composeNote(q)];
   });
   return {head,rows,maxOpt};
 }
-async function buildXlsx(){
+async function buildXlsx(list=S.qs,title=S.title){
   await loadScript(LIB.xlsx);
-  const {head,rows,maxOpt}=buildRows();
+  const {head,rows,maxOpt}=buildRows(list);
   const aoa=[head,...rows];
-  if(S.title.trim()) aoa.push([],['遊戲標題：'+S.title.trim()]);
+  if(String(title).trim()) aoa.push([],['遊戲標題：'+String(title).trim()]);
   const ws=XLSX.utils.aoa_to_sheet(aoa);
   // 題目、選項、備註一律存成「文字」格式，避免 Excel 自動轉成日期或數字
   const rg=XLSX.utils.decode_range(ws['!ref']);const textCols=new Set([1,...Array.from({length:maxOpt},(_,i)=>2+i),2+maxOpt+2]);
@@ -3452,6 +3547,7 @@ async function buildXlsx(){
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Kahoot');
   return new Uint8Array(XLSX.write(wb,{type:'array',bookType:'xlsx'}));
 }
+const safeName=t=>String(t||'題組').trim().replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,40)||'題組';
 function baseName(){
   const d=new Date();const ds=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
   const nm=(S.name||'').trim().replace(/[\\/:*?"<>|\s]+/g,'_');
@@ -3467,7 +3563,7 @@ async function saveFile(filename,data,mime){
 }
 function collectIssues(){
   const bad=S.qs.map((q,i)=>({i,is:issuesOf(q)})).filter(x=>x.is.length);
-  if(!S.title.trim()) bad.unshift({i:-1,is:['還沒有填寫']});
+  if(!titleOk()) bad.unshift({i:-1,is:['還沒有填寫']});
   return bad;
 }
 function renderFinishWarn(force){
@@ -3475,7 +3571,7 @@ function renderFinishWarn(force){
   const bad=collectIssues();
   if(!bad.length){box.hidden=true;return 0}
   box.hidden=false;
-  box.innerHTML=`<b>⚠ 還有 ${bad.length} 個地方需要補齊</b><ul>${bad.slice(0,15).map(x=>`<li><button type="button" data-fix="${x.i}">${x.i<0?'遊戲標題':'第 '+(x.i+1)+' 題'}</button>${esc(x.is.join('、'))}</li>`).join('')}${bad.length>15?`<li>…另有 ${bad.length-15} 項</li>`:''}</ul><div class="fw-act"><span>點上面的項目可直接前往修改</span><button type="button" class="mini-btn" id="finishAnyway">仍要導出</button></div>`;
+  box.innerHTML=`<b>⚠ 還有 ${bad.length} 個地方需要補齊</b><ul>${bad.slice(0,15).map(x=>`<li><button type="button" data-fix="${x.i}">${x.i<0?'遊戲標題':qLabel(x.i)}</button>${esc(x.is.join('、'))}</li>`).join('')}${bad.length>15?`<li>…另有 ${bad.length-15} 項</li>`:''}</ul><div class="fw-act"><span>點上面的項目可直接前往修改</span><button type="button" class="mini-btn" id="finishAnyway">仍要導出</button></div>`;
   return bad.length;
 }
 let skipCheck=false;
@@ -3483,9 +3579,9 @@ async function checkBefore(){
   if(skipCheck){skipCheck=false;return true}
   if(!S.qs.length){toast('還沒有題目');return false}
   const bad=S.qs.map((q,i)=>({i,is:issuesOf(q)})).filter(x=>x.is.length);
-  if(!S.title.trim()) bad.unshift({i:-1,is:['還沒有填寫']});
+  if(!titleOk()) bad.unshift({i:-1,is:['還沒有填寫']});
   if(!bad.length) return true;
-  const v=await modal('下載前請確認','以下項目還沒完成，Kahoot 可能會匯入失敗或缺資訊：<br><br>'+bad.slice(0,12).map(x=>x.i<0?`<b>遊戲標題</b>：還沒有填寫`:`<b>第 ${x.i+1} 題</b>：${esc(x.is.join('、'))}`).join('<br>')+(bad.length>12?`<br>…另有 ${bad.length-12} 項`:''),
+  const v=await modal('下載前請確認','以下項目還沒完成，Kahoot 可能會匯入失敗或缺資訊：<br><br>'+bad.slice(0,12).map(x=>x.i<0?`<b>遊戲標題</b>：還沒有填寫`:`<b>${qLabel(x.i)}</b>：${esc(x.is.join('、'))}`).join('<br>')+(bad.length>12?`<br>…另有 ${bad.length-12} 項`:''),
     [{label:'回去修改',value:false,primary:true},{label:'仍要下載',value:true}]);
   if(!v){const f=bad[0];if(f.i<0){$('#gTitle').focus();$('#gTitle').scrollIntoView({behavior:'smooth',block:'center'})}else{S.cur=f.i;render();focusQuestion()}}
   return v;
@@ -3500,25 +3596,35 @@ async function askName(){
 $('#dlExcel').onclick=async()=>{
   if(!await checkBefore()) return;
   if(!await askName()) return;
-  try{await saveFile(baseName()+'.xlsx',await buildXlsx(),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')}catch(e){console.error(e);toast('產生 Excel 失敗：'+e.message)}
+  try{
+    if(multiGroup()){
+      // 多個題組：每個題組一份 Excel，打包成 ZIP
+      await loadScript(LIB.jszip);const zip=new JSZip();const base=baseName();
+      for(const [gi,g] of S.groups.entries()){const list=groupQs(g);if(!list.length)continue;zip.file(`${base}_${gi+1}_${safeName(g.name)}.xlsx`,await buildXlsx(list,groupTitle(g)))}
+      await saveFile(base+'_題組.zip',await zip.generateAsync({type:'blob'}),'application/zip');
+    }else await saveFile(baseName()+'.xlsx',await buildXlsx(),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  }catch(e){console.error(e);toast('產生 Excel 失敗：'+e.message)}
 };
 $('#dlZip').onclick=async()=>{
   if(!await checkBefore()) return;
   if(!await askName()) return;
   try{
     await loadScript(LIB.jszip);
-    const zip=new JSZip();const base=baseName();zip.file(base+'.xlsx',await buildXlsx());
+    const zip=new JSZip();const base=baseName();
+    const parts=multiGroup()?S.groups.map((g,gi)=>({list:groupQs(g),title:groupTitle(g),dir:`${gi+1}_${safeName(g.name)}/`,name:g.name})).filter(x=>x.list.length):[{list:S.qs,title:S.title,dir:'',name:''}];
+    for(const pt of parts) zip.file(pt.dir+base+(pt.dir?'_'+safeName(pt.name):'')+'.xlsx',await buildXlsx(pt.list,pt.title));
     const lines=[`遊戲標題：${S.title.trim()||'（未填）'}`,`LINE 名稱：${S.name.trim()||'（未填）'}`,`背景：${S.bg?(S.bg.kind==='theme'?(S.bg.name?'公版主題「'+S.bg.name+'」':'公版截圖'):'自訂圖片'):'未提供（由小幫手預設）'}`,''];
     const extOf=im=>{let e=(im.name.split('.').pop()||'').toLowerCase();if(!IMG_EXT.test(e))e=(im.blob.type.split('/')[1]||'png').replace('jpeg','jpg');return e==='jpeg'?'jpg':e};
     if(S.cover){zip.file(`圖片/封面.${extOf(S.cover)}`,S.cover.blob);lines.push(`封面.${extOf(S.cover)}　→　遊戲封面圖`)}
     if(S.bg){zip.file(`圖片/背景.${extOf(S.bg.img)}`,S.bg.img.blob);lines.push(`背景.${extOf(S.bg.img)}　→　${S.bg.kind==='theme'?(S.bg.name?'公版主題「'+S.bg.name+'」':'公版背景截圖'):'自訂背景圖'}`)}
-    S.qs.forEach((q,i)=>allImgs(q).forEach(([slot,im])=>{
-      const no=i+1;
+    if(multiGroup())lines.push('題組：'+parts.map(pt=>`${pt.name}（${pt.list.length} 題，遊戲標題「${pt.title}」）`).join('、'),'');
+    for(const pt of parts) pt.list.forEach((q,i)=>allImgs(q).forEach(([slot,im])=>{
+      const no=i+1;const D=pt.dir;
       const nm=slot==='qimg'?`${no}`:slot==='aimg'?`${no}解答`:slot==='qbg'?`${no}_bkgrd`:slot==='pin'?`${no}答案位置`:`${no}-${+slot.slice(1)+1}`;
       const what=slot==='qimg'?'題目圖':slot==='aimg'?'解答圖':slot==='qbg'?'本題專屬背景':slot==='pin'?'答案位置圖':'選項 '+(+slot.slice(1)+1)+' 圖';
-      const fn=`${nm}.${extOf(im)}`;zip.file('圖片/'+fn,im.blob);
-      lines.push(`${fn}　→　第 ${no} 題${what}${im.cut?'（原圖）':''}：${q.text.trim()}`);
-      if(im.cut){const cf=`${nm}_cut.${extOf(im.cut)}`;zip.file('圖片/'+cf,im.cut.blob);lines.push(`${cf}　→　第 ${no} 題${what}（裁剪後，請用這張）`)}
+      const fn=`${nm}.${extOf(im)}`;zip.file(D+'圖片/'+fn,im.blob);
+      lines.push(`${D}${fn}　→　${pt.name?pt.name+' ':''}第 ${no} 題${what}${im.cut?'（原圖）':''}：${q.text.trim()}`);
+      if(im.cut){const cf=`${nm}_cut.${extOf(im.cut)}`;zip.file(D+'圖片/'+cf,im.cut.blob);lines.push(`${D}${cf}　→　${pt.name?pt.name+' ':''}第 ${no} 題${what}（裁剪後，請用這張）`)}
     }));
     zip.file('圖片/圖片對照表.txt','﻿'+lines.join('\r\n'));
     await saveFile(base+'.zip',await zip.generateAsync({type:'blob'}),'application/zip');
@@ -3567,7 +3673,7 @@ $('#parseBtn').onclick=async()=>{
   }finally{btn.disabled=false;btn.textContent='✦ 開始辨識題目'}
 };
 $('#addQ').onclick=()=>{
-  const first=!S.qs.length;S.qs.splice(S.cur+1,0,newQ());
+  const first=!S.qs.length;const nq=newQ();if(multiGroup()&&S.qs[S.cur])nq.grp=S.qs[S.cur].grp;S.qs.splice(S.cur+1,0,nq);
   S.cur=first?0:S.cur+1;S.editing=true;render();save();
   setTimeout(focusQuestion,30);
 };
@@ -3585,7 +3691,7 @@ function syncSeg(){if(typeof syncGs==='function'&&$('#gsSum'))syncGs();document.
 $('#clearAll').onclick=async()=>{
   if(!S.qs.length) return;
   if(await modal('清空全部？',`會刪除目前 ${S.qs.length} 題與所有圖片，並清除遊戲標題、封面圖、背景圖和更多設定（題號、選項前綴、答題秒數），此瀏覽器的草稿也會一起清掉，無法復原。`,[{label:'取消',value:false},{label:'清空',value:true,primary:true}])){
-    revokeAll();S.qs=[];S.cur=0;S.editing=false;
+    revokeAll();S.qs=[];S.groups=[];S.cur=0;S.editing=false;
     if(S.cover)URL.revokeObjectURL(S.cover.url);if(S.bg)URL.revokeObjectURL(S.bg.img.url);
     Object.assign(S,{title:'',cover:null,bg:null,qNo:'none',optPrefix:'none',defTime:10,gsOpen:false,setOpen:false,extraOpen:false});
     $('#gTitle').value='';$('#tgen').hidden=true;$('#bulkTime').value='20';renderGMedia();syncSeg();syncGs();
@@ -3643,10 +3749,15 @@ function renderSide(){
       <div class="sp-field"><div class="sp-lb">⏱ 答題秒數</div>
         <button type="button" class="sp-sel ${openMenu==='time'?'open':''}" data-menu="time"><span id="sideTimeVal">${timeLabel(q.time)}</span><i class="dd"></i></button>${timeMenu}
         <button type="button" class="sp-link" data-side="applyall">套用到所有題目</button></div>
+      ${multiGroup()?`<div class="sp-field"><div class="sp-lb">🗂 題組</div><select class="sp-gsel" id="spGroup" aria-label="這題所屬的題組">${S.groups.map(g=>`<option value="${g.id}" ${g.id===q.grp?'selected':''}>${esc(g.name)}</option>`).join('')}</select></div>`:''}
       <div class="sp-field"><div class="sp-lb">🏅 分數</div>
         ${T.noPoints?'<div class="sp-na">這個題型不計分</div>':`<button type="button" class="sp-sel ${openMenu==='points'?'open':''}" data-menu="points"><span>${ptsLabel}</span><i class="dd"></i></button>${ptsMenu}`}</div>
     </div>${tab}`;
 }
+document.addEventListener('change',e=>{if(e.target.id!=='spGroup')return;const q=cur();if(!q)return;q.grp=e.target.value;
+  // 移到別的題組：放在那個題組的最後
+  const id=q.id;S.qs=S.qs.filter(x=>x!==q);const last=S.qs.map(x=>x.grp).lastIndexOf(q.grp);S.qs.splice(last+1,0,q);normGroups();S.cur=S.qs.findIndex(x=>x.id===id);
+  render();save();toast(`已移到「${groupOf(q).name}」`)});
 document.addEventListener('click',e=>{
   const s=e.target.closest('[data-side],[data-menu],[data-pick-type],[data-pick-time],[data-pick-points]');
   const q=cur();
@@ -4154,7 +4265,7 @@ rail.addEventListener('click',async e=>{
     S.qs.splice(i,1);if(S.cur>i||S.cur>=S.qs.length)S.cur=Math.max(0,S.cur-1);render();save();
   }
 });
-makeSortable(thumbs,{itemSel:'.titem',axis:()=>isRow()?'x':'y',longPress:true,ignore:'button',scroller:rail,
+makeSortable(thumbs,{itemSel:'.titem',axis:()=>isRow()?'x':'y',longPress:true,ignore:'button',scroller:rail,anchorSel:'.tgrp,.tgrp-empty',
   onTap:(it,e)=>{
     const i=+it.dataset.i;const id=S.qs[i].id;
     if(e&&e.shiftKey){const a=Math.min(selAnchor,i),b=Math.max(selAnchor,i);selIds.clear();for(let k=a;k<=b;k++)selIds.add(S.qs[k].id)}
@@ -4177,11 +4288,40 @@ makeSortable(thumbs,{itemSel:'.titem',axis:()=>isRow()?'x':'y',longPress:true,ig
       const selIdx=S.qs.map((q,i)=>selIds.has(q.id)?i:-1).filter(i=>i>=0);
       newOrder=[];all.forEach(i=>{if(i===from)newOrder.push(...selIdx);else if(!selIds.has(S.qs[i].id))newOrder.push(i)});
     }else newOrder=all;
-    const before=S.qs.map(q=>q.id).join();
-    S.qs=newOrder.map(i=>S.qs[i]);S.cur=S.qs.findIndex(q=>q.id===movedId);
+    const before=S.qs.map(q=>q.id).join()+(multiGroup()?S.qs.map(q=>q.grp).join():'');
+    // 放到哪個題組：看拖曳後上方最近的題組標題
+    if(multiGroup()){let g=S.groups[0].id;let tg=g;for(const c of thumbs.children){if(c.matches('.tgrp'))g=c.dataset.g;else if(c===el)tg=g}
+      if(group)S.qs.forEach(q=>{if(selIds.has(q.id))q.grp=tg});else S.qs[from].grp=tg}
+    S.qs=newOrder.map(i=>S.qs[i]);normGroups();S.cur=S.qs.findIndex(q=>q.id===movedId);
     render();save();
-    if(S.qs.map(q=>q.id).join()!==before) toast(group?`已移動 ${selIds.size} 題`:`已移到第 ${S.cur+1} 題`);
+    if(S.qs.map(q=>q.id).join()+(multiGroup()?S.qs.map(q=>q.grp).join():'')!==before) toast(group?`已移動 ${selIds.size} 題`:multiGroup()?`已移到「${groupOf(S.qs[S.cur]).name}」第 ${localNo(S.cur)} 題`:`已移到第 ${S.cur+1} 題`);
   }});
+// ---- 題組：新增、編輯（名稱、遊戲標題、順序、刪除）
+async function editGroup(id){
+  const g=S.groups.find(x=>x.id===id);if(!g) return;const gi=S.groups.indexOf(g);const n=groupQs(g).length;
+  const p=modal('編輯題組',`<div class="grp-form"><label>題組名稱<input type="text" id="gfName" maxlength="40" value="${esc(g.name)}"></label>
+    <label>這個題組的遊戲標題<input type="text" id="gfTitle" maxlength="95" value="${esc(g.title||'')}" placeholder="${esc([S.title.trim(),g.name].filter(Boolean).join(' ')||'例：婚禮問答 第一回合')}"></label>
+    <div class="gf-tip">每個題組會各自下載成一份 Excel、匯入成一個 Kahoot 遊戲。遊戲標題留空時，用「遊戲標題＋題組名稱」。</div></div>`,
+    [{label:'刪除題組',value:'del',cls:'btn-ghost'},...(gi>0?[{label:'↑ 上移',value:'up'}]:[]),...(gi<S.groups.length-1?[{label:'↓ 下移',value:'down'}]:[]),{label:'取消',value:null},{label:'儲存',value:'ok',primary:true}],'grpm');
+  setTimeout(()=>{const i=$('#gfName');if(i){i.focus();i.select()}},30);
+  const v=await p;if(!v) return;
+  const nm=($('#gfName')||{}).value,tt=($('#gfTitle')||{}).value;
+  if(v==='ok'||v==='up'||v==='down'){if(nm!=null&&nm.trim())g.name=nm.trim();if(tt!=null)g.title=tt.trim()}
+  if(v==='up'||v==='down'){const j=v==='up'?gi-1:gi+1;S.groups.splice(gi,1);S.groups.splice(j,0,g)}
+  if(v==='del'){
+    if(n&&!await modal(`刪除題組「${g.name}」？`,`這個題組的 ${n} 題會移到${gi>0?'上一個':'下一個'}題組，題目不會被刪除。`,[{label:'取消',value:false},{label:'刪除題組',value:true,primary:true}])) return;
+    const to=S.groups[gi>0?gi-1:gi+1];groupQs(g).forEach(q=>q.grp=to.id);S.groups.splice(gi,1);
+    toast(S.groups.length<2?'已取消分組，所有題目合併成一個遊戲':`已刪除題組，題目移到「${to.name}」`)}
+  normGroups();render();save();
+}
+$('#addG').onclick=()=>{
+  if(!multiGroup()){S.groups=[{id:newGid(),name:'題組 1',title:''},{id:newGid(),name:'題組 2',title:''}];S.qs.forEach(q=>q.grp=S.groups[0].id)}
+  else S.groups.push({id:newGid(),name:`題組 ${S.groups.length+1}`,title:''});
+  const g=S.groups[S.groups.length-1];const q=newQ();q.grp=g.id;S.qs.push(q);normGroups();
+  S.cur=S.qs.indexOf(q);S.editing=true;render();save();setTimeout(focusQuestion,30);
+  toast(`已新增「${g.name}」，可以把題目拖進去，或在題目設定裡選題組`);
+};
+rail.addEventListener('click',e=>{const b=e.target.closest('[data-gact]');if(!b)return;e.stopPropagation();if(b.dataset.gact==='edit')editGroup(b.dataset.g)});
 async function deleteSelected(){
   const idx=S.qs.map((q,i)=>selIds.has(q.id)?i:-1).filter(i=>i>=0);if(!idx.length) return;
   if(!await modal(`刪除已選的 ${idx.length} 題？`,idx.slice(0,8).map(i=>`第 ${i+1} 題：${esc(S.qs[i].text||'（未輸入題目）')}`).join('<br>')+(idx.length>8?`<br>…另有 ${idx.length-8} 題`:''),[{label:'取消',value:false},{label:`刪除 ${idx.length} 題`,value:true,primary:true}])) return;
